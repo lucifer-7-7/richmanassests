@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Enquire — Talk to a specialist · RichManAssets</title>
+<meta name="description" content="Tell us what you're looking for. A RichManAssets specialist replies the same day — buying, renting, loans, legal, construction or interiors."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/market.css">
+<style>
+  .page-top{padding:118px 0 12px}
+  .page-top h1{font-family:var(--f-display);font-weight:500;font-size:clamp(34px,5.6vw,72px);line-height:1;letter-spacing:-.015em;margin-top:14px;max-width:16ch}
+  .page-top h1 .it{font-style:italic;color:var(--accent)}
+  .page-top p{margin-top:16px;color:var(--ink-3);font-size:16px;max-width:50ch;line-height:1.6}
+  .c-grid{display:grid;gap:clamp(30px,4vw,60px);align-items:start;padding:clamp(34px,5vw,60px) 0 clamp(60px,9vw,110px)}
+  @media(min-width:900px){.c-grid{grid-template-columns:1.05fr .95fr}}
+  .c-info .block{padding:24px 0;border-bottom:1px solid var(--line)}
+  .c-info .block:first-child{padding-top:0}
+  .c-info h5{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .c-info .big-link{font-family:var(--f-display);font-size:clamp(24px,3vw,34px);font-weight:500;letter-spacing:-.01em;display:inline-flex;align-items:center;gap:12px}
+  .c-info .big-link:hover{color:var(--accent)}
+  .c-info p{color:var(--ink-2);font-size:15px;line-height:1.6}
+  .c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .hours{display:flex;justify-content:space-between;max-width:340px;font-size:14px;color:var(--ink-2);padding:7px 0;border-bottom:1px dotted var(--line)}
+  .hours b{font-weight:500}
+  .mapwrap{margin-top:18px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+  .mapwrap iframe{display:block;width:100%;height:240px;border:0;filter:grayscale(.3) contrast(1.02)}
+</style>
+</head>
+<body data-screen-label="Contact">
+
+<nav class="nav solid" id="nav">
+  <a href="Rich Man Assets.html" class="brand">RichMan<span class="mono">Assets</span></a>
+  <div class="nav-links">
+    <a href="properties.html?listing=sale">Buy</a>
+    <a href="properties.html?listing=rent">Rent</a>
+    <a href="services.html">Services</a>
+    <a href="loans.html">Home Loans</a>
+    <a href="contact.html" class="nav-cta">Enquire</a>
+  </div>
+</nav>
+
+<header class="page-top wrap">
+  <div class="crumb"><a href="Rich Man Assets.html">Home</a><span class="sep">/</span><span>Enquire</span></div>
+  <h1>Let's find your <span class="it">next move.</span></h1>
+  <p id="introLine">Tell us what you're after and a specialist gets back to you — usually the same day. No call-centre, no pressure.</p>
+</header>
+
+<section class="wrap"><div class="c-grid">
+  <!-- form -->
+  <form class="form" id="leadForm" style="border:1px solid var(--line)">
+    <div class="form-body">
+      <div class="form-row">
+        <div class="field"><label>Your name</label><input required name="name" placeholder="Full name"></div>
+        <div class="field"><label>Phone</label><input required name="phone" type="tel" placeholder="+91 …"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Email</label><input name="email" type="email" placeholder="you@email.com"></div>
+        <div class="field"><label>I'm interested in</label>
+          <select name="service" id="svcSelect">
+            <option>Buying a property</option><option>Renting / Leasing</option><option>Home / project loan</option>
+            <option>Selling my property</option><option>Construction</option><option>Interior design</option>
+            <option>Legal services</option><option>Property management</option><option>Agricultural land</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Budget / requirement</label><input name="budget" id="reqField" placeholder="e.g. 3–4 BHK villa near the coast, ~₹5 Cr"></div>
+      <div class="field"><label>Preferred contact time</label>
+        <select name="time"><option>Anytime</option><option>Morning (9–12)</option><option>Afternoon (12–4)</option><option>Evening (4–8)</option></select>
+      </div>
+      <div class="field"><label>Anything else?</label><textarea name="msg" placeholder="Tell us a little more (optional)"></textarea></div>
+      <button class="btn btn-submit" type="submit"><span>Send my enquiry</span><span class="arr">→</span></button>
+      <p class="note">We reply the same day. Your details stay private.</p>
+    </div>
+    <div class="ok-msg">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h4>Thank you!</h4>
+      <p>Your enquiry is in. A specialist will reach out shortly — meanwhile, feel free to WhatsApp or call us.</p>
+    </div>
+  </form>
+
+  <!-- info -->
+  <div class="c-info">
+    <div class="block">
+      <h5>Talk to us now</h5>
+      <a class="big-link" id="callBig" href="tel:+919876543210"><svg width="22" height="22" viewBox="0 0 32 32" fill="currentColor"><path d="M6 3h5l2 6-3 2c1 3 3 5 6 6l2-3 6 2v5c0 1-1 2-2 2C13 26 6 19 6 6c0-1 0-3 0-3z"/></svg>+91 98765 43210</a>
+      <div class="c-actions">
+        <a class="btn btn-dark" id="waBtn" target="_blank" rel="noopener"><span>WhatsApp us</span><span class="arr">→</span></a>
+        <a class="btn btn-ghost" href="mailto:hello@richmanassets.com"><span>Email</span></a>
+      </div>
+    </div>
+    <div class="block">
+      <h5>Office</h5>
+      <p>RichManAssets · Vittu Bharat Associates LLP<br>2nd Floor, Balmatta Road<br>Mangaluru, Karnataka 575001</p>
+    </div>
+    <div class="block">
+      <h5>Business hours</h5>
+      <div class="hours"><span>Monday – Saturday</span><b>9:30 am – 7:00 pm</b></div>
+      <div class="hours"><span>Sunday</span><b>By appointment</b></div>
+    </div>
+    <div class="block" style="border-bottom:0">
+      <h5>Find us</h5>
+      <div class="mapwrap">
+        <iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mangaluru" src="https://www.openstreetmap.org/export/embed.html?bbox=74.83%2C12.86%2C74.88%2C12.89&amp;layer=mapnik&amp;marker=12.8703%2C74.8545"></iframe>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <h3>Premium property,<br>handled <span class="it">end to end.</span></h3>
+      <div class="foot-col"><h5>Explore</h5><ul>
+        <li><a href="properties.html?listing=sale">Buy</a></li>
+        <li><a href="properties.html?listing=rent">Rent &amp; Lease</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="loans.html">Home Loans &amp; EMI</a></li>
+      </ul></div>
+      <div class="foot-col"><h5>Reach us</h5><ul>
+        <li><a href="contact.html">Enquire now</a></li>
+        <li><a href="mailto:hello@richmanassets.com">hello@richmanassets.com</a></li>
+        <li><a href="tel:+919876543210">+91 98765 43210</a></li>
+        <li><a href="#">Mangaluru · Karnataka</a></li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 RichManAssets</span><span>Powered by Vittu Bharat Associates LLP</span></div>
+  </div>
+</footer>
+
+<div class="floaters">
+  <a class="wa" id="floatWa" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff"/></svg></a>
+  <a class="call" id="floatCall" aria-label="Call"><svg viewBox="0 0 32 32" fill="none"><path d="M6 3h5l2 6-3 2c1 3 3 5 6 6l2-3 6 2v5c0 1-1 2-2 2C13 26 6 19 6 6c0-1 0-3 0-3z" fill="currentColor"/></svg></a>
+</div>
+
+<script src="assets/data.js"></script>
+<script>
+  document.getElementById('floatCall').href="tel:"+RMA.PHONE;
+  let waText="Hi RichManAssets, I'd like to enquire.";
+
+  // prefill from ?ref=<id>
+  const ref=new URLSearchParams(location.search).get('ref');
+  if(ref){
+    const p=RMA.HOMES.find(h=>h.id===ref);
+    if(p){
+      document.getElementById('introLine').textContent=`Enquiring about ${p.name} (${p.loc}). Fill this in and a specialist will get straight back to you.`;
+      document.getElementById('reqField').value=`${p.name}, ${p.loc} — ${p.price}${p.note||''}`;
+      waText=`Hi RichManAssets, I'm interested in ${p.name} (${p.loc}).`;
+    }
+  }
+  const wa=RMA.waLink(waText);
+  document.getElementById('floatWa').href=wa;
+  document.getElementById('waBtn').href=wa;
+
+  document.getElementById('leadForm').addEventListener('submit',e=>{e.preventDefault();e.currentTarget.classList.add('sent');e.currentTarget.querySelector('.ok-msg').classList.add('show');window.scrollTo({top:0,behavior:'smooth'});});
+</script>
+</body>
+</html>

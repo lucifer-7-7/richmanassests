@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Property Listings — Buy, Rent & Lease · RichManAssets</title>
+<meta name="description" content="Browse villas, houses, apartments, plots, commercial and agricultural property across coastal Karnataka. Filter by buy / rent / lease, type, location and budget."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/market.css">
+<style>
+  .page-top{padding:120px 0 28px;background:var(--paper)}
+  .page-top h1{font-family:var(--f-display);font-weight:500;font-size:clamp(34px,5.4vw,68px);line-height:1;letter-spacing:-.015em;margin-top:14px}
+  .page-top h1 .it{font-style:italic;color:var(--accent)}
+  .page-top p{margin-top:14px;color:var(--ink-3);font-size:15px;max-width:52ch}
+  .empty{text-align:center;padding:80px 20px;color:var(--ink-3)}
+  .empty h3{font-family:var(--f-display);font-size:30px;color:var(--ink);margin-bottom:10px}
+  .listings-wrap{padding:clamp(26px,4vw,46px) 0 0}
+
+  /* ── SCROLL STRIP ── full-width block, body clips nothing because width=100% */
+  .hscroll-outer{
+    width:100%;overflow-x:auto;overflow-y:hidden;
+    scrollbar-width:none;-ms-overflow-style:none;
+    padding:8px 0 20px;cursor:grab;
+    position:relative;
+  }
+  .hscroll-outer:active{cursor:grabbing}
+  .hscroll-outer::-webkit-scrollbar{display:none}
+
+  /* right-edge scroll hint gradient — desktop only */
+  .hscroll-outer::after{
+    content:"";pointer-events:none;position:absolute;
+    top:0;right:0;bottom:0;width:80px;
+    background:linear-gradient(to left,var(--paper) 0%,transparent 100%);
+    z-index:2;
+  }
+  @media(max-width:768px){.hscroll-outer::after{display:none}}
+
+  .hscroll-row{
+    display:flex;gap:20px;
+    /* gutter: matches site --gutter on each side */
+    padding:4px clamp(16px,5vw,72px);
+    width:max-content;
+  }
+
+  /* card width: ~78vw on mobile (shows partial next card), fixed 340px on desktop */
+  .hscroll-row .plist{
+    width:min(78vw,340px);flex:none;
+  }
+  @media(min-width:640px){
+    .hscroll-row .plist{width:300px}
+  }
+  @media(min-width:1024px){
+    .hscroll-row .plist{width:340px}
+  }
+
+  /* grid fallback when Show All clicked */
+  .grid-mode{display:grid!important;grid-template-columns:repeat(3,1fr);
+    width:auto!important;padding:0 clamp(16px,5vw,72px) 0}
+  @media(max-width:920px){.grid-mode{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.grid-mode{grid-template-columns:1fr}}
+  .grid-mode .plist{width:auto!important}
+
+  .show-more-wrap{text-align:center;padding:clamp(28px,4vw,44px) 0 clamp(60px,9vw,110px)}
+  .show-more-wrap .btn-show{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:14px 34px;border:1.5px solid var(--ink);border-radius:100px;
+    font-size:13.5px;letter-spacing:.04em;cursor:pointer;
+    background:none;color:var(--ink);font-family:inherit;
+    transition:background .3s,color .3s;
+  }
+  .show-more-wrap .btn-show:hover{background:var(--ink);color:var(--paper)}
+  .show-more-wrap .btn-show svg{width:15px;height:15px}
+</style>
+</head>
+<body data-screen-label="Listings">
+
+<nav class="nav solid" id="nav">
+  <a href="Rich Man Assets.html" class="brand">RichMan<span class="mono">Assets</span></a>
+  <div class="nav-links">
+    <a href="properties.html?listing=sale">Buy</a>
+    <a href="properties.html?listing=rent">Rent</a>
+    <a href="services.html">Services</a>
+    <a href="loans.html">Home Loans</a>
+    <a href="contact.html" class="nav-cta">Enquire</a>
+  </div>
+</nav>
+
+<header class="page-top wrap">
+  <div class="crumb"><a href="Rich Man Assets.html">Home</a><span class="sep">/</span><span>Listings</span></div>
+  <h1>Find your <span class="it">place</span>.</h1>
+  <p>Every listing is verified and title-checked. Filter below, or tell us what you want and we'll shortlist it for you.</p>
+</header>
+
+<!-- FILTER BAR -->
+<div class="filterbar">
+  <div class="wrap"><div class="fb-in">
+    <div class="seg" id="segListing">
+      <button data-val="all" class="on">All</button>
+      <button data-val="sale">Buy</button>
+      <button data-val="rent">Rent</button>
+      <button data-val="lease">Lease</button>
+    </div>
+    <select class="fb-sel" id="fType">
+      <option value="">All types</option>
+      <option>Villa</option><option>House</option><option>Estate</option>
+      <option>Apartment</option><option>Plot</option><option>Commercial</option><option>Agricultural</option>
+    </select>
+    <select class="fb-sel" id="fArea">
+      <option value="">Any location</option>
+      <option>Mulki</option><option>Sasihithlu</option><option>Surathkal</option><option>Yermal</option>
+      <option>Kapu</option><option>Someshwara</option><option>Manipal</option><option>Maravanthe</option>
+      <option>Mangaluru</option><option>Padubidri</option><option>Sakleshpur</option><option>Chikmagalur</option>
+      <option>Hampankatta</option><option>Baikampady</option><option>Bantwal</option>
+    </select>
+    <select class="fb-sel" id="fBudget">
+      <option value="">Any budget</option>
+      <option value="u30">Under ₹30 L</option>
+      <option value="30-1c">₹30 L – ₹1 Cr</option>
+      <option value="1-5c">₹1 Cr – ₹5 Cr</option>
+      <option value="5c">₹5 Cr +</option>
+    </select>
+    <select class="fb-sel" id="fSort">
+      <option value="featured">Sort: Featured</option>
+      <option value="low">Price: Low → High</option>
+      <option value="high">Price: High → Low</option>
+    </select>
+    <span class="fb-count" id="count"></span>
+  </div></div>
+</div>
+
+<section class="listings-wrap wrap">
+  <div class="empty" id="empty" style="display:none">
+    <h3>Nothing matches just yet.</h3>
+    <p>Loosen a filter, or tell us exactly what you're after — we'll find it off-market.</p>
+    <a class="btn btn-dark" href="contact.html" style="margin-top:22px"><span>Tell us what you want</span><span class="arr">→</span></a>
+  </div>
+</section>
+
+<div class="hscroll-outer" id="scrollOuter">
+  <div class="hscroll-row" id="grid"></div>
+</div>
+
+<div class="show-more-wrap" id="showMoreWrap" style="display:none">
+  <button class="btn-show" id="showMoreBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    Show all properties
+  </button>
+</div>
+
+<!-- CTA -->
+<section class="lead">
+  <div class="wrap"><div class="lead-grid" style="grid-template-columns:1fr;text-align:center;place-items:center">
+    <div>
+      <span class="kicker" style="color:var(--gold)">Can't see it?</span>
+      <h2 style="margin-top:14px">We list a lot <span class="it">off-market.</span></h2>
+      <p class="lead-sub" style="margin-inline:auto">Tell us the brief and a specialist will send you matching homes — often before they go public.</p>
+      <div class="loans-actions" style="justify-content:center;margin-top:24px">
+        <a class="btn btn-paper" href="contact.html"><span>Share your brief</span><span class="arr">→</span></a>
+        <a class="btn btn-line" id="waBtn" target="_blank" rel="noopener"><span>WhatsApp us</span></a>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <h3>Premium property,<br>handled <span class="it">end to end.</span></h3>
+      <div class="foot-col"><h5>Explore</h5><ul>
+        <li><a href="properties.html?listing=sale">Buy</a></li>
+        <li><a href="properties.html?listing=rent">Rent &amp; Lease</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="loans.html">Home Loans &amp; EMI</a></li>
+      </ul></div>
+      <div class="foot-col"><h5>Reach us</h5><ul>
+        <li><a href="contact.html">Enquire now</a></li>
+        <li><a href="mailto:hello@richmanassets.com">hello@richmanassets.com</a></li>
+        <li><a href="tel:+919876543210">+91 98765 43210</a></li>
+        <li><a href="#">Mangaluru · Karnataka</a></li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 RichManAssets</span><span>Powered by Vittu Bharat Associates LLP</span></div>
+  </div>
+</footer>
+
+<div class="floaters">
+  <a class="wa" id="floatWa" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff"/></svg></a>
+  <a class="call" id="floatCall" aria-label="Call"><svg viewBox="0 0 32 32" fill="none"><path d="M6 3h5l2 6-3 2c1 3 3 5 6 6l2-3 6 2v5c0 1-1 2-2 2C13 26 6 19 6 6c0-1 0-3 0-3z" fill="currentColor"/></svg></a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="assets/data.js"></script>
+<script>
+  const wa=RMA.waLink("Hi RichManAssets, I'm looking for a property — here's my brief:");
+  document.getElementById('floatWa').href=wa;
+  document.getElementById('floatCall').href="tel:"+RMA.PHONE;
+  document.getElementById('waBtn').href=wa;
+
+  const grid=document.getElementById('grid'), empty=document.getElementById('empty'), count=document.getElementById('count');
+  const segListing=document.getElementById('segListing');
+  const fType=document.getElementById('fType'), fArea=document.getElementById('fArea'), fBudget=document.getElementById('fBudget'), fSort=document.getElementById('fSort');
+
+  const state={listing:'all',type:'',area:'',budget:'',sort:'featured'};
+
+  // read query
+  const q=new URLSearchParams(location.search);
+  if(q.get('listing')){const v=q.get('listing')==='buy'?'sale':q.get('listing');state.listing=v;}
+  if(q.get('type'))state.type=q.get('type');
+  if(q.get('area'))state.area=q.get('area');
+  if(q.get('budget'))state.budget=q.get('budget');
+  // reflect into controls
+  [...segListing.children].forEach(b=>b.classList.toggle('on',b.dataset.val===state.listing));
+  fType.value=state.type; fArea.value=state.area; fBudget.value=state.budget; fSort.value=state.sort;
+
+  function inBudget(v,b){
+    if(!b)return true;
+    if(b==='u30')return v<3000000;
+    if(b==='30-1c')return v>=3000000&&v<10000000;
+    if(b==='1-5c')return v>=10000000&&v<50000000;
+    if(b==='5c')return v>=50000000;
+    return true;
+  }
+  const INITIAL_COUNT = 8;
+  let showAll = false;
+  const showMoreWrap = document.getElementById('showMoreWrap');
+  const showMoreBtn = document.getElementById('showMoreBtn');
+  const scrollOuter = document.getElementById('scrollOuter');
+
+  function render(){
+    let list=RMA.HOMES.filter(p=>
+      (state.listing==='all'||p.listing===state.listing) &&
+      (!state.type||p.type===state.type) &&
+      (!state.area||p.area===state.area) &&
+      inBudget(p.priceVal,state.budget)
+    );
+    if(state.sort==='low')list.sort((a,b)=>a.priceVal-b.priceVal);
+    else if(state.sort==='high')list.sort((a,b)=>b.priceVal-a.priceVal);
+    else list.sort((a,b)=>(b.featured?1:0)-(a.featured?1:0));
+    const hasMore = !showAll && list.length > INITIAL_COUNT;
+    const visible = showAll ? list : list.slice(0, INITIAL_COUNT);
+    grid.innerHTML=visible.map(RMA.listingCard).join('');
+    empty.style.display=list.length?'none':'block';
+    scrollOuter.style.display=list.length?'':'none';
+    count.textContent=list.length+(list.length===1?' property':' properties');
+    if(hasMore){
+      showMoreWrap.style.display='block';
+      showMoreBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg> Show all ${list.length} properties`;
+    } else {
+      showMoreWrap.style.display='none';
+    }
+  }
+
+  showMoreBtn.addEventListener('click',()=>{
+    showAll=true;
+    render();
+    grid.classList.add('grid-mode');
+    scrollOuter.style.overflowX='visible';
+    scrollOuter.style.cursor='default';
+  });
+
+  function resetAndRender(){
+    showAll=false;
+    grid.classList.remove('grid-mode');
+    scrollOuter.style.overflowX='auto';
+    scrollOuter.style.cursor='grab';
+    render();
+  }
+
+  segListing.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    [...segListing.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');state.listing=b.dataset.val;resetAndRender();});
+  fType.onchange=()=>{state.type=fType.value;resetAndRender();};
+  fArea.onchange=()=>{state.area=fArea.value;resetAndRender();};
+  fBudget.onchange=()=>{state.budget=fBudget.value;resetAndRender();};
+  fSort.onchange=()=>{state.sort=fSort.value;resetAndRender();};
+  render();
+
+  // ── GSAP smooth drag-to-scroll ──
+  (function(){
+    var el = scrollOuter;
+    var reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var dragging = false, startX = 0, startScroll = 0;
+    var lastX = 0, lastT = 0, velocity = 0;
+    // quickTo: reuses single tween for perf — only create after GSAP ready
+    var scrollTo = typeof gsap !== 'undefined'
+      ? gsap.quickTo(el, 'scrollLeft', {duration:0.7, ease:'power3.out'})
+      : null;
+
+    el.addEventListener('pointerdown', function(e){
+      if(showAll) return;
+      dragging = true;
+      startX = e.clientX;
+      startScroll = el.scrollLeft;
+      lastX = e.clientX;
+      lastT = Date.now();
+      velocity = 0;
+      el.setPointerCapture(e.pointerId);
+      el.style.cursor = 'grabbing';
+      // kill any running momentum tween
+      if(scrollTo) gsap.killTweensOf(el);
+    });
+
+    el.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      var dx = startX - e.clientX;
+      // instant position during drag (no tween — raw feel)
+      el.scrollLeft = startScroll + dx;
+      // track velocity: px/ms over last frame
+      var now = Date.now();
+      var dt = now - lastT || 1;
+      velocity = (lastX - e.clientX) / dt; // positive = dragging left
+      lastX = e.clientX;
+      lastT = now;
+    });
+
+    function endDrag(){
+      if(!dragging) return;
+      dragging = false;
+      el.style.cursor = 'grab';
+      if(reduce || !scrollTo) return;
+      // throw: momentum proportional to velocity at release
+      var throwDist = velocity * 220; // tune feel here
+      var target = Math.max(0, Math.min(el.scrollLeft + throwDist, el.scrollWidth - el.clientWidth));
+      scrollTo(target);
+    }
+
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', endDrag);
+
+    // prevent click-through after drag
+    el.addEventListener('click', function(e){
+      if(Math.abs(el.scrollLeft - startScroll) > 4) e.stopPropagation();
+    }, true);
+  })();
+</script>
+</body>
+</html>

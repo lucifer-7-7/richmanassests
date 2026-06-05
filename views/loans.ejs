@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head', {
+  title: 'Home Loans & EMI — Partner Bank Rates · RichManAssets',
+  description: 'Pre-approved home loan offers from partner banks. Fast eligibility, honest EMI advice, and the lowest rate we can negotiate for you.',
+  canonical: 'https://richmanassets.com/loans'
+}) %>
+<link rel="stylesheet" href="/assets/market.css?v=2">
+<style>
+  .page-top{padding:118px 0 40px}
+  .page-top h1{font-family:var(--f-display);font-weight:500;font-size:clamp(34px,5.6vw,72px);line-height:1;letter-spacing:-.015em;margin-top:14px;max-width:18ch}
+  .page-top h1 .it{font-style:italic;color:var(--accent)}
+  .page-top p{margin-top:16px;color:var(--ink-3);font-size:16px;max-width:50ch;line-height:1.6}
+  .emi-calc{background:var(--paper-2);border-radius:var(--r-lg);padding:clamp(30px,4vw,52px);margin:clamp(40px,6vw,80px) 0}
+  .emi-calc h2{font-family:var(--f-display);font-size:clamp(24px,3.2vw,38px);font-weight:500;letter-spacing:-.01em;margin-bottom:28px}
+  .emi-calc h2 .it{font-style:italic;color:var(--accent)}
+  .calc-grid{display:grid;gap:24px}
+  @media(min-width:760px){.calc-grid{grid-template-columns:1fr 1fr 1fr}}
+  .calc-field{display:flex;flex-direction:column;gap:8px}
+  .calc-field label{font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .calc-field input{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font:inherit;font-size:16px;color:var(--ink);outline:none;transition:border .3s;width:100%}
+  .calc-field input:focus{border-color:var(--ink)}
+  .calc-result{margin-top:28px;padding:28px;background:var(--ink);color:var(--paper);border-radius:var(--r);display:flex;align-items:center;flex-wrap:wrap;gap:24px}
+  .emi-big{font-family:var(--f-display);font-size:clamp(36px,5vw,62px);font-weight:500;letter-spacing:-.02em}
+  .emi-big .it{font-style:italic;color:var(--accent-soft)}
+  .emi-breakdown{display:flex;gap:32px;flex-wrap:wrap;margin-left:auto}
+  .emi-breakdown div .v{font-family:var(--f-display);font-size:22px;font-weight:500}
+  .emi-breakdown div .k{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(247,244,237,.5);margin-top:4px}
+  .loan-pts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin:clamp(40px,6vw,80px) 0}
+  .loan-pt{padding:24px;border:1px solid var(--line);border-radius:var(--r)}
+  .loan-pt h4{font-family:var(--f-display);font-size:clamp(18px,2vw,24px);font-weight:500;margin:14px 0 10px}
+  .loan-pt p{font-size:14.5px;color:var(--ink-3);line-height:1.6}
+</style>
+</head>
+<body data-screen-label="Loans">
+
+<%- include('partials/nav') %>
+
+<header class="page-top wrap">
+  <div class="crumb"><a href="/">Home</a><span class="sep">/</span><span>Home Loans</span></div>
+  <h1>Found the home. <span class="it">We'll find the loan.</span></h1>
+  <p>Pre-approved offers from our partner banks, honest eligibility advice, and the lowest EMI we can negotiate — handled by bankers, not call centres.</p>
+</header>
+
+<section class="wrap">
+  <div class="emi-calc">
+    <h2>Calculate your <span class="it">EMI.</span></h2>
+    <div class="calc-grid">
+      <div class="calc-field"><label>Loan amount (₹)</label><input type="number" id="cAmount" value="5000000" min="100000" step="50000"></div>
+      <div class="calc-field"><label>Tenure (years)</label><input type="number" id="cTenure" value="20" min="1" max="30"></div>
+      <div class="calc-field"><label>Interest rate (% p.a.)</label><input type="number" id="cRate" value="8.5" min="5" max="20" step="0.05"></div>
+    </div>
+    <div class="calc-result">
+      <div>
+        <div style="font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,244,237,.5);margin-bottom:8px">Monthly EMI</div>
+        <div class="emi-big" id="emiResult">₹43,<span class="it">391</span></div>
+      </div>
+      <div class="emi-breakdown">
+        <div><div class="v" id="emiTotal">—</div><div class="k">Total payable</div></div>
+        <div><div class="v" id="emiInterest">—</div><div class="k">Total interest</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loan-pts">
+    <div class="loan-pt">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;color:var(--accent)"><ellipse cx="11" cy="8" rx="7" ry="3.2"/><path d="M4 8v6c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2V8"/><path d="M14 17v5c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2v-6"/></svg>
+      <h4>Partner-bank rates</h4>
+      <p>Direct tie-ups with SBI, HDFC, Axis and ICICI mean we get rates that aren't on the counter — and we pass them to you.</p>
+    </div>
+    <div class="loan-pt">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;color:var(--accent)"><path d="M8 4h12l6 6v18H8z"/><path d="M20 4v6h6M12 17h10M12 22h10"/></svg>
+      <h4>Doorstep paperwork</h4>
+      <p>We collect documents, liaise with the bank, and keep you informed at every step. You don't have to sit in a branch.</p>
+    </div>
+    <div class="loan-pt">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;color:var(--accent)"><path d="M16 3 5 7v8c0 7 5 12 11 14 6-2 11-7 11-14V7z"/><path d="M11 16l4 4 7-8"/></svg>
+      <h4>In-house legal desk</h4>
+      <p>Our empaneled advocate handles title verification and registration in parallel with your loan — so handover isn't delayed.</p>
+    </div>
+    <div class="loan-pt">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;color:var(--accent)"><circle cx="13" cy="12" r="6"/><path d="M4 28c0-5 4-8 9-8s9 3 9 8M22 11l3 3 5-5"/></svg>
+      <h4>Honest eligibility check</h4>
+      <p>We tell you upfront what you'll qualify for — not what sounds good. If it's not viable, we tell you that too.</p>
+    </div>
+  </div>
+</section>
+
+<section class="lead" style="margin-top:0">
+  <div class="wrap"><div class="lead-grid" style="grid-template-columns:1fr;text-align:center;place-items:center">
+    <div>
+      <h2>Ready to check your <span class="it">eligibility?</span></h2>
+      <p class="lead-sub" style="margin-inline:auto;margin-top:12px">Takes five minutes. One of our banking specialists gets back to you with real options.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:24px">
+        <a class="btn btn-dark" href="/contact?service=loans"><span>Check eligibility</span><span class="arr">→</span></a>
+        <a class="btn btn-ghost" href="https://wa.me/919036001234?text=Hi%20RichManAssets%2C%20I%27d%20like%20to%20check%20my%20home%20loan%20eligibility." target="_blank" rel="noopener"><span>WhatsApp us</span></a>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<%- include('partials/footer') %>
+
+<script>
+  const nav = document.getElementById('nav');
+  nav.classList.add('solid');
+
+  function fmt(n) {
+    if (n >= 10000000) return '₹' + (n/10000000).toFixed(2) + ' Cr';
+    if (n >= 100000) return '₹' + (n/100000).toFixed(2) + ' L';
+    return '₹' + n.toLocaleString('en-IN');
+  }
+  function calcEMI() {
+    const P = parseFloat(document.getElementById('cAmount').value) || 0;
+    const r = (parseFloat(document.getElementById('cRate').value) || 0) / 1200;
+    const n = (parseFloat(document.getElementById('cTenure').value) || 0) * 12;
+    if (!P || !r || !n) return;
+    const emi = P * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+    const total = emi * n;
+    const interest = total - P;
+    const [whole, dec] = Math.round(emi).toLocaleString('en-IN').split(',');
+    document.getElementById('emiResult').innerHTML = '₹' + whole + (dec ? ',<span class="it">' + dec + '</span>' : '');
+    document.getElementById('emiTotal').textContent = fmt(Math.round(total));
+    document.getElementById('emiInterest').textContent = fmt(Math.round(interest));
+  }
+  ['cAmount','cRate','cTenure'].forEach(id => document.getElementById(id).addEventListener('input', calcEMI));
+  calcEMI();
+</script>
+</body>
+</html>

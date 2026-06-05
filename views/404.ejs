@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head', { title: 'Page Not Found — RichManAssets', description: 'The page you are looking for does not exist.' }) %>
+<style>
+  .notfound{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 20px}
+  .notfound h1{font-family:var(--f-display);font-size:clamp(80px,14vw,160px);line-height:1;letter-spacing:-.04em;color:var(--paper-3);font-weight:300}
+  .notfound h2{font-family:var(--f-display);font-size:clamp(24px,4vw,44px);margin-top:-20px;font-weight:400}
+  .notfound p{margin-top:16px;color:var(--ink-3);max-width:40ch}
+</style>
+</head>
+<body>
+<%- include('partials/nav') %>
+<div class="notfound">
+  <h1>404</h1>
+  <h2>Page not found.</h2>
+  <p>The page you're looking for doesn't exist or may have moved.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:28px">
+    <a class="btn btn-dark" href="/"><span>Go home</span></a>
+    <a class="btn btn-ghost" href="/properties"><span>Browse properties</span></a>
+  </div>
+</div>
+<%- include('partials/footer') %>
+<script>document.getElementById('nav').classList.add('solid');</script>
+</body>
+</html>

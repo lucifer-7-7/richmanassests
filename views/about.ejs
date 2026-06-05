@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head', {
+  title: 'About RichManAssets — Premium Property Consultants in Udupi, Mangaluru & Coastal Karnataka',
+  description: 'RichManAssets is coastal Karnataka\'s most trusted property consultancy. Serving Udupi, Mangaluru, Manipal and the Western Ghats for 15+ years. Villas, plots, loans, legal — one accountable team.',
+  canonical: 'https://richmanassets.com/about',
+  ogImage: 'https://richmanassets.com/assets/img/site-hero.jpg'
+}) %>
+<link rel="stylesheet" href="/assets/market.css?v=2">
+<style>
+  .about-hero{
+    background:var(--ink);color:var(--paper);
+    padding:clamp(120px,16vw,180px) 0 clamp(56px,8vw,96px);
+    position:relative;overflow:hidden;
+  }
+  .about-hero::before{
+    content:"";position:absolute;right:-10%;top:-20%;
+    width:60vw;max-width:700px;aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle,rgba(154,123,63,.12),transparent 70%);
+    pointer-events:none;
+  }
+  .about-hero h1{
+    font-family:var(--f-display);font-weight:400;
+    font-size:clamp(36px,6vw,84px);line-height:.96;letter-spacing:-.024em;
+    text-wrap:balance;max-width:16ch;
+  }
+  .about-hero h1 .it{font-style:italic;color:var(--accent-soft)}
+  .about-hero p{
+    margin-top:22px;max-width:52ch;
+    font-size:clamp(15px,1.5vw,17px);line-height:1.68;
+    color:rgba(247,244,237,.74);
+  }
+  .about-hero .hero-meta{
+    display:flex;gap:clamp(20px,3vw,40px);flex-wrap:wrap;
+    margin-top:36px;padding-top:32px;
+    border-top:1px solid rgba(247,244,237,.12);
+  }
+  .about-hero .hero-meta div .v{
+    font-family:var(--f-display);font-size:clamp(28px,3.4vw,44px);
+    font-weight:500;letter-spacing:-.02em;color:var(--gold);
+  }
+  .about-hero .hero-meta div .l{
+    font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:rgba(247,244,237,.44);margin-top:5px;
+  }
+
+  /* prose sections */
+  .about-sec{padding:clamp(64px,9vw,112px) 0}
+  .about-grid{
+    display:grid;gap:clamp(36px,6vw,80px);align-items:start;
+  }
+  @media(min-width:880px){.about-grid{grid-template-columns:1fr 1fr}}
+  @media(min-width:880px){.about-grid.flip .prose{order:2}}
+  @media(min-width:880px){.about-grid.flip .media-col{order:1}}
+  .prose .label{
+    font-family:var(--f-mono);font-size:11px;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:block;
+  }
+  .prose h2{
+    font-family:var(--f-display);font-weight:400;
+    font-size:clamp(28px,3.8vw,50px);line-height:1.04;letter-spacing:-.018em;
+    text-wrap:balance;margin-bottom:20px;
+  }
+  .prose h2 .it{font-style:italic;color:var(--accent)}
+  .prose p{
+    font-size:clamp(14.5px,1.4vw,16.5px);line-height:1.74;
+    color:var(--ink-2);margin-bottom:18px;max-width:54ch;
+  }
+  .prose p:last-child{margin-bottom:0}
+  .prose ul{list-style:none;margin-top:20px;display:flex;flex-direction:column;gap:10px}
+  .prose ul li{
+    display:flex;gap:12px;align-items:baseline;
+    font-size:14.5px;color:var(--ink-2);
+    padding:10px 0;border-bottom:1px solid var(--line-soft);
+  }
+  .prose ul li .d{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--gold-deep);flex:none;transform:translateY(-2px);
+  }
+
+  .media-col{border-radius:16px;overflow:hidden;background:var(--paper-2)}
+  .media-col img{width:100%;height:100%;object-fit:cover;display:block}
+  .media-col.dark{
+    background:var(--ink);border-radius:16px;
+    padding:clamp(28px,3.6vw,48px);color:var(--paper);
+    display:flex;flex-direction:column;gap:clamp(20px,2.8vw,32px);
+  }
+  .media-col.dark h3{
+    font-family:var(--f-display);font-weight:400;
+    font-size:clamp(22px,2.6vw,34px);letter-spacing:-.015em;
+    color:var(--paper);line-height:1.08;
+  }
+  .media-col.dark h3 .it{font-style:italic;color:var(--gold)}
+  .media-col.dark p{font-size:14.5px;line-height:1.66;color:rgba(247,244,237,.7)}
+
+  /* location grid */
+  .loc-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:clamp(10px,1.4vw,18px);margin-top:clamp(32px,4vw,52px);
+  }
+  .loc-card{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:12px;padding:clamp(16px,2vw,24px);
+    transition:.36s ease;
+  }
+  .loc-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .loc-card h4{
+    font-family:var(--f-display);font-weight:500;
+    font-size:clamp(18px,1.9vw,24px);margin-bottom:7px;letter-spacing:-.01em;
+  }
+  .loc-card p{font-size:13px;color:var(--ink-3);line-height:1.5}
+  .loc-card .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .loc-card .pill{
+    font-family:var(--f-mono);font-size:9.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);
+    border-radius:100px;padding:5px 10px;
+  }
+
+  /* trust */
+  .trust-block{
+    background:var(--paper-2);border-radius:16px;
+    padding:clamp(28px,3.6vw,48px);
+    display:grid;gap:clamp(16px,2vw,24px);
+    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  }
+  .trust-block .t{
+    display:flex;flex-direction:column;gap:6px;
+    padding:clamp(14px,1.8vw,22px);background:var(--paper);
+    border-radius:10px;border:1px solid var(--line-soft);
+  }
+  .trust-block .t .v{
+    font-family:var(--f-display);font-size:clamp(26px,3vw,36px);
+    font-weight:500;letter-spacing:-.02em;color:var(--accent);
+  }
+  .trust-block .t .l{
+    font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);
+  }
+
+  /* team values */
+  .values-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:clamp(12px,1.6vw,20px);margin-top:clamp(32px,4vw,52px);
+  }
+  .value-card{
+    padding:clamp(20px,2.4vw,30px);border:1px solid var(--line);
+    border-radius:12px;transition:.36s ease;
+    background:var(--paper);
+  }
+  .value-card:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+  .value-card:hover p{color:rgba(247,244,237,.7)}
+  .value-card .n{
+    font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:block;
+    transition:.36s ease;
+  }
+  .value-card:hover .n{color:rgba(247,244,237,.5)}
+  .value-card h4{
+    font-family:var(--f-display);font-size:clamp(18px,1.8vw,22px);
+    font-weight:500;margin-bottom:9px;letter-spacing:-.01em;
+  }
+  .value-card p{font-size:13.5px;color:var(--ink-3);line-height:1.58;transition:.36s ease}
+
+  /* google rating widget */
+  .rating-band{
+    background:var(--ink);color:var(--paper);
+    padding:clamp(40px,6vw,72px) 0;
+    text-align:center;
+  }
+  .rating-band .r-score{
+    font-family:var(--f-display);font-size:clamp(56px,10vw,100px);
+    font-weight:400;letter-spacing:-.04em;line-height:1;color:var(--gold);
+  }
+  .rating-band .r-stars{display:flex;justify-content:center;gap:6px;margin:10px 0}
+  .rating-band .r-stars svg{width:22px;height:22px;fill:var(--gold)}
+  .rating-band .r-label{
+    font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:rgba(247,244,237,.44);
+  }
+  .rating-band .r-note{
+    margin-top:6px;font-size:14px;color:rgba(247,244,237,.62);max-width:34ch;margin-inline:auto;
+  }
+  .crumb{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+  .crumb a{color:var(--muted);text-decoration:none;transition:.2s}.crumb a:hover{color:var(--ink)}
+  .crumb .sep{color:var(--line)}
+</style>
+
+<!-- JSON-LD: LocalBusiness (SEO) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": "RichManAssets",
+  "description": "RichManAssets is coastal Karnataka's leading property consultancy, serving Udupi, Mangaluru, Manipal, Kundapur, Udupi District and the Western Ghats since 2009. Residential, commercial, plots, home loans and legal services.",
+  "url": "https://richmanassets.com",
+  "telephone": "+919036001234",
+  "email": "hello@richmanassets.com",
+  "foundingDate": "2009",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Mangaluru",
+    "addressLocality": "Mangaluru",
+    "addressRegion": "Karnataka",
+    "postalCode": "575001",
+    "addressCountry": "IN"
+  },
+  "areaServed": [
+    "Udupi", "Mangaluru", "Manipal", "Kundapur", "Udupi District",
+    "Dakshina Kannada", "Sakleshpur", "Chikmagalur", "Coastal Karnataka"
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "1200",
+    "bestRating": "5"
+  },
+  "knowsAbout": [
+    "Real estate in Udupi", "Property for sale in Mangaluru", "Home loans Karnataka",
+    "Coastal villas Karnataka", "Beachfront property India", "Property investment Udupi",
+    "Agricultural land Karnataka", "Commercial property Mangaluru"
+  ]
+}
+</script>
+</head>
+<body>
+<%- include('partials/nav') %>
+
+<!-- HERO -->
+<header class="about-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="/">Home</a><span class="sep">/</span><span>About</span></div>
+    <h1>Coastal Karnataka's<br>most trusted<br><span class="it">property team.</span></h1>
+    <p>For over 15 years, families across Udupi, Mangaluru, Manipal and the Western Ghats have trusted us to find the right home, negotiate the right price and close the right way. One team. No middlemen. No surprises.</p>
+    <div class="hero-meta">
+      <div><div class="v">15+</div><div class="l">Years in the market</div></div>
+      <div><div class="v">₹500Cr+</div><div class="l">Transacted</div></div>
+      <div><div class="v">1,200+</div><div class="l">Happy families</div></div>
+      <div><div class="v">4.9 ★</div><div class="l">Client rating</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- TRUST SCORE BAND -->
+<section class="rating-band">
+  <div class="wrap">
+    <div class="r-score">4.9</div>
+    <div class="r-stars">
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+    </div>
+    <div class="r-label">Average rating · 1,200+ verified clients</div>
+    <div class="r-note">Across Udupi, Mangaluru, Manipal and the Western Ghats</div>
+  </div>
+</section>
+
+<!-- WHO WE ARE -->
+<section class="about-sec">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="prose reveal">
+        <span class="label">Who we are</span>
+        <h2>Built on the coast.<br><span class="it">Rooted in trust.</span></h2>
+        <p>RichManAssets was founded in Mangaluru in 2009, when the coastal Karnataka property market was fragmented, opaque and difficult to navigate for buyers and sellers alike. We built one team to fix that.</p>
+        <p>Today we are one of the most recognised property consultancies across the Udupi–Mangaluru coastal corridor, covering residential sales, commercial leasing, plot transactions, home finance and legal services from a single desk.</p>
+        <p>We are powered by <strong>Vittu Bharat Associates LLP</strong>, with a legal desk empaneled with SBI, HDFC, Karnataka Bank and 8 other national lenders.</p>
+      </div>
+      <div class="media-col dark reveal">
+        <h3>One desk for<br><span class="it">everything</span> property.</h3>
+        <p>Most property journeys in coastal Karnataka involve a broker who doesn't do loans, a banker who doesn't understand title, and a lawyer who gets called too late. We put all three roles in-house so nothing falls through the cracks.</p>
+        <div class="trust-block" style="background:rgba(247,244,237,.06);border-radius:10px;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="font-family:var(--f-display);font-size:30px;font-weight:500;color:var(--gold)">11</div>
+            <div style="font-family:var(--f-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(247,244,237,.44)">Banking partners</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="font-family:var(--f-display);font-size:30px;font-weight:500;color:var(--gold)">100%</div>
+            <div style="font-family:var(--f-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(247,244,237,.44)">Title-clear listings</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="font-family:var(--f-display);font-size:30px;font-weight:500;color:var(--gold)">8</div>
+            <div style="font-family:var(--f-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(247,244,237,.44)">Service lines</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="font-family:var(--f-display);font-size:30px;font-weight:500;color:var(--gold)">1 day</div>
+            <div style="font-family:var(--f-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(247,244,237,.44)">Typical response time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- UDUPI REGION — SEO FOCUS -->
+<section class="about-sec" style="background:var(--paper-2);padding:clamp(64px,9vw,112px) 0">
+  <div class="wrap">
+    <div class="prose" style="max-width:70ch;margin-bottom:clamp(32px,4vw,52px)">
+      <span class="label">Where we operate</span>
+      <h2>The property specialists<br>for <span class="it">Udupi District</span> and beyond.</h2>
+      <p>The Udupi–Dakshina Kannada coastal strip is one of South India's most desirable property markets — driven by a combination of natural beauty, strong NRI investment, university demand from Manipal and growing retirement interest from metros. We know every pocket of this coastline.</p>
+    </div>
+    <div class="loc-grid">
+      <div class="loc-card reveal">
+        <h4>Udupi</h4>
+        <p>Temple city with strong rental demand driven by Manipal University, hospitals and tourism. Excellent infrastructure, reliable connectivity.</p>
+        <div class="pill-row"><span class="pill">Residential</span><span class="pill">Plots</span><span class="pill">Commercial</span></div>
+      </div>
+      <div class="loc-card reveal">
+        <h4>Manipal</h4>
+        <p>Planned plateau university town with India's largest private medical school. Perpetual rental demand from students, faculty and international researchers.</p>
+        <div class="pill-row"><span class="pill">Houses</span><span class="pill">Investment</span><span class="pill">Rentals</span></div>
+      </div>
+      <div class="loc-card reveal">
+        <h4>Mangaluru</h4>
+        <p>Karnataka's second-largest city. Port, airport, banking hub. Strong commercial and residential market with consistent NRI buyer interest from Gulf, UK and US.</p>
+        <div class="pill-row"><span class="pill">Commercial</span><span class="pill">Apartments</span><span class="pill">Villas</span></div>
+      </div>
+      <div class="loc-card reveal">
+        <h4>Surathkal</h4>
+        <p>NITK campus zone. High-demand rental corridor. Beachfront properties attract both lifestyle buyers and investors seeking consistent occupancy.</p>
+        <div class="pill-row"><span class="pill">Beach villas</span><span class="pill">Rentals</span><span class="pill">Plots</span></div>
+      </div>
+      <div class="loc-card reveal">
+        <h4>Kundapur</h4>
+        <p>Fast-growing coastal town between Udupi and Mangaluru. Agricultural and residential land at significantly lower entry prices than city corridors.</p>
+        <div class="pill-row"><span class="pill">Plots</span><span class="pill">Agri land</span><span class="pill">Houses</span></div>
+      </div>
+      <div class="loc-card reveal">
+        <h4>Maravanthe & Kapu</h4>
+        <p>The most scenic stretch of NH-66 — sea on one side, backwater on the other. Increasingly sought by second-home buyers from Bangalore and Mumbai.</p>
+        <div class="pill-row"><span class="pill">Beach sites</span><span class="pill">Villas</span><span class="pill">Plots</span></div>
+      </div>
+      <div class="loc-card reveal">
+        <h4>Sakleshpur</h4>
+        <p>Cool, misty hill station in Hassan district. Coffee and areca estate country. Rising demand from Bangalore buyers looking for working estates and retreats.</p>
+        <div class="pill-row"><span class="pill">Estates</span><span class="pill">Agri</span><span class="pill">Hill homes</span></div>
+      </div>
+      <div class="loc-card reveal">
+        <h4>Chikmagalur</h4>
+        <p>Karnataka's original coffee country at 1,000m elevation. Plantation estates, resort properties and hill bungalows within 5 hours of Bangalore.</p>
+        <div class="pill-row"><span class="pill">Coffee estates</span><span class="pill">Retreats</span><span class="pill">Plots</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY WE'RE DIFFERENT -->
+<section class="about-sec">
+  <div class="wrap">
+    <div class="prose" style="max-width:60ch;margin-bottom:clamp(28px,3.6vw,48px)">
+      <span class="label">Our promise</span>
+      <h2>What makes us<br><span class="it">different.</span></h2>
+      <p>Most agencies are transaction-focused. We are relationship-focused — which is why over 60% of our business comes from referrals and repeat clients.</p>
+    </div>
+    <div class="values-grid">
+      <div class="value-card reveal">
+        <span class="n">01</span>
+        <h4>Title-clear only</h4>
+        <p>We refuse to list a property until our in-house legal desk has verified the title, checked for encumbrances and confirmed clean ownership. No exceptions.</p>
+      </div>
+      <div class="value-card reveal">
+        <span class="n">02</span>
+        <h4>Honest pricing</h4>
+        <p>We tell you the realistic market rate, not the aspirational one. We have walked away from listings where the seller's price was simply not justifiable.</p>
+      </div>
+      <div class="value-card reveal">
+        <span class="n">03</span>
+        <h4>One team, no handoffs</h4>
+        <p>Your single point of contact handles everything: property, loan, legal, interiors. You are never passed from department to department.</p>
+      </div>
+      <div class="value-card reveal">
+        <span class="n">04</span>
+        <h4>Banking empanelment</h4>
+        <p>Our advocate is empaneled with SBI, HDFC, Karnataka Bank and 8 other lenders — which means faster loan sanctions and better rates than going to a bank cold.</p>
+      </div>
+      <div class="value-card reveal">
+        <span class="n">05</span>
+        <h4>NRI specialist desk</h4>
+        <p>We have handled hundreds of NRI transactions across the UK, US and Gulf countries. Power of attorney, FEMA compliance and repatriation paperwork handled completely.</p>
+      </div>
+      <div class="value-card reveal">
+        <span class="n">06</span>
+        <h4>Post-sale management</h4>
+        <p>We stay involved after the keys change hands — tenant management, maintenance and property protection for clients who live away from their investment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="about-sec" style="background:var(--paper-2);padding:clamp(64px,9vw,112px) 0">
+  <div class="wrap">
+    <div class="intro-head" style="margin-bottom:clamp(32px,4vw,52px)">
+      <h2 class="fx">Clients speak for <span class="it">themselves.</span></h2>
+      <p class="sub fx">Real words from families and investors along the coastal Karnataka corridor.</p>
+    </div>
+    <div class="tcards">
+      <% testimonials.forEach(function(t) { %>
+      <div class="tcard reveal">
+        <div class="stars">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+        </div>
+        <blockquote>"<%= t.quote %>"</blockquote>
+        <div class="who"><span class="av"><%= t.initials %></span><div><b><%= t.name %></b><span><%= t.role %></span></div></div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="lead">
+  <div class="wrap"><div class="lead-grid" style="grid-template-columns:1fr;text-align:center;place-items:center">
+    <div>
+      <span class="kicker" style="color:var(--gold)"><span class="gold-line"></span>Ready to talk?</span>
+      <h2 style="margin-top:14px">Find your place on the <span class="it">Karnataka coast.</span></h2>
+      <p class="lead-sub" style="margin-inline:auto;margin-top:12px">One conversation with a specialist is all it takes to get started — buying, selling, renting or investing.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:24px">
+        <a class="btn btn-dark" href="/properties"><span>Browse properties</span><span class="arr">→</span></a>
+        <a class="btn btn-ghost" href="/contact"><span>Talk to us</span></a>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<%- include('partials/footer') %>
+
+<script>
+  const nav = document.getElementById('nav');
+  nav.classList.add('solid');
+  const io = new IntersectionObserver((es) => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: .08, rootMargin: '0px 0px -4% 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

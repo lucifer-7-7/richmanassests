@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head', {
+  title: 'Enquire — Talk to a specialist · RichManAssets',
+  description: 'Tell us what you\'re looking for. A RichManAssets specialist replies the same day — buying, renting, loans, legal, construction or interiors.',
+  canonical: 'https://richmanassets.com/contact'
+}) %>
+<link rel="stylesheet" href="/assets/market.css?v=2">
+<style>
+  .page-top{padding:118px 0 12px}
+  .page-top h1{font-family:var(--f-display);font-weight:500;font-size:clamp(34px,5.6vw,72px);line-height:1;letter-spacing:-.015em;margin-top:14px;max-width:16ch}
+  .page-top h1 .it{font-style:italic;color:var(--accent)}
+  .page-top p{margin-top:16px;color:var(--ink-3);font-size:16px;max-width:50ch;line-height:1.6}
+  .c-grid{display:grid;gap:clamp(30px,4vw,60px);align-items:start;padding:clamp(34px,5vw,60px) 0 clamp(60px,9vw,110px)}
+  @media(min-width:900px){.c-grid{grid-template-columns:1.05fr .95fr}}
+  .c-info .block{padding:24px 0;border-bottom:1px solid var(--line)}
+  .c-info .block:first-child{padding-top:0}
+  .c-info h5{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .c-info .big-link{font-family:var(--f-display);font-size:clamp(24px,3vw,34px);font-weight:500;letter-spacing:-.01em;display:inline-flex;align-items:center;gap:12px}
+  .c-info .big-link:hover{color:var(--accent)}
+  .c-info p{color:var(--ink-2);font-size:15px;line-height:1.6}
+  .c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .hours{display:flex;justify-content:space-between;max-width:340px;font-size:14px;color:var(--ink-2);padding:7px 0;border-bottom:1px dotted var(--line)}
+</style>
+</head>
+<body data-screen-label="Contact">
+
+<%- include('partials/nav') %>
+
+<header class="page-top wrap">
+  <div class="crumb"><a href="/">Home</a><span class="sep">/</span><span>Enquire</span></div>
+  <h1>Let's find your <span class="it">next move.</span></h1>
+  <p>Tell us what you're after and a specialist gets back to you — usually the same day. No call-centre, no pressure.</p>
+</header>
+
+<section class="wrap"><div class="c-grid">
+  <div class="c-info">
+    <div class="block">
+      <h5>Call or WhatsApp</h5>
+      <a class="big-link" href="tel:+919036001234">+91 90360 01234</a>
+      <p style="margin-top:10px">Direct line to our property specialists. Available 9am–7pm, Mon–Sat.</p>
+      <div class="c-actions">
+        <a class="btn btn-dark" href="tel:+919036001234"><span>Call now</span></a>
+        <a class="btn btn-ghost" href="https://wa.me/919036001234?text=Hi%20RichManAssets%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener"><span>WhatsApp</span></a>
+      </div>
+    </div>
+    <div class="block">
+      <h5>Email</h5>
+      <a class="big-link" href="mailto:hello@richmanassets.com" style="font-size:clamp(18px,2.2vw,26px)">hello@richmanassets.com</a>
+    </div>
+    <div class="block">
+      <h5>Office hours</h5>
+      <div class="hours"><span>Monday – Friday</span><b>9:00 – 19:00</b></div>
+      <div class="hours"><span>Saturday</span><b>9:00 – 17:00</b></div>
+      <div class="hours"><span>Sunday</span><b>Closed</b></div>
+    </div>
+    <div class="block">
+      <h5>Location</h5>
+      <p>Mangaluru, Karnataka · India<br>Serving coastal Karnataka and the Western Ghats.</p>
+    </div>
+  </div>
+
+  <%- include('partials/enquiry-form', { propertyRef: ref || '', pageName: 'contact' }) %>
+</div></section>
+
+<%- include('partials/footer') %>
+
+<script>
+  const nav = document.getElementById('nav');
+  nav.classList.add('solid');
+
+  // handle form submit via fetch
+  const form = document.getElementById('leadForm');
+  const okMsg = form.querySelector('.ok-msg');
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = new FormData(form);
+    const res = await fetch('/enquiry', { method: 'POST', body: new URLSearchParams(data) });
+    if (res.ok) {
+      form.querySelector('.form-body').style.display = 'none';
+      okMsg.style.display = 'block';
+    }
+  });
+</script>
+</body>
+</html>

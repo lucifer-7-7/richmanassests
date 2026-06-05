@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Home Loans & EMI Calculator · RichManAssets</title>
+<meta name="description" content="Home, plot and project loans through our partner banks. Calculate your EMI instantly and check eligibility — handled by bankers, not call-centres."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/market.css">
+<style>
+  .page-top{padding:120px 0 18px}
+  .page-top h1{font-family:var(--f-display);font-weight:500;font-size:clamp(34px,5.6vw,72px);line-height:1;letter-spacing:-.015em;margin-top:14px;max-width:15ch}
+  .page-top h1 .it{font-style:italic;color:var(--accent)}
+  .page-top p{margin-top:16px;color:var(--ink-3);font-size:16px;max-width:52ch;line-height:1.6}
+  .banks{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+  .banks .b{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;color:var(--ink-2);border:1px solid var(--line);border-radius:100px;padding:10px 18px}
+  .bank-note{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+</style>
+</head>
+<body data-screen-label="Home Loans">
+
+<nav class="nav solid" id="nav">
+  <a href="Rich Man Assets.html" class="brand">RichMan<span class="mono">Assets</span></a>
+  <div class="nav-links">
+    <a href="properties.html?listing=sale">Buy</a>
+    <a href="properties.html?listing=rent">Rent</a>
+    <a href="services.html">Services</a>
+    <a href="loans.html">Home Loans</a>
+    <a href="contact.html" class="nav-cta">Enquire</a>
+  </div>
+</nav>
+
+<header class="page-top wrap">
+  <div class="crumb"><a href="Rich Man Assets.html">Home</a><span class="sep">/</span><span>Home Loans</span></div>
+  <h1>Found the home. <span class="it">Now the loan.</span></h1>
+  <p>Move the sliders to see your EMI in real time, then let our team beat it with a partner-bank rate. Honest numbers, no obligation.</p>
+</header>
+
+<!-- EMI CALCULATOR -->
+<section class="sec-tight wrap">
+  <div class="emi">
+    <div class="emi-pane">
+      <div class="emi-ctrl">
+        <div class="top"><label>Loan amount</label><span class="val" id="vAmt">₹50,00,000</span></div>
+        <input type="range" id="amt" min="500000" max="100000000" step="100000" value="5000000">
+      </div>
+      <div class="emi-ctrl">
+        <div class="top"><label>Interest rate (p.a.)</label><span class="val" id="vRate">8.5%</span></div>
+        <input type="range" id="rate" min="7" max="14" step="0.05" value="8.5">
+      </div>
+      <div class="emi-ctrl">
+        <div class="top"><label>Tenure</label><span class="val" id="vTen">20 years</span></div>
+        <input type="range" id="ten" min="1" max="30" step="1" value="20">
+      </div>
+      <a class="btn btn-dark" href="contact.html" style="width:100%;justify-content:center;margin-top:6px"><span>Get this rate &amp; check eligibility</span><span class="arr">→</span></a>
+    </div>
+
+    <div class="emi-out">
+      <div class="lab">Your monthly EMI</div>
+      <div class="big" id="emiVal">₹43,<span class="it">391</span></div>
+      <div class="split">
+        <div><div class="v" id="oInt">₹54.1 L</div><div class="k">Total interest</div></div>
+        <div><div class="v" id="oTot">₹1.04 Cr</div><div class="k">Total payable</div></div>
+        <div><div class="v" id="oPrin">₹50 L</div><div class="k">Principal</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY / partner banks -->
+<section class="sec-tight wrap">
+  <div class="shead">
+    <div class="l"><span class="kicker"><span class="gold-line"></span>Why borrow through us</span>
+      <h2>A better rate, <span class="it">less running around.</span></h2></div>
+  </div>
+  <div class="why-grid">
+    <div class="why-item"><span class="ic"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h6l3-9 6 18 3-9h6"/></svg></span><h4>Sharper rates</h4><p>Direct bank tie-ups and volume mean offers most walk-in customers never see.</p></div>
+    <div class="why-item"><span class="ic"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="12"/><path d="M16 9v7l5 3"/></svg></span><h4>Faster sanction</h4><p>Files move in days, not weeks — we know each bank's checklist by heart.</p></div>
+    <div class="why-item"><span class="ic"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 27V8l11-4 11 4v19M5 27h22M11 27v-7h10v7"/></svg></span><h4>Doorstep paperwork</h4><p>Documents collected and processed at your home or office — including for NRIs.</p></div>
+  </div>
+  <p class="bank-note" style="margin-top:36px">Empaneled with leading lenders</p>
+  <div class="banks">
+    <span class="b">SBI</span><span class="b">HDFC</span><span class="b">ICICI</span><span class="b">Axis</span>
+    <span class="b">Canara</span><span class="b">Kotak</span><span class="b">LIC HFL</span><span class="b">Bajaj Housing</span>
+  </div>
+</section>
+
+<!-- process -->
+<section class="sec-tight wrap">
+  <div class="shead"><div class="l"><span class="kicker"><span class="gold-line"></span>How the loan works</span>
+    <h2>Four steps to <span class="it">sanction.</span></h2></div></div>
+  <div class="proc-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="proc-step"><span class="num">1</span><h4>Share details</h4><p>Income, the property and your rough budget — a five-minute call.</p></div>
+    <div class="proc-step"><span class="num">2</span><h4>Eligibility &amp; offers</h4><p>We size the loan and bring back the best partner-bank offers.</p></div>
+    <div class="proc-step"><span class="num">3</span><h4>Documentation</h4><p>Papers collected doorstep; legal &amp; valuation handled in-house.</p></div>
+    <div class="proc-step"><span class="num">4</span><h4>Sanction &amp; disbursal</h4><p>Approved, signed and disbursed — typically within a week.</p></div>
+  </div>
+</section>
+
+<!-- LEAD -->
+<section class="lead" id="enquire">
+  <div class="wrap"><div class="lead-grid">
+    <div>
+      <span class="kicker" style="color:var(--gold)"><span class="gold-line"></span>Check eligibility</span>
+      <h2>Let's get you <span class="it">pre-approved.</span></h2>
+      <p class="lead-sub">Send a few details and our loan desk will come back with your eligibility and the best rate we can arrange — same day.</p>
+      <div class="assure">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>No impact on your credit score to enquire</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>NRI &amp; self-employed welcome</div>
+      </div>
+    </div>
+    <form class="form" id="leadForm">
+      <div class="form-body">
+        <div class="form-row">
+          <div class="field"><label>Your name</label><input required name="name" placeholder="Full name"></div>
+          <div class="field"><label>Phone</label><input required name="phone" type="tel" placeholder="+91 …"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Loan amount</label><input name="amt" placeholder="e.g. ₹50 L"></div>
+          <div class="field"><label>Employment</label>
+            <select name="emp"><option>Salaried</option><option>Self-employed</option><option>Business</option><option>NRI</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Anything we should know?</label><textarea name="msg" placeholder="Property, city, timeline… (optional)"></textarea></div>
+        <button class="btn btn-submit" type="submit"><span>Check my eligibility</span><span class="arr">→</span></button>
+        <p class="note">We reply the same day. Your details stay private.</p>
+      </div>
+      <div class="ok-msg">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h4>Got it!</h4>
+        <p>Our loan desk will reach out shortly with your eligibility and the best rate we can arrange.</p>
+      </div>
+    </form>
+  </div></div>
+</section>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <h3>Premium property,<br>handled <span class="it">end to end.</span></h3>
+      <div class="foot-col"><h5>Explore</h5><ul>
+        <li><a href="properties.html?listing=sale">Buy</a></li>
+        <li><a href="properties.html?listing=rent">Rent &amp; Lease</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="loans.html">Home Loans &amp; EMI</a></li>
+      </ul></div>
+      <div class="foot-col"><h5>Reach us</h5><ul>
+        <li><a href="contact.html">Enquire now</a></li>
+        <li><a href="mailto:hello@richmanassets.com">hello@richmanassets.com</a></li>
+        <li><a href="tel:+919876543210">+91 98765 43210</a></li>
+        <li><a href="#">Mangaluru · Karnataka</a></li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 RichManAssets</span><span>Powered by Vittu Bharat Associates LLP</span></div>
+  </div>
+</footer>
+
+<div class="floaters">
+  <a class="wa" id="floatWa" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff"/></svg></a>
+  <a class="call" id="floatCall" aria-label="Call"><svg viewBox="0 0 32 32" fill="none"><path d="M6 3h5l2 6-3 2c1 3 3 5 6 6l2-3 6 2v5c0 1-1 2-2 2C13 26 6 19 6 6c0-1 0-3 0-3z" fill="currentColor"/></svg></a>
+</div>
+
+<script src="assets/data.js"></script>
+<script>
+  document.getElementById('floatWa').href=RMA.waLink("Hi RichManAssets, I'd like to check my home-loan eligibility.");
+  document.getElementById('floatCall').href="tel:"+RMA.PHONE;
+
+  const amt=document.getElementById('amt'),rate=document.getElementById('rate'),ten=document.getElementById('ten');
+  const vAmt=document.getElementById('vAmt'),vRate=document.getElementById('vRate'),vTen=document.getElementById('vTen');
+  const emiVal=document.getElementById('emiVal'),oInt=document.getElementById('oInt'),oTot=document.getElementById('oTot'),oPrin=document.getElementById('oPrin');
+
+  const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+  function compact(n){
+    if(n>=10000000)return '₹'+(n/10000000).toFixed(2).replace(/\.?0+$/,'')+' Cr';
+    if(n>=100000)return '₹'+(n/100000).toFixed(1).replace(/\.0$/,'')+' L';
+    return inr(n);
+  }
+  function fillRange(el){
+    const pct=((el.value-el.min)/(el.max-el.min)*100).toFixed(1);
+    el.style.background=`linear-gradient(to right,#8A6D38 0%,#8A6D38 ${pct}%,rgba(23,21,15,.18) ${pct}%,rgba(23,21,15,.18) 100%)`;
+  }
+  function calc(){
+    const P=+amt.value, R=+rate.value/12/100, N=+ten.value*12;
+    const emi = R===0? P/N : P*R*Math.pow(1+R,N)/(Math.pow(1+R,N)-1);
+    const total=emi*N, interest=total-P;
+    vAmt.textContent=compact(P);
+    vRate.textContent=(+rate.value).toFixed(2).replace(/\.00$/,'')+'%';
+    vTen.textContent=ten.value+' year'+(ten.value==1?'':'s');
+    const e=Math.round(emi).toLocaleString('en-IN');
+    const parts=e.split(',');
+    emiVal.innerHTML='₹'+parts.slice(0,-1).join(',')+',<span class="it">'+parts[parts.length-1]+'</span>';
+    oInt.textContent=compact(interest); oTot.textContent=compact(total); oPrin.textContent=compact(P);
+    [amt,rate,ten].forEach(fillRange);
+  }
+  [amt,rate,ten].forEach(s=>s.addEventListener('input',calc));
+  calc();
+
+  document.getElementById('leadForm').addEventListener('submit',e=>{e.preventDefault();e.currentTarget.classList.add('sent');e.currentTarget.querySelector('.ok-msg').classList.add('show');});
+</script>
+</body>
+</html>

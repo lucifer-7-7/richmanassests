@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin Login — RichManAssets</title>
+<meta name="robots" content="noindex,nofollow"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#F7F4ED;min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .box{background:#fff;border:1px solid rgba(23,21,15,.12);border-radius:16px;padding:44px 40px;width:100%;max-width:380px}
+  .logo{font-size:20px;font-weight:600;letter-spacing:-.01em;margin-bottom:30px;color:#17150F}
+  .logo span{font-size:9px;letter-spacing:.28em;text-transform:uppercase;opacity:.5;margin-left:6px;font-weight:400;vertical-align:2px}
+  h1{font-size:22px;font-weight:500;margin-bottom:6px;color:#17150F}
+  p{font-size:13px;color:#6A6354;margin-bottom:26px}
+  label{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#928A79;margin-bottom:6px}
+  input[type=password]{width:100%;padding:13px 15px;border:1px solid rgba(23,21,15,.18);border-radius:8px;font:inherit;font-size:15px;color:#17150F;outline:none;transition:border .25s}
+  input[type=password]:focus{border-color:#17150F}
+  .err{color:#c0392b;font-size:13px;margin-bottom:14px;padding:10px 14px;background:#fdf0ee;border-radius:6px}
+  button{width:100%;margin-top:18px;padding:14px;background:#17150F;color:#F7F4ED;border:0;border-radius:8px;font:inherit;font-size:14px;letter-spacing:.04em;cursor:pointer;transition:.3s}
+  button:hover{background:#9A7B3F}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">RichManAssets <span>Admin</span></div>
+  <h1>Sign in</h1>
+  <p>Enter your admin password to continue.</p>
+  <% if (flash) { %><div class="err"><%= flash %></div><% } %>
+  <form method="post" action="/admin/login">
+    <label>Password</label>
+    <input type="password" name="password" autofocus autocomplete="current-password" required>
+    <button type="submit">Sign in →</button>
+  </form>
+</div>
+</body>
+</html>

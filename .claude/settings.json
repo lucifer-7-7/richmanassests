@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(head -200)",
+      "PowerShell($root = \"c:\\\\Users\\\\seeke\\\\Downloads\\\\rich man assests 3\"; $files = Get-ChildItem -Path $root -Recurse -Force; $filesByExt = @{}; foreach\\($f in $files\\) { if\\(!$f.PSIsContainer\\) { $ext = if\\($f.Extension\\) { $f.Extension } else { \"<no ext>\" }; if\\(!$filesByExt[$ext]\\) { $filesByExt[$ext] = @{count=0; size=0} } $filesByExt[$ext].count += 1; $filesByExt[$ext].size += $f.Length } }; $filesByExt.GetEnumerator\\(\\) | Sort-Object -Property @{Expression={$_.Value.count}; Descending=$true} | ForEach-Object { Write-Host \"$\\($_.Name\\): $\\($_.Value.count\\) files, $\\('{0:N0}' -f $_.Value.size\\) bytes\" })"
+    ]
+  }
+}

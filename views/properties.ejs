@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head', {
+  title: 'Properties — Buy, Rent & Lease · RichManAssets',
+  description: 'Browse villas, estates, houses, apartments, plots and commercial properties across coastal Karnataka. Filter by location, type and budget.',
+  canonical: 'https://richmanassets.com/properties'
+}) %>
+<link rel="stylesheet" href="/assets/market.css?v=2">
+<style>
+  .mkt-hero{padding:clamp(110px,14vw,160px) 0 clamp(40px,6vw,70px);background:var(--ink);color:var(--paper)}
+  .mkt-hero h1{font-family:var(--f-display);font-size:clamp(34px,5.5vw,72px);font-weight:400;letter-spacing:-.02em;line-height:1}
+  .mkt-hero h1 .it{font-style:italic;color:var(--accent-soft)}
+  .mkt-hero p{margin-top:14px;font-size:15px;color:rgba(247,244,237,.7);max-width:44ch}
+  .filter-bar{background:var(--paper-2);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40;padding:14px 0}
+  .filter-form{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .filter-form select,.filter-form input[type=text]{
+    background:var(--paper);border:1px solid var(--line);border-radius:6px;
+    font:inherit;font-size:13.5px;color:var(--ink);padding:10px 14px;outline:none;
+    transition:border .3s;min-width:140px;cursor:pointer
+  }
+  .filter-form select:focus,.filter-form input:focus{border-color:var(--ink)}
+  .filter-form .btn-apply{background:var(--ink);color:var(--paper);border-radius:6px;padding:10px 22px;font-size:13px;letter-spacing:.04em;border:0;cursor:pointer;transition:.3s}
+  .filter-form .btn-apply:hover{background:var(--accent)}
+  .filter-form .btn-reset{background:none;border:1px solid var(--line);border-radius:6px;padding:10px 16px;font-size:13px;color:var(--ink-3);cursor:pointer;transition:.3s}
+  .filter-form .btn-reset:hover{border-color:var(--ink);color:var(--ink)}
+  .results-meta{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:28px 0 16px}
+  .plist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:clamp(16px,2vw,26px);padding-bottom:80px}
+  .empty-state{padding:80px 0;text-align:center;color:var(--ink-3)}
+  .empty-state h3{font-family:var(--f-display);font-size:clamp(22px,3vw,34px);margin-bottom:12px}
+</style>
+</head>
+<body>
+<%- include('partials/nav') %>
+
+<section class="mkt-hero">
+  <div class="wrap">
+    <span class="kicker" style="color:var(--accent-soft);margin-bottom:16px;display:block"><span class="gold-line"></span>All listings</span>
+    <h1>Find your <span class="it">perfect</span><br>property.</h1>
+    <p>Villas, estates, plots, commercial — across coastal Karnataka and the Western Ghats.</p>
+  </div>
+</section>
+
+<div class="filter-bar">
+  <div class="wrap">
+    <form class="filter-form" action="/properties" method="get" id="filterForm">
+      <select name="listing">
+        <option value="" <%= !q.listing ? 'selected' : '' %>>All types</option>
+        <option value="sale" <%= q.listing === 'sale' ? 'selected' : '' %>>For Sale</option>
+        <option value="rent" <%= q.listing === 'rent' ? 'selected' : '' %>>For Rent</option>
+        <option value="lease" <%= q.listing === 'lease' ? 'selected' : '' %>>For Lease</option>
+      </select>
+      <select name="area">
+        <option value="">Any location</option>
+        <% areas.forEach(function(a) { %>
+        <option <%= q.area === a ? 'selected' : '' %>><%= a %></option>
+        <% }) %>
+      </select>
+      <select name="type">
+        <option value="">All property types</option>
+        <% ['Villa','House','Estate','Apartment','Plot','Commercial','Agricultural'].forEach(function(t) { %>
+        <option <%= q.type === t ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+      <select name="budget">
+        <option value="">Any budget</option>
+        <option value="u30" <%= q.budget === 'u30' ? 'selected' : '' %>>Under ₹30 L</option>
+        <option value="30-1c" <%= q.budget === '30-1c' ? 'selected' : '' %>>₹30 L – ₹1 Cr</option>
+        <option value="1-5c" <%= q.budget === '1-5c' ? 'selected' : '' %>>₹1 Cr – ₹5 Cr</option>
+        <option value="5c" <%= q.budget === '5c' ? 'selected' : '' %>>₹5 Cr+</option>
+      </select>
+      <button class="btn-apply" type="submit">Apply</button>
+      <a class="btn-reset" href="/properties">Reset</a>
+    </form>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="results-meta"><%= properties.length %> propert<%= properties.length === 1 ? 'y' : 'ies' %> found</div>
+
+  <% if (properties.length === 0) { %>
+  <div class="empty-state">
+    <h3>No properties found</h3>
+    <p>Try adjusting your filters or <a href="/properties" style="color:var(--accent)">browse all listings</a>.</p>
+  </div>
+  <% } else { %>
+  <div class="plist-grid">
+    <% properties.forEach(function(p) { %>
+    <article class="plist">
+      <div class="ph">
+        <% if (p.has_img && p.img_card) { %>
+        <img src="/<%= p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
+        <% } else { %>
+        <div class="ph-placeholder"><span>Photos on request</span></div>
+        <% } %>
+        <span class="badge <%= p.listing %>"><%= p.badge_txt || (p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease') %></span>
+      </div>
+      <div class="body">
+        <div class="price"><%= p.price %><% if (p.price_note) { %><small><%= p.price_note %></small><% } %></div>
+        <h3><%= p.name %></h3>
+        <div class="loc">
+          <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
+          <%= p.loc %> · <%= p.type %><% if (p.subtype) { %> · <%= p.subtype %><% } %>
+        </div>
+        <div class="meta">
+          <% if (p.beds && p.beds !== '—') { %><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8v9M2 17h13M2 12h13a0 0 0 0 1 0 0v5M5 8h7a3 3 0 0 1 3 3"/></svg> <%= p.beds %></span><% } %>
+          <% if (p.sqft) { %><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="13" height="13" rx="1"/><path d="M2 6h3M2 11h3M6 2v3M11 2v3"/></svg> <%= p.sqft %></span><% } %>
+        </div>
+        <div class="cta">
+          <a class="v" href="/property/<%= p.id %>"><%= p.has_img ? 'View home' : 'Enquire' %></a>
+          <a class="w" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I am interested in ' + p.name + ' (' + p.loc + ').') %>" aria-label="WhatsApp" target="_blank" rel="noopener">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('solid', window.scrollY > 60);
+  onScroll(); addEventListener('scroll', onScroll, { passive: true });
+  nav.classList.add('solid');
+</script>
+</body>
+</html>

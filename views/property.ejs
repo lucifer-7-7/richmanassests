@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head', {
+  title: p.name + ' — ' + p.loc + ' · ' + p.price + ' · RichManAssets',
+  description: p.name + ', ' + p.loc + ' — ' + (p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease') + ' at ' + p.price + '. ' + (p.story_body ? p.story_body.substring(0, 140).replace(/\n/g, ' ') + '…' : ''),
+  canonical: 'https://richmanassets.com/property/' + p.id,
+  ogImage: p.img_hero ? 'https://richmanassets.com/' + p.img_hero : undefined,
+  ogType: 'article'
+}) %>
+<link rel="stylesheet" href="/assets/property.css">
+
+<!-- JSON-LD: Property listing -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Residence",
+  "name": "<%= p.name %>",
+  "description": "<%= (p.story_body || '').substring(0, 200).replace(/\n/g, ' ').replace(/"/g, '\\"') %>",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "<%= p.loc %>",
+    "addressRegion": "Karnataka",
+    "addressCountry": "IN"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "<%= p.price %>",
+    "priceCurrency": "INR",
+    "availability": "https://schema.org/InStock"
+  }<% if (p.img_hero) { %>,
+  "image": "https://richmanassets.com/<%= p.img_hero %>"<% } %>
+}
+</script>
+</head>
+<body data-screen-label="<%= p.name %>" class="has-prop-cta">
+
+<%- include('partials/nav') %>
+
+<!-- Mobile sticky CTA -->
+<div class="prop-sticky-cta">
+  <div class="cta-price">
+    <div class="p"><%= p.price %><% if (p.price_note) { %><small style="font-size:12px;font-weight:400;color:var(--muted)"> <%= p.price_note %></small><% } %></div>
+    <div class="t"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %> · <%= p.type %></div>
+  </div>
+  <a class="cta-wa" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I\'m interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
+  </a>
+  <a class="cta-btn" href="/contact?ref=<%= p.id %>">Book a visit</a>
+</div>
+
+<header class="phero">
+  <% if (p.img_hero) { %>
+  <img src="/<%= p.img_hero %>" alt="<%= p.name %>, <%= p.loc %>">
+  <% } else { %>
+  <div style="background:var(--paper-2);height:100%"></div>
+  <% } %>
+  <div class="scrim"></div>
+  <div class="phero-inner">
+    <div class="badge-row">
+      <span class="pbadge <%= p.listing %>"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></span>
+      <span class="pbadge"><%= p.type %></span>
+    </div>
+    <div class="eyebrow"><span class="ln"></span><span><%= p.loc %></span></div>
+    <h1><%= p.name %></h1>
+    <div class="pprice"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
+  </div>
+</header>
+
+<section class="specs">
+  <div class="wrap"><div class="specs-in">
+    <div class="spec"><h6>Price</h6><div class="v" style="font-size:clamp(20px,2vw,26px)"><%= p.price %></div></div>
+    <div class="spec"><h6>Listing</h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></div></div>
+    <div class="spec"><h6>Type</h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.type %></div></div>
+    <% if (p.beds && p.beds !== '—') { %><div class="spec"><h6>Bedrooms</h6><div class="v"><%= p.beds %></div></div><% } %>
+    <% if (p.baths && p.baths !== '—') { %><div class="spec"><h6>Bathrooms</h6><div class="v"><%= p.baths %></div></div><% } %>
+    <% if (p.sqft) { %><div class="spec"><h6>Area</h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.sqft %> sq ft</div></div><% } %>
+  </div></div>
+</section>
+
+<section class="story wrap">
+  <div class="story-grid with-buy">
+    <div class="reveal">
+      <% if (p.story_kicker) { %><div class="kicker lead-k"><%= p.story_kicker %></div><% } %>
+      <% if (p.story_heading) { %><h2><%- p.story_heading.replace(' water.', ' <span class="it">water.</span>').replace(' years.', ' <span class="it">years.</span>').replace(' mist.', ' <span class="it">mist.</span>').replace(' open.', ' <span class="it">open.</span>').replace(' enough.', ' <span class="it">enough.</span>').replace(' address.', ' <span class="it">address.</span>').replace(' quickly.', ' <span class="it">quickly.</span>').replace(' scale.', ' <span class="it">scale.</span>').replace(' forgot.', ' <span class="it">forgot.</span>').replace(' sea.', ' <span class="it">sea.</span>') %></h2><% } %>
+      <% if (p.story_body) {
+        const paras = p.story_body.split('\n\n');
+        paras.forEach(function(para) { if (para.trim()) { %>
+      <p><%= para.trim() %></p>
+      <% }})} %>
+      <% if (p.img_hero) { %>
+      <figure class="figcrop reveal" style="margin-top:34px;aspect-ratio:16/10">
+        <img src="/<%= p.img_hero %>" alt="<%= p.name %>" style="object-position:center" loading="lazy">
+      </figure>
+      <% } %>
+    </div>
+
+    <aside class="buy-card-wrap reveal">
+      <div class="buy-card">
+        <div class="bc-price"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
+        <div class="bc-sub"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %> · <%= p.type %> · <%= p.loc %></div>
+        <% if (p.emi_val && p.listing === 'sale') { %>
+        <div class="bc-emi">
+          <div class="l">Est. EMI<br><span style="font-size:11px;color:var(--muted)"><%= p.emi_label %></span></div>
+          <div style="text-align:right"><div class="v"><%= p.emi_val %><small style="font-size:12px;font-weight:400">/mo</small></div><a href="/loans">Calculate yours →</a></div>
+        </div>
+        <% } %>
+        <div class="bc-actions">
+          <a class="btn btn-dark" href="/contact?ref=<%= p.id %>"><span>Book a visit</span><span class="arr">→</span></a>
+          <div class="bc-row">
+            <a class="bc-wa btn" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I\'m interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener" style="gap:8px"><span>WhatsApp</span></a>
+            <a class="bc-call" href="tel:+919036001234" aria-label="Call">
+              <svg viewBox="0 0 32 32" fill="currentColor"><path d="M6 3h5l2 6-3 2c1 3 3 5 6 6l2-3 6 2v5c0 1-1 2-2 2C13 26 6 19 6 6c0-1 0-3 0-3z"/></svg>
+            </a>
+          </div>
+        </div>
+        <p class="bc-note">Talk to a real specialist — same-day reply. No pressure, honest advice on price &amp; papers.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+
+<% if (p.img_hero) { %>
+<figure class="band-img reveal">
+  <img src="/<%= p.img_hero %>" alt="<%= p.name %>" style="object-position:center 62%" loading="lazy">
+</figure>
+<% } %>
+
+<section class="feat wrap">
+  <div class="feat-grid">
+    <% if (p.amenities) { %>
+    <div class="reveal">
+      <div class="kicker" style="margin-bottom:18px">What's here</div>
+      <h3>The essentials</h3>
+      <ul class="amen">
+        <% p.amenities.split('|').forEach(function(a) { if (a.trim()) { %>
+        <li><span class="d"></span><%= a.trim() %></li>
+        <% }}); %>
+      </ul>
+    </div>
+    <% } %>
+    <% if (p.setting_heading) { %>
+    <div class="setting reveal">
+      <div class="kicker" style="margin-bottom:18px">The setting</div>
+      <h3><%= p.setting_heading %></h3>
+      <% if (p.setting_body) {
+        const paras = p.setting_body.split('\n\n');
+        paras.forEach(function(para) { if (para.trim()) { %>
+      <p><%= para.trim() %></p>
+      <% }})} %>
+      <% if (p.setting_pills) { %>
+      <div class="pill-row">
+        <% p.setting_pills.split('|').forEach(function(pill) { if (pill.trim()) { %>
+        <span class="pill"><%= pill.trim() %></span>
+        <% }}); %>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+</section>
+
+<% if (similar && similar.length > 0) { %>
+<section class="similar wrap">
+  <div class="shead">
+    <div class="l">
+      <span class="kicker"><span class="gold-line"></span>You might also like</span>
+      <h2 style="font-family:var(--f-display);font-weight:500;font-size:clamp(26px,3.4vw,42px);margin-top:12px;letter-spacing:-.01em">Similar homes</h2>
+    </div>
+    <a class="tlink" href="/properties">All listings <span class="arr">→</span></a>
+  </div>
+  <div class="plist-grid">
+    <% similar.forEach(function(s) { %>
+    <a class="plist" href="/property/<%= s.id %>" style="text-decoration:none">
+      <div class="ph">
+        <% if (s.img_card) { %>
+        <img src="/<%= s.img_card %>" alt="<%= s.name %>, <%= s.loc %>" loading="lazy">
+        <% } else { %><div class="ph-placeholder"><span>Photos on request</span></div><% } %>
+        <span class="badge <%= s.listing %>"><%= s.listing === 'sale' ? 'For Sale' : s.listing === 'rent' ? 'For Rent' : 'For Lease' %></span>
+      </div>
+      <div class="body">
+        <div class="price"><%= s.price %></div>
+        <h3><%= s.name %></h3>
+        <div class="loc">
+          <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
+          <%= s.loc %> · <%= s.type %>
+        </div>
+        <div class="cta"><span class="v" style="display:block">View home</span></div>
+      </div>
+    </a>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<% if (next) { %>
+<a class="p-next" href="/property/<%= next.id %>">
+  <% if (next.img_card) { %><img src="/<%= next.img_card %>" alt="<%= next.name %>, <%= next.loc %>" loading="lazy"><% } %>
+  <div class="scrim"></div>
+  <div class="nx">
+    <span class="k">Next listing</span>
+    <h3><%= next.name %><span class="arr">→</span></h3>
+    <span class="loc"><%= next.loc %> · <%= next.price %></span>
+  </div>
+</a>
+<% } %>
+
+<%- include('partials/footer') %>
+
+<script>
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('solid', window.scrollY > window.innerHeight * .72);
+  onScroll(); addEventListener('scroll', onScroll, { passive: true });
+  const io = new IntersectionObserver((es) => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: .1, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

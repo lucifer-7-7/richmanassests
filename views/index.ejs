@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en" class="loading">
+<head>
+<%- include('partials/head', {
+  title: 'RichManAssets — Premium Property Marketplace · Coastal Karnataka',
+  description: 'Buy, rent or lease premium property across coastal Karnataka and the Western Ghats. Villas, plots, commercial and agricultural land, plus loans, legal and interiors.',
+  canonical: 'https://richmanassets.com/'
+}) %>
+<link rel="stylesheet" href="/assets/home.css?v=2">
+<style>
+  .loans-cta{background:var(--paper-2)}
+  .loans-in{display:grid;gap:30px;align-items:center;padding:clamp(48px,7vw,96px) 0}
+  @media(min-width:880px){.loans-in{grid-template-columns:1.2fr 1fr}}
+  .loans-in h2{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,4.4vw,56px);line-height:1.02;letter-spacing:-.02em;max-width:18ch;text-wrap:balance}
+  .loans-in h2 .it{font-style:italic;color:var(--accent)}
+  .loans-in p{margin-top:16px;max-width:46ch;color:var(--ink-3);font-size:15px;line-height:1.62}
+  .loans-pts{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px}
+  .loans-pts div{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+  .loans-pts .d{width:6px;height:6px;border-radius:50%;background:var(--gold-deep)}
+  .loans-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+  .btn{border-radius:var(--r-pill)}
+
+  /* banking partners */
+  .bank-grid{
+    display:flex;gap:10px;
+    overflow-x:auto;scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    padding-bottom:4px;
+  }
+  .bank-grid::-webkit-scrollbar{display:none}
+  .bank-card{
+    flex:none;width:130px;scroll-snap-align:start;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:0;padding:16px 12px;background:var(--white);
+    border:1px solid var(--line);border-radius:var(--r-sm);
+    text-align:center;transition:.3s var(--ease);
+  }
+  @media(min-width:760px){
+    .bank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));overflow:visible;padding-bottom:0}
+    .bank-card{width:auto;padding:clamp(16px,2vw,24px) 14px}
+  }
+  .bank-card:hover{border-color:var(--accent);box-shadow:0 6px 20px -10px rgba(154,123,63,.24);transform:translateY(-2px)}
+  .bank-logo-wrap{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;width:100%}
+  .bank-logo-wrap img{max-height:40px;max-width:110px;width:auto;object-fit:contain;display:block}
+  .bank-name{font-size:10.5px;color:var(--ink-3);line-height:1.3;letter-spacing:.01em;text-align:center}
+</style>
+
+<!-- JSON-LD: Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": "RichManAssets",
+  "description": "Premium property marketplace across coastal Karnataka and the Western Ghats.",
+  "url": "https://richmanassets.com",
+  "telephone": "+919036001234",
+  "email": "hello@richmanassets.com",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Mangaluru",
+    "addressRegion": "Karnataka",
+    "addressCountry": "IN"
+  },
+  "areaServed": ["Mangaluru", "Udupi", "Dakshina Kannada", "Sakleshpur", "Chikmagalur"],
+  "sameAs": []
+}
+</script>
+</head>
+<body data-screen-label="Home">
+
+<!-- LOADER -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-brand">
+    <div class="mark"><b>RichMan</b><i>Assets</i></div>
+    <div class="sub">Premium Property</div>
+  </div>
+  <div class="loader-bar"><i></i></div>
+</div>
+
+<%- include('partials/nav') %>
+
+<!-- HERO -->
+<header class="hero" id="top" data-screen-label="Hero">
+  <div class="hero-track" id="heroTrack">
+    <% heroSlides.forEach(function(p, i) { %>
+    <div class="hero-slide<%= i === 0 ? ' is-active' : '' %>">
+      <div class="hero-media">
+        <img src="/<%= p.img_hero %>"
+             alt="<%= p.name %>, <%= p.loc %>"
+             <%= i === 0 ? '' : 'loading="lazy"' %>>
+      </div>
+      <div class="hero-grad"></div>
+      <div class="hero-ui"><div class="wrap hero-ui-in">
+        <div class="hero-meta">
+          <div class="hero-eyebrow"><span class="ln"></span>Featured &middot; <%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></div>
+          <h1 class="hero-name"><%= p.name %></h1>
+          <div class="hero-loc">
+            <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
+            <%= p.loc %> <span class="sep"></span> <%= p.type %> <span class="sep"></span> <%= p.beds %> beds
+          </div>
+        </div>
+        <div class="hero-side">
+          <div class="hero-price"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
+          <a class="hero-view" href="/property/<%= p.id %>">View home <span class="arr">&rarr;</span></a>
+        </div>
+      </div></div>
+    </div>
+    <% }) %>
+  </div>
+  <div class="hero-frame"></div>
+  <div class="hero-cue"><span>Scroll</span><span class="bar"></span></div>
+  <div class="hero-dots" id="heroDots">
+    <% heroSlides.forEach(function(p, i) { %>
+    <button data-i="<%= i %>" class="<%= i === 0 ? 'on' : '' %>" aria-label="Show <%= p.name %>"></button>
+    <% }) %>
+  </div>
+</header>
+
+<!-- SEARCH BAND -->
+<section class="search-band" data-screen-label="Search">
+  <div class="search-lead">
+    <h2>Start your <span class="it">search.</span></h2>
+    <span class="hint">Buy &middot; Rent &middot; Lease</span>
+  </div>
+  <div class="wrap">
+    <div class="search-card">
+      <div class="search-tabs" id="searchTabs">
+        <button data-val="sale" class="on">Buy</button>
+        <button data-val="rent">Rent</button>
+        <button data-val="lease">Lease</button>
+      </div>
+      <form class="search-fields" action="/properties" method="get">
+        <input type="hidden" name="listing" id="sListing" value="sale">
+        <label class="sf"><span>Location</span>
+          <select name="area">
+            <option value="">Any location</option>
+            <% areas.forEach(function(a) { %><option><%= a %></option><% }) %>
+          </select>
+        </label>
+        <label class="sf"><span>Property type</span>
+          <select name="type">
+            <option value="">All types</option>
+            <option>Villa</option><option>House</option><option>Estate</option>
+            <option>Apartment</option><option>Plot</option><option>Commercial</option><option>Agricultural</option>
+          </select>
+        </label>
+        <label class="sf"><span>Budget</span>
+          <select name="budget">
+            <option value="">Any budget</option>
+            <option value="u30">Under ₹30 L</option>
+            <option value="30-1c">₹30 L to ₹1 Cr</option>
+            <option value="1-5c">₹1 Cr to ₹5 Cr</option>
+            <option value="5c">₹5 Cr and above</option>
+          </select>
+        </label>
+        <button class="search-go" type="submit">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5"/><path d="M11 11l4 4"/></svg>
+          Search
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="sec intro" data-screen-label="Browse">
+  <div class="intro-head">
+    <h2 class="fx">Find your <span class="it">place</span> to begin.</h2>
+    <p class="sub fx">Every kind of property, in one marketplace. Pick a path and we will walk it with you, from the first visit to the keys.</p>
+  </div>
+  <div class="cats-wrap">
+    <div class="cats" id="catGrid">
+      <% categories.forEach(function(c) { %>
+      <a class="cat fx" href="/properties?<%= c.q %>">
+        <img src="/assets/img/<%= c.img %>.jpg" alt="<%= c.title %>" loading="lazy">
+        <span class="cat-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        <span class="cat-txt"><h3><%= c.title %></h3><span class="n"><%= c.note %></span></span>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- PROPERTIES & SPACES SHOWCASE -->
+<section class="sec-tight intro" data-screen-label="Properties">
+  <div class="intro-head">
+    <h2 class="fx">Premium properties & <span class="it">spaces.</span></h2>
+    <p class="sub fx">Builder sales, resale apartments, villas, independent homes, rentals, and commercial hubs.</p>
+  </div>
+
+  <div class="mkt-tabs-wrap">
+    <div class="mkt-tabs" id="propTabs">
+      <button class="mkt-tab on" data-filter="all">All Properties</button>
+      <button class="mkt-tab" data-filter="builder">Builder Sales</button>
+      <button class="mkt-tab" data-filter="resale">Resale Flats</button>
+      <button class="mkt-tab" data-filter="villa">Villas</button>
+      <button class="mkt-tab" data-filter="house">Independent Houses</button>
+      <button class="mkt-tab" data-filter="rent">Rental Properties</button>
+      <button class="mkt-tab" data-filter="comm-office">Commercial Office Space</button>
+      <button class="mkt-tab" data-filter="comm-retail">Commercial Space</button>
+      <button class="mkt-tab" data-filter="mixed">Residential/Commercial</button>
+    </div>
+  </div>
+
+  <div class="h-scroll-wrap">
+    <div class="h-scroll" id="propGrid">
+      <% allListings.forEach(function(p) { 
+        if (p.type === 'Plot' || p.type === 'Agricultural') return;
+        let pFilter = '';
+        if (p.subtype === 'Builder sales') pFilter = 'builder';
+        else if (p.subtype === 'Resale flats') pFilter = 'resale';
+        else if (p.type === 'Villa') pFilter = 'villa';
+        else if (p.subtype === 'Independent house' || p.type === 'House') pFilter = 'house';
+        else if (p.listing === 'rent') pFilter = 'rent';
+        else if (p.subtype === 'Commercial office space') pFilter = 'comm-office';
+        else if (p.subtype === 'Commercial space') pFilter = 'comm-retail';
+        else if (p.subtype === 'Residential/commercial') pFilter = 'mixed';
+      %>
+      <article class="plist fx" data-filter-cat="<%= pFilter %>">
+        <div class="ph">
+          <% if (p.has_img && p.img_card) { %>
+          <img src="/<%= p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
+          <% } else { %>
+          <div class="ph-placeholder"><span>Photos on request</span></div>
+          <% } %>
+          <span class="badge <%= p.listing %>"><%= p.badge_txt || (p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease') %></span>
+          <button class="fav" aria-label="Save">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14S2 10 2 5.8C2 3.5 3.8 2 5.8 2 7 2 8 3 8 3s1-1 2.2-1C12.2 2 14 3.5 14 5.8 14 10 8 14 8 14z"/></svg>
+          </button>
+        </div>
+        <div class="body">
+          <div class="price"><%= p.price %><% if (p.price_note) { %><small><%= p.price_note %></small><% } %></div>
+          <h3><%= p.name %></h3>
+          <div class="loc">
+            <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
+            <%= p.loc %> · <%= p.type %>
+          </div>
+          <div class="meta">
+            <% if (p.beds && p.beds !== '—') { %><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8v9M2 17h13M2 12h13a0 0 0 0 1 0 0v5M5 8h7a3 3 0 0 1 3 3"/></svg> <%= p.beds %> Beds</span><% } %>
+            <% if (p.sqft) { %><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="13" height="13" rx="1"/><path d="M2 6h3M2 11h3M6 2v3M11 2v3"/></svg> <%= p.sqft %> sqft</span><% } %>
+          </div>
+          <div class="cta">
+            <a class="v" href="/property/<%= p.id %>"><%= p.has_img ? 'View details' : 'Enquire' %></a>
+            <a class="w" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I am interested in ' + p.name + ' (' + p.loc + ').') %>" aria-label="WhatsApp" target="_blank" rel="noopener">
+              <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- PLOTS & SITES SHOWCASE -->
+<section class="sec-tight intro" data-screen-label="Plots">
+  <div class="intro-head">
+    <h2 class="fx">Premium plots & <span class="it">sites.</span></h2>
+    <p class="sub fx">Residential layouts, layout plots, commercial sites, beach & river facing land, industrial sites, and agricultural properties.</p>
+  </div>
+
+  <div class="mkt-tabs-wrap">
+    <div class="mkt-tabs" id="plotTabs">
+      <button class="mkt-tab on" data-filter="all">All Plots</button>
+      <button class="mkt-tab" data-filter="res-plot">Residential Plots</button>
+      <button class="mkt-tab" data-filter="layout">Layout Plots</button>
+      <button class="mkt-tab" data-filter="comm-site">Commercial Sites</button>
+      <button class="mkt-tab" data-filter="beach">Beach Facing</button>
+      <button class="mkt-tab" data-filter="industrial">Industrial Sites</button>
+      <button class="mkt-tab" data-filter="river">River Facing</button>
+      <button class="mkt-tab" data-filter="agri">Agriculture Sites</button>
+    </div>
+  </div>
+
+  <div class="h-scroll-wrap">
+    <div class="h-scroll" id="plotGrid">
+      <% allListings.forEach(function(p) { 
+        if (p.type !== 'Plot' && p.type !== 'Agricultural') return;
+        let pFilter = '';
+        if (p.subtype === 'Residential plots') pFilter = 'res-plot';
+        else if (p.subtype === 'Layout plots') pFilter = 'layout';
+        else if (p.subtype === 'Commercial sites') pFilter = 'comm-site';
+        else if (p.subtype === 'Beach facing sites') pFilter = 'beach';
+        else if (p.subtype === 'Industrial sites') pFilter = 'industrial';
+        else if (p.subtype === 'River facing sites') pFilter = 'river';
+        else if (p.subtype === 'Agriculture sites' || p.type === 'Agricultural') pFilter = 'agri';
+      %>
+      <article class="plist fx" data-filter-cat="<%= pFilter %>">
+        <div class="ph">
+          <% if (p.has_img && p.img_card) { %>
+          <img src="/<%= p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
+          <% } else { %>
+          <div class="ph-placeholder"><span>Photos on request</span></div>
+          <% } %>
+          <span class="badge <%= p.listing %>"><%= p.badge_txt || (p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease') %></span>
+          <button class="fav" aria-label="Save">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14S2 10 2 5.8C2 3.5 3.8 2 5.8 2 7 2 8 3 8 3s1-1 2.2-1C12.2 2 14 3.5 14 5.8 14 10 8 14 8 14z"/></svg>
+          </button>
+        </div>
+        <div class="body">
+          <div class="price"><%= p.price %></div>
+          <h3><%= p.name %></h3>
+          <div class="loc">
+            <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
+            <%= p.loc %> · <%= p.type %>
+          </div>
+          <div class="meta">
+            <% if (p.sqft) { %><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="13" height="13" rx="1"/><path d="M2 6h3M2 11h3M6 2v3M11 2v3"/></svg> <%= p.sqft %></span><% } %>
+          </div>
+          <div class="cta">
+            <a class="v" href="/property/<%= p.id %>">Enquire</a>
+            <a class="w" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I am interested in ' + p.name + ' (' + p.loc + ').') %>" aria-label="WhatsApp" target="_blank" rel="noopener">
+              <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="sec intro" id="services" data-screen-label="Services">
+  <div class="intro-head">
+    <h2 class="fx">One team for <span class="it">everything</span> property.</h2>
+    <p class="sub fx">Buying, finance, legal, building and interiors sit under one roof, so nothing falls between the gaps.</p>
+  </div>
+  <div class="svc-grid">
+    <% services.forEach(function(s) { %>
+    <a class="svc-tile fx" href="<%= s.id === 'loans' ? '/loans' : '/services#' + s.id %>">
+      <span class="n"><%= s.n %></span>
+      <span class="ic"><%- s.icon_svg %></span>
+      <h3><%= s.title %></h3>
+      <p><%= s.desc %></p>
+    </a>
+    <% }) %>
+  </div>
+</section>
+
+<!-- INTERIOR DESIGN ATELIER -->
+<section class="sec intro" id="interiors" data-screen-label="Interiors">
+  <div class="intro-head">
+    <h2 class="fx">Premium interior <span class="it">design.</span></h2>
+    <p class="sub fx">Turnkey, bespoke spaces designed for luxury living and productivity, under one single point of accountability.</p>
+  </div>
+
+  <div class="mkt-tabs-wrap">
+    <div class="mkt-tabs" id="interiorTabs">
+      <button class="mkt-tab on" data-filter="all">All Designs</button>
+      <button class="mkt-tab" data-filter="home">Home Interiors</button>
+      <button class="mkt-tab" data-filter="office">Office & Commercial</button>
+    </div>
+  </div>
+
+  <div class="h-scroll-wrap">
+    <div class="interior-gallery" id="interiorGrid">
+      <div class="int-card fx" data-type="home">
+        <div class="media"><img src="/assets/img/mermaid-card.jpg" alt="Luxury Living Room Design" loading="lazy"></div>
+        <div class="body">
+          <h3>Bespoke Living Rooms</h3>
+          <p>Premium customized furniture, accent wall paneling, modular layouts, and modern automated lighting systems.</p>
+          <div class="features"><span>3D Design</span><span>Turnkey Build</span><span>Luxury Furnishings</span></div>
+          <a class="btn-int" href="/contact?service=interior&ref=bespoke_living">Enquire Package</a>
+        </div>
+      </div>
+      <div class="int-card fx" data-type="home">
+        <div class="media"><img src="/assets/img/tara-card.jpg" alt="Modern Kitchen Design" loading="lazy"></div>
+        <div class="body">
+          <h3>Italian Modular Kitchens</h3>
+          <p>Sleek handleless designs, soft-close hardware, quartz countertops, and built-in appliances packages.</p>
+          <div class="features"><span>Soft-close</span><span>Anti-fingerprint</span><span>10y Warranty</span></div>
+          <a class="btn-int" href="/contact?service=interior&ref=modular_kitchen">Enquire Package</a>
+        </div>
+      </div>
+      <div class="int-card fx" data-type="home">
+        <div class="media"><img src="/assets/img/sereno-hero.jpg" alt="Luxury Wardrobe Design" loading="lazy"></div>
+        <div class="body">
+          <h3>Premium Bed & Wardrobes</h3>
+          <p>Floor-to-ceiling sliding wardrobes with integrated profile LED lighting and walk-in dressing setups.</p>
+          <div class="features"><span>LED Profile</span><span>Bespoke beds</span><span>Walk-in closet</span></div>
+          <a class="btn-int" href="/contact?service=interior&ref=bed_wardrobes">Enquire Package</a>
+        </div>
+      </div>
+      <div class="int-card fx" data-type="office">
+        <div class="media"><img src="/assets/img/jumeirah-card.jpg" alt="Executive Office Suite" loading="lazy"></div>
+        <div class="body">
+          <h3>Executive Boardrooms & Cabins</h3>
+          <p>Laminate or veneer executive tables, acoustical ceiling panels, soundproof glass partitions, and AV integrations.</p>
+          <div class="features"><span>Acoustics</span><span>AV Integrated</span><span>Ergonomic Seating</span></div>
+          <a class="btn-int" href="/contact?service=interior&ref=boardrooms_cabins">Enquire Package</a>
+        </div>
+      </div>
+      <div class="int-card fx" data-type="office">
+        <div class="media"><img src="/assets/img/sandranch-card.jpg" alt="Open Workspace Design" loading="lazy"></div>
+        <div class="body">
+          <h3>Collaborative Coworking Areas</h3>
+          <p>Open-desk cluster layouts, modular power tracks, ergonomic work benches, and vibrant cafeteria zones.</p>
+          <div class="features"><span>Modular Power</span><span>Ergonomic</span><span>Modern layout</span></div>
+          <a class="btn-int" href="/contact?service=interior&ref=collaborative_workspaces">Enquire Package</a>
+        </div>
+      </div>
+      <div class="int-card fx" data-type="office">
+        <div class="media"><img src="/assets/img/backwater-hero.jpg" alt="Turnkey Retail Interior" loading="lazy"></div>
+        <div class="body">
+          <h3>Turnkey Retail Fitouts</h3>
+          <p>Retail showroom design, product display stands, brand-identity integration, and glass storefronts.</p>
+          <div class="features"><span>Showrooms</span><span>Brand Display</span><span>Turnkey Build</span></div>
+          <a class="btn-int" href="/contact?service=interior&ref=retail_fitouts">Enquire Package</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BANKING PARTNERS -->
+<!-- BANKING PARTNERS -->
+<section class="sec-tight intro bank-sec" data-screen-label="Banking partners">
+  <div class="intro-head">
+    <h2 class="fx">Our authorised <span class="it">banking partners.</span></h2>
+    <p class="sub fx">Home loans and project finance sanctioned faster through direct tie-ups with India's leading public and private sector banks.</p>
+  </div>
+
+  <div class="mkt-tabs-wrap">
+    <div class="mkt-tabs" id="bankTabs">
+      <button class="mkt-tab on" data-sector="all">All Partners</button>
+      <button class="mkt-tab" data-sector="public">Public Sector Banks</button>
+      <button class="mkt-tab" data-sector="private">Private Sector / NBFCs</button>
+    </div>
+  </div>
+
+  <div class="bank-grid" id="bankGrid">
+    <div class="bank-card fx" data-sector="public">
+      <div class="bank-logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Bank_of_Baroda_Logo_since_Dec_19.png"
+             alt="Bank of Baroda" loading="lazy">
+      </div>
+      <div class="bank-name">Bank of Baroda</div>
+    </div>
+    <div class="bank-card fx" data-sector="public">
+      <div class="bank-logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Bank_of_Maharashtra_logo.svg"
+             alt="Bank of Maharashtra" loading="lazy">
+      </div>
+      <div class="bank-name">Bank of Maharashtra</div>
+    </div>
+    <div class="bank-card fx" data-sector="public">
+      <div class="bank-logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/SBI-logo.svg"
+             alt="State Bank of India" loading="lazy">
+      </div>
+      <div class="bank-name">State Bank of India</div>
+    </div>
+    <div class="bank-card fx" data-sector="public">
+      <div class="bank-logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/IDBI_Logo.svg/250px-IDBI_Logo.svg.png"
+             alt="IDBI Bank" loading="lazy">
+      </div>
+      <div class="bank-name">IDBI Bank</div>
+    </div>
+    <div class="bank-card fx" data-sector="private">
+      <div class="bank-logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/28/HDFC_Bank_Logo.svg"
+             alt="HDFC Bank" loading="lazy">
+      </div>
+      <div class="bank-name">HDFC Bank</div>
+    </div>
+    <div class="bank-card fx" data-sector="private">
+      <div class="bank-logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Karnataka_Bank_svg_Logo.svg"
+             alt="Karnataka Bank" loading="lazy">
+      </div>
+      <div class="bank-name">Karnataka Bank</div>
+    </div>
+    <div class="bank-card fx" data-sector="private">
+      <div class="bank-logo-wrap" style="background:#003d7a;border-radius:6px;padding:8px 12px">
+        <span style="font-family:var(--f-sans);font-weight:700;font-size:18px;color:#fff;letter-spacing:.04em">SVC Bank</span>
+      </div>
+      <div class="bank-name">SVC Co-operative Bank</div>
+    </div>
+    <div class="bank-card fx" data-sector="private">
+      <div class="bank-logo-wrap" style="background:#c0392b;border-radius:6px;padding:8px 12px">
+        <span style="font-family:var(--f-sans);font-weight:700;font-size:17px;color:#fff;letter-spacing:.02em">Piramal</span>
+      </div>
+      <div class="bank-name">Piramal Finance</div>
+    </div>
+    <div class="bank-card fx" data-sector="private">
+      <div class="bank-logo-wrap" style="background:#e63329;border-radius:6px;padding:6px 12px">
+        <span style="font-family:var(--f-sans);font-weight:700;font-size:15px;color:#fff;letter-spacing:.01em">Chola</span>
+      </div>
+      <div class="bank-name">Cholamandalam Finance</div>
+    </div>
+    <div class="bank-card fx" data-sector="private">
+      <div class="bank-logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Sundaram_Finance_Limited_Logo.jpg"
+             alt="Sundaram Finance" loading="lazy">
+      </div>
+      <div class="bank-name">Sundaram Finance</div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:clamp(24px,3vw,40px)">
+    <a class="btn btn-dark" href="/loans"><span>Check loan eligibility</span><span class="arr">→</span></a>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats" data-screen-label="Stats">
+  <div class="wrap"><div class="stats-in">
+    <div class="stat"><div class="v">₹500<span class="it">Cr+</span></div><div class="l">Property transacted</div></div>
+    <div class="stat"><div class="v">1,200<span class="it">+</span></div><div class="l">Happy families</div></div>
+    <div class="stat"><div class="v">15<span class="it">+</span></div><div class="l">Years in the market</div></div>
+    <div class="stat"><div class="v">8</div><div class="l">Service lines, one desk</div></div>
+  </div></div>
+</section>
+
+<!-- TRUST SCORE -->
+<section class="trust-sec" data-screen-label="Trust">
+  <div class="trust-inner">
+    <div class="trust-left">
+      <span class="kicker"><span class="gold-line"></span>Why clients trust us</span>
+      <h2>Rated <span class="it">4.9</span> by families<br>across coastal Karnataka.</h2>
+      <p>Over 15 years, 1,200+ families have bought, sold, rented and built with us along the Coastal Karnataka and Western Ghats corridor. Our track record speaks honestly.</p>
+      <div class="trust-score-badge">
+        <div class="score">4.9</div>
+        <div class="score-meta">
+          <div class="stars">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#C2A05A"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+          </div>
+          <div class="count">1,200+ verified clients</div>
+        </div>
+      </div>
+      <p style="margin-top:16px"><a href="/about" style="color:var(--accent);font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase">Our story & credentials →</a></p>
+    </div>
+    <div class="trust-right">
+      <div class="trust-stat fx">
+        <div class="v">₹500<span class="it">Cr+</span></div>
+        <div class="l">Property value transacted</div>
+      </div>
+      <div class="trust-stat fx">
+        <div class="v">15<span class="it">+</span></div>
+        <div class="l">Years in coastal Karnataka</div>
+      </div>
+      <div class="trust-stat fx">
+        <div class="v">11</div>
+        <div class="l">Authorised banking partners</div>
+      </div>
+      <div class="trust-stat fx">
+        <div class="v">100<span class="it">%</span></div>
+        <div class="l">Title-clear listings only</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOANS -->
+<section class="loans-cta" data-screen-label="Loans">
+  <div class="wrap"><div class="loans-in">
+    <div>
+      <span class="kicker" style="color:var(--gold)"><span class="gold-line"></span>Home &amp; project loans</span>
+      <h2>Found the home. <span class="it">We will find the loan.</span></h2>
+      <p>Pre-approved offers from our partner banks, eligibility advice, and custom rates from public sector and private sector banks negotiated directly.</p>
+      
+      <div class="emi-pane" style="background:none;border:0;padding:0;margin-top:24px">
+        <div class="emi-ctrl" style="margin-bottom:18px">
+          <div class="top" style="display:flex;justify-content:space-between;color:rgba(0, 0, 0, 0.88);font-size:12px;margin-bottom:6px">
+            <span style="font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color: black;">Loan Amount</span>
+            <span style="font-weight:600;font-size:16px" id="slideAmtVal">₹50 L</span>
+          </div>
+          <input type="range" id="slideAmount" min="500000" max="50000000" step="500000" value="5000000" style="width:100%;height:3px;background:rgba(0, 0, 0, 0.2);border-radius:2px;outline:none;-webkit-appearance:none;appearance:none">
+        </div>
+        <div class="emi-ctrl" style="margin-bottom:18px">
+          <div class="top" style="display:flex;justify-content:space-between;color:rgba(0, 0, 0, 0.88);font-size:12px;margin-bottom:6px">
+            <span style="font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color: black">Tenure</span>
+            <span style="font-weight:600;font-size:16px" id="slideTenureVal">20 Years</span>
+          </div>
+          <input type="range" id="slideTenure" min="5" max="30" step="1" value="20" style="width:100%;height:3px;background:rgba(0, 0, 0, 0.2);border-radius:2px;outline:none;-webkit-appearance:none;appearance:none">
+        </div>
+        <div class="emi-ctrl" style="margin-bottom:24px">
+          <div class="top" style="display:flex;justify-content:space-between;color:rgba(4, 4, 4, 0.88);font-size:12px;margin-bottom:6px">
+            <span style="font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color: black">Interest Rate</span>
+            <span style="font-weight:600;font-size:16px" id="slideRateVal">8.5% p.a.</span>
+          </div>
+          <input type="range" id="slideRate" min="7" max="15" step="0.1" value="8.5" style="width:100%;height:3px;background:rgba(0, 0, 0, 0.2);border-radius:2px;outline:none;-webkit-appearance:none;appearance:none">
+        </div>
+      </div>
+      
+      <div class="loans-actions" style="margin-top:20px">
+        <a class="btn btn-dark" href="/contact?service=loans"><span>Get loan quotes</span><span class="arr">→</span></a>
+        <a class="btn btn-ghost" href="/loans" style="border-color:rgba(247,244,237,.24);color:var(--paper)"><span>Eligibility terms</span></a>
+      </div>
+    </div>
+    <div class="emi-out" style="display:flex;flex-direction:column;justify-content:center;height:100%">
+      <div class="lab" style="color:rgba(247,244,237,.56)">Estimated Monthly EMI</div>
+      <div class="big" style="color:var(--gold);margin:14px 0" id="homeEmiVal">₹43,<span class="it">391</span></div>
+      <div class="split" style="border-top-color:rgba(247,244,237,.14)">
+        <div><div class="v" id="homeEmiTotal">₹1.04 Cr</div><div class="k" style="color:rgba(247,244,237,.48)">Total Payable</div></div>
+        <div><div class="v" id="homeEmiInterest">₹54 L</div><div class="k" style="color:rgba(247,244,237,.48)">Total Interest</div></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="sec intro" data-screen-label="Testimonials">
+  <div class="intro-head">
+    <h2 class="fx">Bought with <span class="it">confidence.</span></h2>
+    <p class="sub fx">A few words from families and investors we have helped along the coast.</p>
+  </div>
+  <div class="tcards">
+    <% testimonials.forEach(function(t) { %>
+    <div class="tcard fx">
+      <div class="stars">
+        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none"><path d="M8 1l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.4 3.9 13.6l.9-4.6L1.4 5.8 6 5.2z"/></svg>
+      </div>
+      <blockquote>"<%= t.quote %>"</blockquote>
+      <div class="who"><span class="av"><%= t.initials %></span><div><b><%= t.name %></b><span><%= t.role %></span></div></div>
+    </div>
+    <% }) %>
+  </div>
+</section>
+
+<!-- LEAD FORM -->
+<section class="lead" id="enquire" data-screen-label="Enquire">
+  <div class="wrap"><div class="lead-grid">
+    <div>
+      <span class="kicker" style="color:var(--gold)"><span class="gold-line"></span>Talk to us</span>
+      <h2>Tell us what you are <span class="it">looking for.</span></h2>
+      <p class="lead-sub">One short message and a real specialist gets back to you, usually the same day. No call centre, no spam, no pressure.</p>
+      <div class="assure">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Same-day response, by a specialist</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Honest advice on price and paperwork</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Or WhatsApp and call us right now</div>
+      </div>
+      <div class="loans-actions" style="margin-top:26px">
+        <a class="btn btn-paper" href="https://wa.me/919036001234?text=Hi%20RichManAssets%2C%20I%27d%20like%20to%20discuss%20a%20property." target="_blank" rel="noopener"><span>WhatsApp us</span><span class="arr">→</span></a>
+        <a class="btn btn-line" href="tel:+919036001234"><span>Call now</span></a>
+      </div>
+    </div>
+    <%- include('partials/enquiry-form', { propertyRef: '' }) %>
+  </div></div>
+</section>
+
+<%- include('partials/footer') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
+<script src="/assets/home.js" defer></script>
+<script src="/assets/motion.js" defer></script>
+</body>
+</html>

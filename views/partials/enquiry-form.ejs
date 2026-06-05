@@ -1,0 +1,36 @@
+<form class="form" id="leadForm" action="/enquiry" method="post">
+  <input type="hidden" name="property_ref" value="<%= propertyRef || '' %>">
+  <input type="hidden" name="page" value="<%= typeof pageName !== 'undefined' ? pageName : 'home' %>">
+  <div class="form-body">
+    <div class="form-row">
+      <div class="field"><label>Your name</label><input required name="name" placeholder="Full name" autocomplete="name"></div>
+      <div class="field"><label>Phone</label><input required name="phone" type="tel" placeholder="+91 …" autocomplete="tel"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Email</label><input name="email" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="field"><label>Interested in</label>
+        <select name="service">
+          <option>Buying a property</option><option>Renting or leasing</option><option>Home or project loan</option>
+          <option>Selling my property</option><option>Construction</option><option>Interior design</option>
+          <option>Legal services</option><option>Property management</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Budget or requirement</label><input name="budget" placeholder="e.g. 3 to 4 BHK villa near the coast"></div>
+      <div class="field"><label>Preferred contact time</label>
+        <select name="time_pref">
+          <option>Anytime</option><option>Morning</option><option>Afternoon</option><option>Evening</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Anything else?</label><textarea name="message" placeholder="Tell us a little more (optional)"></textarea></div>
+    <button class="btn btn-submit" type="submit"><span>Send my enquiry</span><span class="arr">→</span></button>
+    <p class="note">We reply the same day. Your details stay private.</p>
+  </div>
+  <div class="ok-msg" style="display:none">
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h4>Thank you</h4>
+    <p>Your enquiry is in. A specialist will reach out shortly.</p>
+  </div>
+</form>

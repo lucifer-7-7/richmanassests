@@ -1,0 +1,1128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Rich Man Assets — A Vittu Bharath Associates Product</title>
+<meta name="description" content="Rich Man Assets — Curated real estate, rentals, lease, agriculture, industrial and revenue-generating properties. A product of Vittu Bharath Associates LLP." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#F2EBDD;             /* warm ivory */
+    --bg-2:#EAE1CF;            /* second cream */
+    --ink:#1B1A17;             /* near-black warm */
+    --ink-2:#3A352D;
+    --muted:#7A7165;
+    --line:rgba(27,26,23,.16);
+    --line-soft:rgba(27,26,23,.08);
+    --accent:#2C3A2A;          /* deep forest */
+    --accent-2:#8C6B3F;        /* bronze */
+    --gold:#B59563;
+    --paper:#F7F2E6;
+
+    --f-display: "Cormorant Garamond", "Times New Roman", serif;
+    --f-sans: "DM Sans", system-ui, sans-serif;
+    --f-mono: "DM Mono", ui-monospace, monospace;
+
+    --w-max: 1480px;
+    --gutter: clamp(20px, 4vw, 56px);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--f-sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{overflow-x:hidden}
+  img{display:block;max-width:100%}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  ::selection{background:var(--accent);color:var(--paper)}
+
+  /* ---------- Type scale ---------- */
+  .display{font-family:var(--f-display);font-weight:400;letter-spacing:-.02em;line-height:.95}
+  .display .italic{font-style:italic;font-weight:300}
+  .eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2)}
+  .lead{font-family:var(--f-display);font-weight:400;font-size:clamp(20px,2.2vw,30px);line-height:1.35;color:var(--ink-2)}
+  .body{font-size:15px;line-height:1.65;color:var(--ink-2)}
+  .small{font-size:13px;letter-spacing:.02em;color:var(--muted)}
+
+  /* ---------- Layout helpers ---------- */
+  .wrap{max-width:var(--w-max);margin:0 auto;padding-inline:var(--gutter)}
+  section{position:relative}
+  .rule{height:1px;background:var(--line)}
+  .rule-soft{height:1px;background:var(--line-soft)}
+
+  /* ---------- Nav ---------- */
+  .nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    backdrop-filter:saturate(140%) blur(14px);
+    -webkit-backdrop-filter:saturate(140%) blur(14px);
+    background:color-mix(in oklab, var(--bg) 70%, transparent);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  .nav.scrolled{border-bottom-color:var(--line-soft);background:color-mix(in oklab, var(--bg) 88%, transparent)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px;gap:24px;max-width:var(--w-max);margin:0 auto;padding-inline:var(--gutter)}
+  .brand{display:flex;align-items:center;gap:14px;font-family:var(--f-display);font-size:22px;letter-spacing:.01em}
+  .brand .mark{
+    width:34px;height:34px;border:1px solid var(--ink);border-radius:50%;
+    display:grid;place-items:center;font-family:var(--f-display);font-size:14px;font-style:italic;
+    position:relative
+  }
+  .brand .mark::after{content:"";position:absolute;inset:3px;border:1px solid var(--line);border-radius:50%}
+  .brand b{font-weight:500}
+  .brand i{font-style:italic;font-weight:300;color:var(--ink-2)}
+  .nav-links{display:flex;gap:28px;align-items:center}
+  .nav-links a{font-size:13px;letter-spacing:.04em;color:var(--ink-2);position:relative;padding:6px 0}
+  .nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-links a:hover::after{transform:scaleX(1)}
+  .nav-cta{
+    display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 18px;
+    border:1px solid var(--ink);border-radius:999px;font-size:13px;letter-spacing:.04em;
+    transition:all .35s cubic-bezier(.2,.7,.2,1);
+  }
+  .nav-cta:hover{background:var(--ink);color:var(--paper)}
+  .nav-cta .arr{display:inline-block;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  .nav-cta:hover .arr{transform:translateX(3px)}
+  .burger{display:none;width:36px;height:36px;border:1px solid var(--line);border-radius:50%;align-items:center;justify-content:center}
+  .burger span{width:14px;height:1px;background:var(--ink);position:relative}
+  .burger span::before,.burger span::after{content:"";position:absolute;left:0;width:14px;height:1px;background:var(--ink)}
+  .burger span::before{top:-4px}.burger span::after{top:4px}
+
+  /* ---------- Hero ---------- */
+  .hero{padding-top:104px;padding-bottom:48px;position:relative}
+  .hero-meta{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:end;margin-bottom:28px}
+  .hero-meta .left,.hero-meta .right{display:flex;flex-direction:column;gap:6px}
+  .hero-meta .right{align-items:flex-end;text-align:right}
+  .hero-meta .center{font-family:var(--f-mono);font-size:11px;letter-spacing:.3em;color:var(--ink-2);text-transform:uppercase}
+
+  .hero-title{
+    font-family:var(--f-display);font-weight:300;
+    font-size: clamp(64px, 12.2vw, 220px);
+    line-height:.86;letter-spacing:-.025em;
+    text-align:center;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  @media (max-width: 1200px){
+    .hero-title{white-space:normal;font-size:clamp(64px,12vw,180px);line-height:.92}
+  }
+  .hero-title .ampersand{font-style:italic;font-weight:300;color:var(--accent-2);display:inline-block;padding:0 .04em;transform:translateY(.04em)}
+  .hero-title .assets{font-style:italic;font-weight:300}
+
+  .hero-art{
+    position:relative;margin-top:24px;
+    aspect-ratio: 16/8.2;
+    border-radius:6px;overflow:hidden;
+    background:#1f1c17;
+  }
+  .hero-art .ph{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(120% 80% at 50% 100%, rgba(0,0,0,.55), transparent 60%),
+      linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35)),
+      repeating-linear-gradient(135deg, #2a2620 0 2px, #211d18 2px 16px);
+  }
+  .hero-art .ph-label{
+    position:absolute;left:24px;bottom:20px;color:rgba(247,242,230,.7);
+    font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase
+  }
+  .hero-art .ph-corner{
+    position:absolute;right:24px;top:20px;color:rgba(247,242,230,.7);
+    font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase
+  }
+  .hero-art .quote{
+    position:absolute;left:50%;bottom:14%;transform:translateX(-50%);
+    text-align:center;color:var(--paper);max-width:640px;padding:0 20px
+  }
+  .hero-art .quote .k{
+    font-family:var(--f-display);font-style:italic;font-weight:300;font-size:clamp(22px,2.6vw,34px);
+    line-height:1.25
+  }
+  .hero-art .quote .kk{
+    margin-top:14px;font-family:var(--f-mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;opacity:.8
+  }
+
+  .hero-foot{display:grid;grid-template-columns: 1fr auto 1fr;gap:24px;align-items:center;margin-top:24px}
+  .hero-foot .scroll{justify-self:center;display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2)}
+  .hero-foot .scroll .dot{width:4px;height:4px;border-radius:50%;background:var(--ink);animation:bob 1.8s infinite ease-in-out}
+  @keyframes bob{0%,100%{transform:translateY(-2px);opacity:.6}50%{transform:translateY(4px);opacity:1}}
+
+  /* ---------- Intro ---------- */
+  .intro{padding:120px 0 100px}
+  .intro-grid{display:grid;grid-template-columns: 1fr 1fr;gap:80px;align-items:start}
+  .intro h2{
+    font-family:var(--f-display);font-weight:300;font-size:clamp(34px,4.4vw,64px);
+    line-height:1.05;letter-spacing:-.015em
+  }
+  .intro h2 em{font-style:italic;font-weight:300;color:var(--accent-2)}
+  .intro .col-r{display:flex;flex-direction:column;gap:22px;padding-top:14px}
+  .intro .col-r p{font-size:16px;line-height:1.7;color:var(--ink-2);max-width:46ch}
+  .intro .signature{margin-top:10px;display:flex;align-items:center;gap:14px}
+  .intro .signature .sig{font-family:var(--f-display);font-style:italic;font-size:22px;color:var(--ink)}
+  .intro .signature .who{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+  /* ---------- Marquee ---------- */
+  .marq{
+    padding:28px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    overflow:hidden;background:var(--bg-2)
+  }
+  .marq-track{
+    display:flex;gap:80px;white-space:nowrap;animation:marq 50s linear infinite;
+    font-family:var(--f-display);font-size:clamp(28px,4.2vw,56px);font-weight:300;color:var(--ink)
+  }
+  .marq-track i{font-style:italic;color:var(--accent-2);margin:0 12px}
+  .marq-track span.dot{width:6px;height:6px;background:var(--ink);border-radius:50%;align-self:center}
+  @keyframes marq{to{transform:translateX(-50%)}}
+
+  /* ---------- Services ---------- */
+  .services{padding:120px 0 80px}
+  .sect-head{display:grid;grid-template-columns: 1fr 1.4fr;gap:60px;align-items:end;margin-bottom:60px}
+  .sect-head h3{
+    font-family:var(--f-display);font-weight:300;font-size:clamp(36px,4.6vw,68px);line-height:1.02;letter-spacing:-.015em
+  }
+  .sect-head h3 em{font-style:italic;color:var(--accent-2)}
+  .sect-head .sub{font-size:15px;line-height:1.7;color:var(--ink-2);max-width:50ch}
+  .sect-num{display:flex;align-items:center;gap:14px;margin-bottom:18px;color:var(--muted)}
+  .sect-num .ix{font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+  .sect-num .ln{flex:1;height:1px;background:var(--line)}
+
+  .svc-grid{
+    display:grid;grid-template-columns:repeat(12,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line)
+  }
+  .svc{
+    grid-column: span 4;background:var(--bg);padding:32px 28px 28px;
+    min-height:240px;display:flex;flex-direction:column;justify-content:space-between;
+    position:relative;overflow:hidden;
+    transition:background .5s ease, color .5s ease;
+  }
+  .svc::after{
+    content:"";position:absolute;inset:0;background:var(--ink);transform:translateY(100%);
+    transition:transform .55s cubic-bezier(.2,.7,.2,1);z-index:0
+  }
+  .svc > *{position:relative;z-index:1;transition:color .4s ease}
+  .svc:hover::after{transform:translateY(0)}
+  .svc:hover, .svc:hover *{color:var(--paper)}
+  .svc:hover .svc-num{border-color:var(--paper)}
+  .svc:hover .svc-arr{transform:translate(4px,-4px)}
+  .svc-num{
+    width:38px;height:38px;border:1px solid var(--line);border-radius:50%;
+    display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;color:var(--ink-2);
+    transition:border-color .4s ease
+  }
+  .svc h4{font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.1;letter-spacing:-.01em}
+  .svc h4 em{font-style:italic;color:var(--accent-2)}
+  .svc p{font-size:13.5px;line-height:1.55;color:var(--muted);max-width:30ch}
+  .svc .row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:18px}
+  .svc .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .svc .tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);padding:5px 10px;border:1px solid var(--line);border-radius:999px}
+  .svc:hover .tag{border-color:rgba(247,242,230,.35);color:var(--paper)}
+  .svc-arr{
+    width:30px;height:30px;border-radius:50%;border:1px solid var(--line);
+    display:grid;place-items:center;transition:transform .4s ease, border-color .4s ease
+  }
+  .svc:hover .svc-arr{border-color:var(--paper)}
+  .svc-arr svg{width:12px;height:12px}
+
+  .svc.wide{grid-column:span 6}
+  .svc.full{grid-column:span 12;min-height:160px}
+
+  /* ---------- Featured listing ---------- */
+  .featured{padding:120px 0}
+  .feat-grid{display:grid;grid-template-columns: 1.15fr .85fr;gap:40px;align-items:stretch}
+  .feat-img{
+    position:relative;border-radius:6px;overflow:hidden;min-height:560px;
+    background:
+      radial-gradient(140% 100% at 50% 100%, rgba(0,0,0,.55), transparent 60%),
+      linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.35)),
+      repeating-linear-gradient(45deg, #2c2820 0 2px, #221e18 2px 14px);
+  }
+  .feat-img .lbl{position:absolute;left:24px;top:20px;color:rgba(247,242,230,.78);font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+  .feat-img .corner{position:absolute;right:24px;top:20px;color:rgba(247,242,230,.78);font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+  .feat-img .name{
+    position:absolute;left:0;right:0;bottom:0;padding:32px;color:var(--paper);
+    display:flex;justify-content:space-between;align-items:end;gap:24px
+  }
+  .feat-img .name .t{font-family:var(--f-display);font-weight:300;font-size:clamp(36px,4.4vw,60px);line-height:1;letter-spacing:-.01em}
+  .feat-img .name .t em{font-style:italic}
+  .feat-img .name .meta{font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.85;text-align:right}
+
+  .feat-side{display:flex;flex-direction:column;justify-content:space-between;gap:28px;padding:8px 0}
+  .feat-side .tag-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .feat-side h3{font-family:var(--f-display);font-weight:300;font-size:clamp(36px,4vw,52px);line-height:1.02;letter-spacing:-.015em}
+  .feat-side h3 em{font-style:italic;color:var(--accent-2)}
+  .feat-side p{font-size:15px;line-height:1.7;color:var(--ink-2);margin-top:18px}
+  .feat-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;border-top:1px solid var(--line);padding-top:20px;margin-top:24px}
+  .feat-stats .st .v{font-family:var(--f-display);font-size:26px;font-weight:400}
+  .feat-stats .st .l{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+  .feat-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 22px;border-radius:999px;
+    font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+    transition:all .4s cubic-bezier(.2,.7,.2,1)
+  }
+  .btn .arr{display:inline-block;transition:transform .4s ease}
+  .btn.solid{background:var(--ink);color:var(--paper);border:1px solid var(--ink)}
+  .btn.solid:hover{background:var(--accent);border-color:var(--accent)}
+  .btn.solid:hover .arr{transform:translateX(4px)}
+  .btn.ghost{border:1px solid var(--ink);color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:var(--paper)}
+  .btn.ghost:hover .arr{transform:translateX(4px)}
+
+  /* ---------- Portfolio strip ---------- */
+  .portfolio{padding:60px 0 120px}
+  .port-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+  .port{
+    position:relative;border-radius:4px;overflow:hidden;min-height:300px;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.32)),
+      repeating-linear-gradient(135deg, #2a2620 0 2px, #221e18 2px 14px);
+    cursor:pointer
+  }
+  .port.a{grid-column:span 7;min-height:420px}
+  .port.b{grid-column:span 5;min-height:420px;background:
+      linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.32)),
+      repeating-linear-gradient(45deg, #3a3128 0 2px, #2e261e 2px 14px)}
+  .port.c{grid-column:span 5;min-height:360px;background:
+      linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.32)),
+      repeating-linear-gradient(90deg, #2c2820 0 2px, #211d18 2px 14px)}
+  .port.d{grid-column:span 4;min-height:360px;background:
+      linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.32)),
+      repeating-linear-gradient(60deg, #322c22 0 2px, #25201a 2px 14px)}
+  .port.e{grid-column:span 3;min-height:360px;background:
+      linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.32)),
+      repeating-linear-gradient(120deg, #2a2620 0 2px, #211d18 2px 14px)}
+  .port .lbl{position:absolute;left:18px;top:16px;color:rgba(247,242,230,.8);font-family:var(--f-mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase}
+  .port .info{
+    position:absolute;left:0;right:0;bottom:0;padding:20px;color:var(--paper);
+    display:flex;justify-content:space-between;align-items:end;gap:14px
+  }
+  .port .info .t{font-family:var(--f-display);font-weight:300;font-size:24px;line-height:1.05}
+  .port .info .t em{font-style:italic}
+  .port .info .m{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;opacity:.85;text-align:right}
+  .port::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%, rgba(0,0,0,.55));pointer-events:none}
+  .port .pin{position:absolute;right:14px;top:14px;width:30px;height:30px;border:1px solid rgba(247,242,230,.5);border-radius:50%;display:grid;place-items:center;color:rgba(247,242,230,.9);transition:transform .4s ease, background .4s ease}
+  .port:hover .pin{background:rgba(247,242,230,.15);transform:rotate(-12deg)}
+
+  /* ---------- Loans ---------- */
+  .loans{background:var(--ink);color:var(--paper);padding:140px 0}
+  .loans .wrap{position:relative}
+  .loans .sect-num .ln{background:rgba(247,242,230,.18)}
+  .loans .sect-num .ix{color:rgba(247,242,230,.7)}
+  .loans h3{color:var(--paper)}
+  .loans h3 em{color:var(--gold)}
+  .loans .sub{color:rgba(247,242,230,.7)}
+  .loan-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(247,242,230,.12);border:1px solid rgba(247,242,230,.12);margin-top:40px}
+  .loan{background:var(--ink);padding:36px 32px;min-height:280px;display:flex;flex-direction:column;justify-content:space-between;gap:24px;position:relative;overflow:hidden}
+  .loan h4{font-family:var(--f-display);font-weight:300;font-size:38px;letter-spacing:-.01em}
+  .loan h4 em{font-style:italic;color:var(--gold)}
+  .loan p{color:rgba(247,242,230,.7);font-size:14.5px;line-height:1.65;max-width:42ch}
+  .loan ul{display:flex;flex-direction:column;gap:8px}
+  .loan li{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(247,242,230,.7);display:flex;align-items:center;gap:10px}
+  .loan li::before{content:"";width:6px;height:1px;background:var(--gold)}
+  .bank-row{
+    margin-top:48px;display:flex;flex-wrap:wrap;gap:42px;align-items:center;
+    border-top:1px solid rgba(247,242,230,.15);padding-top:28px
+  }
+  .bank-row .ttl{font-family:var(--f-mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(247,242,230,.55);margin-right:auto}
+  .bank-row .bnk{font-family:var(--f-display);font-style:italic;font-weight:400;font-size:22px;color:var(--paper);opacity:.85}
+
+  /* ---------- Process ---------- */
+  .process{padding:140px 0}
+  .proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .proc{background:var(--bg);padding:36px 28px;min-height:240px;display:flex;flex-direction:column;justify-content:space-between;gap:18px}
+  .proc .ix{font-family:var(--f-display);font-style:italic;font-weight:300;font-size:48px;color:var(--accent-2);line-height:1}
+  .proc h5{font-family:var(--f-display);font-weight:400;font-size:24px;letter-spacing:-.005em}
+  .proc p{font-size:13.5px;line-height:1.6;color:var(--muted)}
+
+  /* ---------- Team ---------- */
+  .team{padding:120px 0}
+  .team-head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;margin-bottom:48px}
+  .team-head .right{color:var(--ink-2);font-size:15.5px;line-height:1.7;max-width:50ch;justify-self:end}
+  .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+  .mb{
+    background:var(--bg);padding:28px 26px 26px;min-height:340px;display:flex;flex-direction:column;gap:14px;position:relative;
+    transition:background .4s ease
+  }
+  .mb:hover{background:var(--paper)}
+  .mb .avatar{
+    width:64px;height:64px;border-radius:50%;background:var(--bg-2);
+    display:grid;place-items:center;font-family:var(--f-display);font-style:italic;font-size:24px;color:var(--ink-2);
+    border:1px solid var(--line)
+  }
+  .mb h5{font-family:var(--f-display);font-weight:400;font-size:26px;line-height:1.1;letter-spacing:-.005em}
+  .mb h5 em{font-style:italic;color:var(--accent-2)}
+  .mb .role{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+  .mb p{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+  .mb .yrs{
+    position:absolute;right:24px;top:24px;font-family:var(--f-display);font-style:italic;font-size:36px;color:var(--accent-2);line-height:1
+  }
+  .mb .yrs span{font-family:var(--f-mono);font-style:normal;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:block;margin-top:4px;text-align:right}
+
+  /* ---------- Stats band ---------- */
+  .stats{padding:80px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-2)}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;align-items:end}
+  .stats .st{display:flex;flex-direction:column;gap:8px}
+  .stats .v{font-family:var(--f-display);font-weight:300;font-size:clamp(48px,6vw,82px);line-height:.9;letter-spacing:-.02em}
+  .stats .v em{font-style:italic;color:var(--accent-2)}
+  .stats .l{font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2);max-width:24ch}
+
+  /* ---------- Contact ---------- */
+  .contact{padding:140px 0}
+  .contact-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:80px;align-items:start}
+  .contact h2{font-family:var(--f-display);font-weight:300;font-size:clamp(46px,6vw,96px);line-height:.95;letter-spacing:-.02em}
+  .contact h2 em{font-style:italic;color:var(--accent-2)}
+  .contact .right{display:flex;flex-direction:column;gap:28px;padding-top:14px}
+  .field{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line);padding-bottom:14px}
+  .field label{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+  .field input, .field select, .field textarea{
+    width:100%;background:transparent;border:0;outline:0;color:var(--ink);
+    font-family:var(--f-display);font-size:22px;font-weight:400;padding:6px 0
+  }
+  .field textarea{font-family:var(--f-sans);font-size:15px;line-height:1.5;resize:none;min-height:80px}
+  .field input::placeholder, .field textarea::placeholder{color:var(--muted);font-style:italic}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .send-row{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:8px}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--ink);color:var(--paper);padding:80px 0 32px;position:relative;overflow:hidden}
+  .foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:48px;border-bottom:1px solid rgba(247,242,230,.15)}
+  .foot-top h6{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(247,242,230,.55);margin-bottom:18px}
+  .foot-top a, .foot-top p{color:rgba(247,242,230,.82);font-size:14px;line-height:1.85;display:block;text-decoration:none}
+  .foot-top a:hover{color:var(--gold)}
+  .foot-mark{font-family:var(--f-display);font-weight:300;font-size:clamp(60px,9vw,140px);line-height:.85;letter-spacing:-.02em;margin-top:18px;color:var(--paper)}
+  .foot-mark em{font-style:italic;color:var(--gold)}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:26px;gap:24px;flex-wrap:wrap}
+  .foot-bottom p, .foot-bottom a{color:rgba(247,242,230,.55);font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .foot-bottom a:hover{color:var(--gold)}
+
+  /* ---------- Reveal animations ---------- */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .reveal-stagger > *{opacity:0;transform:translateY(20px);transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal-stagger.in > *{opacity:1;transform:none}
+  .reveal-stagger.in > *:nth-child(1){transition-delay:.05s}
+  .reveal-stagger.in > *:nth-child(2){transition-delay:.12s}
+  .reveal-stagger.in > *:nth-child(3){transition-delay:.19s}
+  .reveal-stagger.in > *:nth-child(4){transition-delay:.26s}
+  .reveal-stagger.in > *:nth-child(5){transition-delay:.33s}
+  .reveal-stagger.in > *:nth-child(6){transition-delay:.40s}
+  .reveal-stagger.in > *:nth-child(7){transition-delay:.47s}
+  .reveal-stagger.in > *:nth-child(8){transition-delay:.54s}
+  .reveal-stagger.in > *:nth-child(9){transition-delay:.61s}
+
+  /* word-by-word title reveal */
+  .word{display:inline-block;overflow:hidden;vertical-align:bottom;padding-right:.05em}
+  .word span{display:inline-block;transform:translateY(110%);transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}
+  .word.in span{transform:translateY(0)}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1100px){
+    .intro-grid{grid-template-columns:1fr;gap:32px}
+    .svc, .svc.wide{grid-column:span 6}
+    .feat-grid{grid-template-columns:1fr;gap:24px}
+    .feat-img{min-height:420px}
+    .port.a, .port.b, .port.c, .port.d, .port.e{grid-column:span 6;min-height:300px}
+    .loan-grid{grid-template-columns:1fr}
+    .proc-grid{grid-template-columns:repeat(2,1fr)}
+    .team-grid{grid-template-columns:repeat(2,1fr)}
+    .stats-grid{grid-template-columns:repeat(2,1fr);gap:32px}
+    .contact-grid{grid-template-columns:1fr;gap:36px}
+    .team-head{grid-template-columns:1fr}
+    .team-head .right{justify-self:start}
+    .foot-top{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width: 720px){
+    .nav-links{display:none}
+    .burger{display:flex}
+    .nav-cta{display:none}
+    .hero-title{font-size:clamp(54px,16vw,120px);white-space:normal}
+    .hero-meta{grid-template-columns:1fr 1fr;gap:14px}
+    .hero-meta .center{display:none}
+    .hero-foot{grid-template-columns:1fr}
+    .hero-art{aspect-ratio:4/5}
+    .intro{padding:80px 0 60px}
+    .services{padding:80px 0 40px}
+    .svc, .svc.wide, .svc.full{grid-column:span 12}
+    .featured{padding:80px 0}
+    .loans{padding:80px 0}
+    .process{padding:80px 0}
+    .team{padding:80px 0}
+    .contact{padding:80px 0}
+    .port.a, .port.b, .port.c, .port.d, .port.e{grid-column:span 12}
+    .proc-grid{grid-template-columns:1fr}
+    .team-grid{grid-template-columns:1fr}
+    .stats-grid{grid-template-columns:1fr 1fr;gap:24px}
+    .field-row{grid-template-columns:1fr}
+    .foot-top{grid-template-columns:1fr 1fr;gap:28px}
+    .sect-head{grid-template-columns:1fr;gap:18px;margin-bottom:36px}
+    .feat-img .name{flex-direction:column;align-items:flex-start;gap:8px}
+    .feat-img .name .meta{text-align:left}
+    .send-row{flex-direction:column;align-items:stretch;gap:14px}
+    .btn{justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav" data-screen-label="00 Nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand" aria-label="Rich Man Assets">
+      <span class="mark"><span style="position:relative;z-index:1">R</span></span>
+      <span><b>Rich Man</b> <i>Assets</i></span>
+    </a>
+    <div class="nav-links" role="menubar">
+      <a href="#services">Services</a>
+      <a href="#featured">Listings</a>
+      <a href="#loans">Loans</a>
+      <a href="#team">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <a href="#contact" class="nav-cta">Enquire <span class="arr">→</span></a>
+    <button class="burger" aria-label="Menu"><span></span></button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header id="top" class="hero" data-screen-label="01 Hero">
+  <div class="wrap">
+    <div class="hero-meta reveal">
+      <div class="left">
+        <span class="eyebrow">A Product of</span>
+        <span class="small" style="color:var(--ink)">Vittu Bharath Associates LLP</span>
+      </div>
+      <div class="center">Estd. Karnataka · Real Estate &amp; Allied Services</div>
+      <div class="right">
+        <span class="eyebrow">Index</span>
+        <span class="small" style="color:var(--ink)">01 — Curated Property Portfolio</span>
+      </div>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="word"><span>Rich</span></span>
+      <span class="word"><span class="italic">Man</span></span>
+      <span class="word"><span class="ampersand">&amp;</span></span>
+      <span class="word"><span class="assets">Assets</span></span>
+    </h1>
+
+    <div class="hero-art reveal" aria-hidden="true">
+      <div class="ph"></div>
+      <span class="ph-label">[ Image · Hero Estate ]</span>
+      <span class="ph-corner">Volume 01 / 2026</span>
+      <div class="quote">
+        <div class="k">“ The home is the chapter where wealth, family and earth meet — we trade in pages worth keeping. ”</div>
+        <div class="kk">— Statement of Practice</div>
+      </div>
+    </div>
+
+    <div class="hero-foot reveal">
+      <div class="small">Plots · Apartments · Lease · Agriculture · Industrial · Loans</div>
+      <a href="#intro" class="scroll"><span>Scroll</span><span class="dot"></span></a>
+      <div class="small" style="text-align:right">Udupi · Mangaluru · Bengaluru</div>
+    </div>
+  </div>
+</header>
+
+<!-- INTRO -->
+<section id="intro" class="intro" data-screen-label="02 Intro">
+  <div class="wrap">
+    <div class="intro-grid">
+      <div class="reveal">
+        <div class="sect-num"><span class="ix">(01) — Introduction</span><span class="ln"></span></div>
+        <h2>A quiet, considered way to <em>own land</em> and <em>build wealth</em> in coastal Karnataka.</h2>
+      </div>
+      <div class="col-r reveal">
+        <p>Rich Man Assets is the property arm of Vittu Bharath Associates LLP — a closely held firm built on three decades of combined experience in real estate, home finance and legal due diligence. We work with families, investors and builders who value clarity over noise.</p>
+        <p>From a residential plot in a growing suburb to a revenue-generating industrial property, every listing on our books is personally walked, verified and priced. We do not chase volume. We curate.</p>
+        <div class="signature">
+          <span class="sig">— Vittu Bharath</span>
+          <span class="who">Associates LLP · Est. 2020</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marq" aria-hidden="true">
+  <div class="marq-track">
+    <span>Residential Plots</span><span class="dot"></span>
+    <span><i>Builder Sales</i></span><span class="dot"></span>
+    <span>Rental Property</span><span class="dot"></span>
+    <span><i>Daily Rentals</i></span><span class="dot"></span>
+    <span>Plot for Lease</span><span class="dot"></span>
+    <span><i>Agriculture</i></span><span class="dot"></span>
+    <span>Industrial</span><span class="dot"></span>
+    <span><i>Revenue Property</i></span><span class="dot"></span>
+    <span>Interiors</span><span class="dot"></span>
+    <span><i>Home Loan</i></span><span class="dot"></span>
+    <!-- duplicated for seamless scroll -->
+    <span>Residential Plots</span><span class="dot"></span>
+    <span><i>Builder Sales</i></span><span class="dot"></span>
+    <span>Rental Property</span><span class="dot"></span>
+    <span><i>Daily Rentals</i></span><span class="dot"></span>
+    <span>Plot for Lease</span><span class="dot"></span>
+    <span><i>Agriculture</i></span><span class="dot"></span>
+    <span>Industrial</span><span class="dot"></span>
+    <span><i>Revenue Property</i></span><span class="dot"></span>
+    <span>Interiors</span><span class="dot"></span>
+    <span><i>Home Loan</i></span><span class="dot"></span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services" class="services" data-screen-label="03 Services">
+  <div class="wrap">
+    <div class="sect-head">
+      <div class="reveal">
+        <div class="sect-num"><span class="ix">(02) — Portfolio of Services</span><span class="ln"></span></div>
+        <h3>Eleven verticals.<br/>One <em>trusted</em> desk.</h3>
+      </div>
+      <p class="sub reveal">From buying your first plot to financing a project loan or finishing the interior of a new apartment — Rich Man Assets is structured so a single relationship covers every part of your real estate journey.</p>
+    </div>
+
+    <div class="svc-grid reveal-stagger">
+      <article class="svc">
+        <div>
+          <div class="svc-num">01</div>
+          <h4>Residential <em>Plots</em></h4>
+          <p>Verified, title-clear residential land in growing suburbs of coastal Karnataka.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">DTCP</span><span class="tag">Title clear</span></div>
+          <span class="svc-arr" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc">
+        <div>
+          <div class="svc-num">02</div>
+          <h4>Commercial <em>Plots</em></h4>
+          <p>Frontage and corner plots on key arterial roads — graded for ROI and access.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">Frontage</span><span class="tag">CC roads</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc">
+        <div>
+          <div class="svc-num">03</div>
+          <h4>Builder <em>Sales</em></h4>
+          <p>Pre-launch and ready inventory from select developers — incl. Sharada Serendipity Apartments.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">RERA</span><span class="tag">Pre-launch</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc">
+        <div>
+          <div class="svc-num">04</div>
+          <h4>Rental <em>Residential</em></h4>
+          <p>Long-term family rentals — apartments, villas and independent houses, fully vetted.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">Long-term</span><span class="tag">Furnished</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc">
+        <div>
+          <div class="svc-num">05</div>
+          <h4>Rental <em>Commercial</em></h4>
+          <p>Retail fronts, offices and warehousing — drafted leases, transparent escalation.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">Retail</span><span class="tag">Office</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc">
+        <div>
+          <div class="svc-num">06</div>
+          <h4>Daily <em>Rentals</em></h4>
+          <p>Service apartments and holiday homes — daily and weekly tariffs, professionally managed.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">Service apt.</span><span class="tag">Holiday</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc">
+        <div>
+          <div class="svc-num">07</div>
+          <h4>Plot &amp; Commercial <em>Lease</em></h4>
+          <p>Long-lease structures for petrol pumps, godowns, schools and large format retail.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">Long lease</span><span class="tag">Anchor use</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc">
+        <div>
+          <div class="svc-num">08</div>
+          <h4>Agriculture <em>Property</em></h4>
+          <p>Plantation, orchard and irrigated agricultural land with documented yield history.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">Plantation</span><span class="tag">RTC</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc">
+        <div>
+          <div class="svc-num">09</div>
+          <h4>Revenue <em>Generating</em></h4>
+          <p>Leased buildings, anchored properties and yield assets with verified rental records.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">Yield</span><span class="tag">Anchored</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc wide">
+        <div>
+          <div class="svc-num">10</div>
+          <h4>Construction, Developers &amp; <em>Interior Décor</em></h4>
+          <p>End-to-end execution — from foundation drawings to fit-out — through our empanelled contractors and design partners.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">Turnkey</span><span class="tag">Design build</span><span class="tag">Site execution</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+
+      <article class="svc wide">
+        <div>
+          <div class="svc-num">11</div>
+          <h4>Industrial Property — <em>Sale &amp; Lease</em></h4>
+          <p>Sheds, factories and warehousing on industrial-zoned land. We help match tenants and buyers with verified industrial inventory.</p>
+        </div>
+        <div class="row">
+          <div class="tags"><span class="tag">KIADB</span><span class="tag">Warehouse</span><span class="tag">Factory</span></div>
+          <span class="svc-arr"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 10L10 2M4 2h6v6"/></svg></span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED LISTING -->
+<section id="featured" class="featured" data-screen-label="04 Featured">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <div class="sect-num"><span class="ix">(03) — Featured Project</span><span class="ln"></span></div>
+        <h3>Now selling.<br/><em>Sharada Serendipity</em> Apartments.</h3>
+      </div>
+      <p class="sub">A boutique residential project from our builder-sales desk — designed for families seeking a quiet, well-built home in a connected neighbourhood.</p>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat-img reveal" aria-label="Sharada Serendipity Apartments photo placeholder">
+        <span class="lbl">[ Image · Sharada Serendipity ]</span>
+        <span class="corner">Builder Sales — 03</span>
+        <div class="name">
+          <div class="t">Sharada <em>Serendipity</em><br/>Apartments</div>
+          <div class="meta">Ready · 2 &amp; 3 BHK<br/>Possession 2026</div>
+        </div>
+      </div>
+
+      <aside class="feat-side reveal">
+        <div>
+          <div class="tag-row">
+            <span class="tag" style="font-family:var(--f-mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);padding:6px 12px;border:1px solid var(--line);border-radius:999px">RERA Registered</span>
+            <span class="tag" style="font-family:var(--f-mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);padding:6px 12px;border:1px solid var(--line);border-radius:999px">Boutique · 24 Units</span>
+          </div>
+          <h3>A home built to <em>last a generation</em>, not a quarter.</h3>
+          <p>Thoughtfully laid floor plates, deep sit-outs, and an interior specification we would build for ourselves. Walkable to school, market and the temple — and minutes from the highway.</p>
+          <div class="feat-stats">
+            <div class="st"><div class="v">2 &amp; 3<em></em></div><div class="l">Bedroom Plans</div></div>
+            <div class="st"><div class="v">1,180<em>+</em></div><div class="l">Sq.Ft. Carpet</div></div>
+            <div class="st"><div class="v">24<em></em></div><div class="l">Boutique Units</div></div>
+          </div>
+        </div>
+        <div class="feat-cta">
+          <a href="#contact" class="btn solid">Request Brochure <span class="arr">→</span></a>
+          <a href="#contact" class="btn ghost">Schedule a Visit <span class="arr">→</span></a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO STRIP -->
+<section class="portfolio" data-screen-label="05 Portfolio">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <div class="sect-num"><span class="ix">(04) — Current Inventory</span><span class="ln"></span></div>
+        <h3>A small <em>edited</em><br/>book of opportunities.</h3>
+      </div>
+      <p class="sub">Five properties from our live desk this season. Full books, walk-throughs and pricing on request — we deliberately do not publish prices online.</p>
+    </div>
+
+    <div class="port-grid reveal-stagger">
+      <div class="port a">
+        <span class="lbl">[ Image · Plot · Udupi ]</span>
+        <span class="pin">↗</span>
+        <div class="info">
+          <div class="t">Residential <em>Plot</em> · Manipal</div>
+          <div class="m">6,400 sq.ft.<br/>East facing</div>
+        </div>
+      </div>
+      <div class="port b">
+        <span class="lbl">[ Image · Apartment · Mangaluru ]</span>
+        <span class="pin">↗</span>
+        <div class="info">
+          <div class="t">3BHK <em>Apartment</em> · Kadri</div>
+          <div class="m">1,520 sq.ft.<br/>Ready to move</div>
+        </div>
+      </div>
+      <div class="port c">
+        <span class="lbl">[ Image · Agriculture · Karkala ]</span>
+        <span class="pin">↗</span>
+        <div class="info">
+          <div class="t">Areca <em>Plantation</em></div>
+          <div class="m">3.2 Acres<br/>RTC clear</div>
+        </div>
+      </div>
+      <div class="port d">
+        <span class="lbl">[ Image · Industrial · Baikampady ]</span>
+        <span class="pin">↗</span>
+        <div class="info">
+          <div class="t">Industrial <em>Shed</em></div>
+          <div class="m">12,000 sq.ft.<br/>Sale / Lease</div>
+        </div>
+      </div>
+      <div class="port e">
+        <span class="lbl">[ Image · Yield ]</span>
+        <span class="pin">↗</span>
+        <div class="info">
+          <div class="t">Revenue <em>Property</em></div>
+          <div class="m">Anchored<br/>9.2% yield</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOANS -->
+<section id="loans" class="loans" data-screen-label="06 Loans">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <div class="sect-num"><span class="ix">(05) — Finance Desk</span><span class="ln"></span></div>
+        <h3>Home loans.<br/>Project loans. <em>Done right.</em></h3>
+      </div>
+      <p class="sub">Led by Ajay Pandit — fifteen years in the home-finance division of major banks. We do not just refer files; we shepherd them, from sanction to disbursal.</p>
+    </div>
+
+    <div class="loan-grid reveal-stagger">
+      <article class="loan">
+        <div>
+          <h4>Home <em>Loan</em></h4>
+          <p>For salaried, self-employed and NRI buyers — across all bank panels we are empanelled with. Eligibility check in 24 hours.</p>
+        </div>
+        <ul>
+          <li>Up to 90% LTV</li>
+          <li>Balance transfer with top-up</li>
+          <li>Joint &amp; co-applicant structuring</li>
+          <li>End-to-end documentation</li>
+        </ul>
+      </article>
+      <article class="loan">
+        <div>
+          <h4>Project <em>Loan</em></h4>
+          <p>For builders, developers and SME industrial buyers. Structured with our legal desk so the file lands clean at the credit committee.</p>
+        </div>
+        <ul>
+          <li>Construction finance</li>
+          <li>Lease rental discounting</li>
+          <li>Working capital tie-ups</li>
+          <li>Legal &amp; technical co-ordination</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="bank-row reveal">
+      <span class="ttl">Empanelled Bank Partners</span>
+      <span class="bnk">Bank of Baroda</span>
+      <span class="bnk">Union Bank</span>
+      <span class="bnk">Canara Bank</span>
+      <span class="bnk">SBI</span>
+      <span class="bnk">HDFC</span>
+      <span class="bnk">ICICI</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" data-screen-label="07 Process">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <div class="sect-num"><span class="ix">(06) — How We Work</span><span class="ln"></span></div>
+        <h3>Four steps.<br/>No <em>surprises</em>.</h3>
+      </div>
+      <p class="sub">A deliberately small process — built by a team that has been on the legal, banking and developer side of the table, often at the same time.</p>
+    </div>
+
+    <div class="proc-grid reveal-stagger">
+      <div class="proc">
+        <div class="ix">i.</div>
+        <h5>Listen</h5>
+        <p>A 30-minute conversation. Use case, budget, timeline, family situation. We do not show anything yet.</p>
+      </div>
+      <div class="proc">
+        <div class="ix">ii.</div>
+        <h5>Shortlist</h5>
+        <p>We curate three to five live options from our books — never the firehose. Each one personally walked.</p>
+      </div>
+      <div class="proc">
+        <div class="ix">iii.</div>
+        <h5>Diligence</h5>
+        <p>Title, RERA, RTC, encumbrance — checked by Advocate Deepa R. Kotian. Bank pre-approval in parallel.</p>
+      </div>
+      <div class="proc">
+        <div class="ix">iv.</div>
+        <h5>Close</h5>
+        <p>Registration, possession, fit-out. We stay in the file until the keys are in your hand — and after.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAND -->
+<section class="stats" data-screen-label="08 Stats">
+  <div class="wrap">
+    <div class="stats-grid reveal-stagger">
+      <div class="st"><div class="v">25<em>+</em></div><div class="l">Years lead-director experience</div></div>
+      <div class="st"><div class="v">17<em></em></div><div class="l">Years of in-house legal practice</div></div>
+      <div class="st"><div class="v">15<em>+</em></div><div class="l">Years in home &amp; project finance</div></div>
+      <div class="st"><div class="v">6<em></em></div><div class="l">Empanelled bank partners</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team" class="team" data-screen-label="09 Team">
+  <div class="wrap">
+    <div class="team-head">
+      <div class="reveal">
+        <div class="sect-num"><span class="ix">(07) — The People</span><span class="ln"></span></div>
+        <h3 style="font-family:var(--f-display);font-weight:300;font-size:clamp(36px,4.6vw,68px);line-height:1.02;letter-spacing:-.015em">Six directors.<br/>One <em>shared</em> ledger of trust.</h3>
+      </div>
+      <p class="right reveal">Rich Man Assets is run as a partnership of practitioners — each director carries a vertical they have lived in for over a decade. You meet the person who actually closes your file.</p>
+    </div>
+
+    <div class="team-grid reveal-stagger">
+      <article class="mb">
+        <div class="avatar">A</div>
+        <div>
+          <h5>Abhijit <em>Shetty</em></h5>
+          <div class="role">Executive Director · Sales</div>
+        </div>
+        <p>Commerce graduate. Nine years inside corporate sales &amp; marketing, fifteen years with builders and real-estate firms.</p>
+        <div class="yrs">15<span>Years</span></div>
+      </article>
+
+      <article class="mb">
+        <div class="avatar">A</div>
+        <div>
+          <h5>Ajay <em>Pandit</em></h5>
+          <div class="role">Executive Director · Finance</div>
+        </div>
+        <p>MBA. Former banker in the home-loan division. Today leads our home &amp; project loan desk across the major bank panels.</p>
+        <div class="yrs">15<span>Years</span></div>
+      </article>
+
+      <article class="mb">
+        <div class="avatar">D</div>
+        <div>
+          <h5>Deepa R. <em>Kotian</em></h5>
+          <div class="role">Executive Director · Legal</div>
+        </div>
+        <p>Advocate. Nine years as legal advisor to Sai Radha Developers, Udupi. On the panels of Bank of Baroda, Union and Canara.</p>
+        <div class="yrs">17<span>Years</span></div>
+      </article>
+
+      <article class="mb">
+        <div class="avatar">P</div>
+        <div>
+          <h5>Prashant <em>Shetty</em></h5>
+          <div class="role">Director · Trading &amp; Ventures</div>
+        </div>
+        <p>Twenty-five years across real estate and business trading. Brings the deepest local-market lens in the team.</p>
+        <div class="yrs">25<span>Years</span></div>
+      </article>
+
+      <article class="mb">
+        <div class="avatar">S</div>
+        <div>
+          <h5>Sachin <em>Mendon</em></h5>
+          <div class="role">Director · Field</div>
+        </div>
+        <p>From the fish trade to the real estate agency floor — seven years walking properties end-to-end with buyers and sellers.</p>
+        <div class="yrs">7<span>Years</span></div>
+      </article>
+
+      <article class="mb">
+        <div class="avatar">H</div>
+        <div>
+          <h5>Hrishikesh</h5>
+          <div class="role">Director · Sales</div>
+        </div>
+        <p>Commerce graduate, formerly in insurance. Four years in real-estate sales and marketing on the residential desk.</p>
+        <div class="yrs">4<span>Years</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact" data-screen-label="10 Contact">
+  <div class="wrap">
+    <div class="contact-grid">
+      <div class="reveal">
+        <div class="sect-num"><span class="ix">(08) — Begin</span><span class="ln"></span></div>
+        <h2>Let us know what you are <em>looking for</em>. We will do the rest.</h2>
+        <p class="lead" style="margin-top:24px;max-width:32ch">No mailing list, no spam. A single director will respond within one working day.</p>
+      </div>
+
+      <form class="right reveal" onsubmit="event.preventDefault(); this.querySelector('.thanks').style.opacity=1; this.reset();">
+        <div class="field-row">
+          <div class="field">
+            <label>Your name</label>
+            <input type="text" placeholder="Full name" required />
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="tel" placeholder="+91" required />
+          </div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" placeholder="name@email.com" required />
+        </div>
+        <div class="field">
+          <label>I am looking for</label>
+          <select>
+            <option>A residential plot</option>
+            <option>An apartment / villa</option>
+            <option>Builder sales — Sharada Serendipity</option>
+            <option>Rental property</option>
+            <option>Agricultural land</option>
+            <option>Industrial / commercial</option>
+            <option>Home loan / project loan</option>
+            <option>Construction &amp; interior</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>A few words about your need</label>
+          <textarea rows="3" placeholder="Budget range, location, timing, anything we should know"></textarea>
+        </div>
+        <div class="send-row">
+          <span class="small thanks" style="opacity:0;transition:opacity .4s ease">Thank you — we will reach out within a working day.</span>
+          <button type="submit" class="btn solid">Send Enquiry <span class="arr">→</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer data-screen-label="11 Footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <div>
+        <h6>The Firm</h6>
+        <p>Rich Man Assets is a product of <strong style="color:var(--paper)">Vittu Bharath Associates LLP</strong> — a real-estate, finance and legal-advisory practice based in coastal Karnataka, India.</p>
+        <p style="margin-top:14px"><a href="#">vittubharath.com — Corporate site →</a></p>
+      </div>
+      <div>
+        <h6>Visit</h6>
+        <a href="#services">Services</a>
+        <a href="#featured">Featured Listing</a>
+        <a href="#loans">Home &amp; Project Loans</a>
+        <a href="#team">About the Team</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div>
+        <h6>Reach</h6>
+        <a href="tel:+91">+91 · Speak to a director</a>
+        <a href="mailto:hello@richmanassets.com">hello@richmanassets.com</a>
+        <p style="margin-top:12px">Udupi · Mangaluru · Bengaluru</p>
+      </div>
+      <div>
+        <h6>Follow</h6>
+        <a href="#">Instagram</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">WhatsApp Catalogue</a>
+        <a href="#">YouTube Walkthroughs</a>
+      </div>
+    </div>
+
+    <div class="foot-mark">Rich Man <em>Assets</em>.</div>
+
+    <div class="foot-bottom">
+      <p>© 2026 Vittu Bharath Associates LLP. All rights reserved.</p>
+      <div style="display:flex;gap:24px">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">RERA Compliance</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Nav scrolled state
+  const nav = document.getElementById('nav');
+  const onScroll = () => {
+    if (window.scrollY > 24) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+  };
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  // Intersection reveals
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:.14, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal, .reveal-stagger, .word').forEach(el=>io.observe(el));
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click', (ev)=>{
+      const id = a.getAttribute('href');
+      if(id.length>1){
+        const t = document.querySelector(id);
+        if(t){ ev.preventDefault(); t.scrollIntoView({behavior:'smooth', block:'start'}); }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

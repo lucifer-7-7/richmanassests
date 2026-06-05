@@ -1,0 +1,30 @@
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title><%= title %></title>
+<meta name="description" content="<%= description || 'Buy, rent or lease premium property across coastal Karnataka and the Western Ghats. Villas, plots, commercial and agricultural land, plus loans, legal and interiors.' %>"/>
+<% if (typeof canonical !== 'undefined') { %><link rel="canonical" href="<%= canonical %>"/><% } %>
+
+<!-- Open Graph -->
+<meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>"/>
+<meta property="og:title" content="<%= title %>"/>
+<meta property="og:description" content="<%= description || 'Premium property marketplace across coastal Karnataka.' %>"/>
+<meta property="og:image" content="<%= typeof ogImage !== 'undefined' ? ogImage : '/assets/img/site-hero.jpg' %>"/>
+<meta property="og:url" content="<%= typeof canonical !== 'undefined' ? canonical : '' %>"/>
+<meta property="og:site_name" content="RichManAssets"/>
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="<%= title %>"/>
+<meta name="twitter:description" content="<%= description || '' %>"/>
+<meta name="twitter:image" content="<%= typeof ogImage !== 'undefined' ? ogImage : '/assets/img/site-hero.jpg' %>"/>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Smooth scroll library -->
+<link rel="stylesheet" href="https://unpkg.com/lenis@1.1.13/dist/lenis.css">
+
+<link rel="stylesheet" href="/assets/site.css?v=2">
+<link rel="stylesheet" href="/assets/market.css?v=2">

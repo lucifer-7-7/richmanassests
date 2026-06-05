@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin — RichManAssets</title>
+<meta name="robots" content="noindex,nofollow"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F4F1;--white:#fff;--ink:#17150F;--ink-2:#3B362C;
+  --muted:#928A79;--line:#E8E4DB;--accent:#9A7B3F;--gold:#C2A05A;
+  --ok-bg:#E8F5E9;--ok:#2E7D32;
+  --err-bg:#FDECEA;--err:#C62828;
+  --r:12px;--r-sm:8px;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;min-height:100svh}
+
+/* ── TOP BAR ── */
+.top{background:var(--ink);color:#F7F4ED;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50}
+.top .brand{font-size:15px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.top .brand .badge{font-size:8px;letter-spacing:.22em;text-transform:uppercase;opacity:.44;border:1px solid rgba(247,244,237,.28);padding:3px 7px;border-radius:100px;font-weight:400}
+.top .nav-links{display:flex;gap:4px;align-items:center}
+.top .nav-links a{color:rgba(247,244,237,.6);font-size:12.5px;text-decoration:none;padding:7px 12px;border-radius:var(--r-sm);transition:.2s}
+.top .nav-links a:hover{background:rgba(247,244,237,.08);color:#F7F4ED}
+.top .nav-links .sign-out{color:rgba(247,244,237,.5)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;min-height:calc(100svh - 56px)}
+.sidebar{
+  width:220px;flex:none;background:var(--white);border-right:1px solid var(--line);
+  padding:16px 12px;display:flex;flex-direction:column;gap:4px;
+  position:sticky;top:56px;height:calc(100svh - 56px);overflow-y:auto;
+}
+.sidebar a,.sidebar button{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:var(--r-sm);
+  font-size:13.5px;color:var(--ink-2);text-decoration:none;
+  transition:.2s;background:none;border:0;cursor:pointer;width:100%;text-align:left;
+}
+.sidebar a:hover,.sidebar button:hover{background:var(--bg);color:var(--ink)}
+.sidebar a.active,.sidebar button.active{background:#17150F;color:#F7F4ED}
+.sidebar .icon{width:18px;height:18px;flex:none;opacity:.7}
+.sidebar a.active .icon,.sidebar button.active .icon{opacity:1}
+.sidebar .sec-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 12px 6px;font-weight:500}
+.sidebar .count-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:100px}
+.content{flex:1;padding:24px 20px;max-width:1100px;overflow:hidden}
+
+/* mobile: no sidebar, bottom nav */
+@media(max-width:720px){
+  .sidebar{display:none}
+  .mob-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:48;
+    background:var(--white);border-top:1px solid var(--line);
+    height:60px;align-items:stretch;
+  }
+  .mob-nav button{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;font-size:10px;letter-spacing:.04em;color:var(--muted);
+    background:none;border:0;cursor:pointer;transition:.2s;padding:0;
+  }
+  .mob-nav button.active{color:var(--ink)}
+  .mob-nav button svg{width:20px;height:20px}
+  body{padding-bottom:60px}
+  .content{padding:16px}
+}
+@media(min-width:721px){.mob-nav{display:none}}
+
+/* ── FLASH ── */
+.flash{padding:12px 16px;border-radius:var(--r-sm);margin-bottom:18px;font-size:13px;display:flex;align-items:center;gap:10px}
+.flash.ok{background:var(--ok-bg);color:var(--ok)}
+.flash.err{background:var(--err-bg);color:var(--err)}
+
+/* ── PANELS ── */
+.panel{display:none}.panel.active{display:block}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+@media(min-width:640px){.stats-row{grid-template-columns:repeat(4,1fr)}}
+.stat-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.stat-card .v{font-size:28px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.stat-card .l{font-size:11.5px;color:var(--muted);margin-top:4px}
+.stat-card.accent .v{color:var(--accent)}
+
+/* ── PROPERTY CARDS ── */
+.prop-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:540px){.prop-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){.prop-grid{grid-template-columns:repeat(3,1fr)}}
+.prop-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:.2s}
+.prop-card:hover{border-color:#aaa8a2;box-shadow:0 6px 18px -10px rgba(0,0,0,.16)}
+.prop-card .thumb{position:relative;aspect-ratio:16/9;background:var(--bg);overflow:hidden}
+.prop-card .thumb img{width:100%;height:100%;object-fit:cover}
+.prop-card .thumb .no-img{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.prop-card .thumb .listing-badge{position:absolute;bottom:8px;left:8px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:100px;color:#fff;font-weight:600}
+.prop-card .thumb .listing-badge.sale{background:#7B5C28}
+.prop-card .thumb .listing-badge.rent{background:#2F6F8A}
+.prop-card .thumb .listing-badge.lease{background:#5A4A7A}
+.prop-card .thumb .status-dot{position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;border:2px solid #fff}
+.prop-card .thumb .status-dot.active{background:#2e7d32}
+.prop-card .thumb .status-dot.hidden{background:#bbb}
+.prop-card .info{padding:14px}
+.prop-card .info .price{font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1}
+.prop-card .info .name{font-size:14px;font-weight:600;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prop-card .info .loc{font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prop-card .actions{display:flex;gap:6px;padding:0 14px 14px}
+.prop-card .actions a,.prop-card .actions button{
+  flex:1;padding:8px 4px;border-radius:var(--r-sm);font-size:12px;font-weight:500;
+  text-align:center;border:0;cursor:pointer;text-decoration:none;transition:.2s;display:block;
+}
+.prop-card .actions .a-edit{background:var(--ink);color:#fff}
+.prop-card .actions .a-edit:hover{background:var(--accent)}
+.prop-card .actions .a-toggle{background:var(--bg);color:var(--ink-2);border:1px solid var(--line)}
+.prop-card .actions .a-toggle:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.prop-card .actions .a-del{background:var(--err-bg);color:var(--err)}
+.prop-card .actions .a-del:hover{background:var(--err);color:#fff}
+.prop-card .actions .a-view{background:var(--bg);color:var(--ink-2);border:1px solid var(--line)}
+.prop-card .actions .a-view:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* add button */
+.add-btn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:500;margin-bottom:20px;cursor:pointer;border:0;transition:.2s;text-decoration:none}
+.add-btn:hover{background:var(--accent)}
+.add-btn svg{width:16px;height:16px}
+
+/* search / filter bar */
+.list-controls{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.list-controls input,.list-controls select{
+  background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:9px 13px;font:inherit;font-size:13px;color:var(--ink);outline:none;
+}
+.list-controls input{flex:1;min-width:160px}
+
+/* ── ENQUIRY CARDS ── */
+.enq-list{display:flex;flex-direction:column;gap:10px}
+.enq-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:8px}
+.enq-card .enq-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.enq-card .enq-name{font-weight:600;font-size:14px}
+.enq-card .enq-date{font-size:11.5px;color:var(--muted);flex:none}
+.enq-card .enq-contact{display:flex;gap:10px;flex-wrap:wrap}
+.enq-card .enq-contact a{font-size:13px;color:var(--accent);text-decoration:none}
+.enq-card .enq-contact a:hover{text-decoration:underline}
+.enq-card .enq-body{font-size:13px;color:var(--ink-2);line-height:1.5}
+.enq-card .enq-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.enq-tag{font-size:10.5px;padding:3px 9px;border-radius:100px;background:var(--bg);color:var(--ink-2);border:1px solid var(--line)}
+.enq-tag.prop{background:#EDE8DE;color:#5A4A2A}
+
+/* ── ADD / EDIT FORM ── */
+.form-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:clamp(18px,3vw,28px)}
+.form-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.form-section:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+.form-section-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px}
+.fg{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:540px){.fg{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.fg.cols3{grid-template-columns:1fr 1fr 1fr}}
+.fg.full{grid-template-columns:1fr!important}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{
+  padding:11px 13px;border:1px solid var(--line);border-radius:var(--r-sm);
+  font:inherit;font-size:14px;color:var(--ink);outline:none;transition:border .2s;
+  background:var(--white);-webkit-appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ink)}
+.field textarea{resize:vertical;min-height:90px}
+.field small{font-size:11.5px;color:var(--muted)}
+.img-preview{width:100%;max-height:160px;object-fit:cover;border-radius:var(--r-sm);margin-top:8px;display:none}
+.img-preview.show{display:block}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.btn-save{padding:12px 26px;background:var(--ink);color:#fff;border:0;border-radius:var(--r);font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:.25s}
+.btn-save:hover{background:var(--accent)}
+.btn-cancel{padding:12px 20px;background:none;border:1px solid var(--line);border-radius:var(--r);font:inherit;font-size:14px;color:var(--muted);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center}
+.btn-cancel:hover{border-color:var(--ink);color:var(--ink)}
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.page-head h1{font-size:clamp(18px,3vw,24px);font-weight:700;letter-spacing:-.01em}
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty h3{font-size:18px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">
+    RichManAssets
+    <span class="badge">Admin</span>
+  </div>
+  <div class="nav-links">
+    <a href="/" target="_blank">View site ↗</a>
+    <a href="/admin/logout" class="sign-out">Sign out</a>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- Desktop sidebar -->
+  <nav class="sidebar">
+    <span class="sec-label">Manage</span>
+    <button class="active" onclick="showPanel('properties')" id="sb-properties">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h3a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+      Properties
+    </button>
+    <button onclick="showPanel('add')" id="sb-add">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+      Add property
+    </button>
+    <button onclick="showPanel('enquiries')" id="sb-enquiries">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+      Enquiries
+      <% if (stats.newEnquiries > 0) { %><span class="count-badge"><%= stats.newEnquiries %></span><% } %>
+    </button>
+
+    <span class="sec-label" style="margin-top:8px">Overview</span>
+    <div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Active</span><b><%= stats.active %></b></div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Total</span><b><%= stats.total %></b></div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Enquiries</span><b><%= stats.enquiries %></b></div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="content">
+    <% if (flash) { %>
+    <div class="flash <%= flash.type === 'ok' ? 'ok' : 'err' %>">
+      <%= flash.type === 'ok' ? '✓' : '!' %> <%= flash.msg %>
+    </div>
+    <% } %>
+
+    <!-- PROPERTIES PANEL -->
+    <div class="panel active" id="panel-properties">
+      <div class="page-head">
+        <h1>Properties</h1>
+        <button class="add-btn" onclick="showPanel('add')">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+          Add new
+        </button>
+      </div>
+
+      <div class="list-controls">
+        <input type="text" id="searchProp" placeholder="Search by name or location…" oninput="filterProps()">
+        <select id="filterListing" onchange="filterProps()">
+          <option value="">All types</option>
+          <option value="sale">For Sale</option>
+          <option value="rent">For Rent</option>
+          <option value="lease">For Lease</option>
+        </select>
+      </div>
+
+      <% if (properties.length === 0) { %>
+      <div class="empty">
+        <h3>No properties yet</h3>
+        <p>Add your first property to get started.</p>
+      </div>
+      <% } else { %>
+      <div class="prop-grid" id="propGrid">
+        <% properties.forEach(function(p) { %>
+        <div class="prop-card" data-name="<%= (p.name + ' ' + p.loc).toLowerCase() %>" data-listing="<%= p.listing %>">
+          <div class="thumb">
+            <% if (p.img_card || p.img_hero) { %>
+            <img src="/<%= p.img_card || p.img_hero %>" alt="<%= p.name %>" loading="lazy">
+            <% } else { %><div class="no-img">No photo</div><% } %>
+            <span class="listing-badge <%= p.listing %>"><%= p.listing === 'sale' ? 'Sale' : p.listing === 'rent' ? 'Rent' : 'Lease' %></span>
+            <span class="status-dot <%= p.active ? 'active' : 'hidden' %>" title="<%= p.active ? 'Active' : 'Hidden' %>"></span>
+          </div>
+          <div class="info">
+            <div class="price"><%= p.price %><% if (p.price_note) { %><span style="font-size:12px;font-weight:400;color:var(--muted)"> <%= p.price_note %></span><% } %></div>
+            <div class="name"><%= p.name %></div>
+            <div class="loc"><%= p.loc %> · <%= p.type %></div>
+          </div>
+          <div class="actions">
+            <a class="a-edit" href="/admin/property/<%= p.id %>/edit">Edit</a>
+            <a class="a-view" href="/property/<%= p.id %>" target="_blank">View</a>
+            <form method="post" action="/admin/property/<%= p.id %>/toggle" style="flex:1;display:contents">
+              <button class="a-toggle" type="submit"><%= p.active ? 'Hide' : 'Show' %></button>
+            </form>
+            <form method="post" action="/admin/property/<%= p.id %>/delete" onsubmit="return confirm('Delete <%= p.name %>?')" style="flex:1;display:contents">
+              <button class="a-del" type="submit">Del</button>
+            </form>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- ADD PROPERTY PANEL -->
+    <div class="panel" id="panel-add">
+      <div class="page-head">
+        <h1>Add property</h1>
+        <button class="btn-cancel" onclick="showPanel('properties')">← Back</button>
+      </div>
+      <div class="form-card">
+        <form method="post" action="/admin/property" enctype="multipart/form-data" id="addForm">
+
+          <div class="form-section">
+            <div class="form-section-title">Basic info</div>
+            <div class="fg">
+              <div class="field"><label>Property name *</label><input name="name" required placeholder="e.g. Villa Mermaid" id="nameField"></div>
+              <div class="field"><label>Slug / URL ID *</label><input name="id" required placeholder="e.g. mermaid" pattern="[a-z0-9\-]+" id="slugField"><small>Used in URL: /property/slug</small></div>
+            </div>
+            <div class="fg cols3">
+              <div class="field"><label>Location *</label><input name="loc" required placeholder="e.g. Mulki Backwaters"></div>
+              <div class="field"><label>Area</label><input name="area" placeholder="e.g. Mulki"></div>
+              <div class="field"><label>Property type *</label>
+                <select name="type" required>
+                  <option value="">Select…</option>
+                  <option>Villa</option><option>House</option><option>Estate</option>
+                  <option>Apartment</option><option>Plot</option><option>Commercial</option><option>Agricultural</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg cols3">
+              <div class="field"><label>Listing *</label>
+                <select name="listing" required>
+                  <option value="">Select…</option>
+                  <option value="sale">For Sale</option>
+                  <option value="rent">For Rent</option>
+                  <option value="lease">For Lease</option>
+                </select>
+              </div>
+              <div class="field"><label>Price *</label><input name="price" required placeholder="e.g. ₹7.5 Cr"></div>
+              <div class="field"><label>Price suffix</label><input name="price_note" placeholder="e.g. /month"></div>
+            </div>
+            <div class="fg cols3">
+              <div class="field"><label>Beds</label><input name="beds" placeholder="e.g. 4"></div>
+              <div class="field"><label>Baths</label><input name="baths" placeholder="e.g. 4"></div>
+              <div class="field"><label>Area / sqft</label><input name="sqft" placeholder="e.g. 4,200 or 3 acres"></div>
+            </div>
+            <div class="fg">
+              <div class="field"><label>Subtype</label><input name="subtype" placeholder="e.g. Event venue, Builder project"></div>
+              <div class="field"><label>Price value (for filters)</label><input name="price_val" type="number" placeholder="e.g. 7500000"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Story & content</div>
+            <div class="fg full">
+              <div class="field"><label>Kicker line</label><input name="story_kicker" placeholder="e.g. Where the river bends"></div>
+              <div class="field"><label>Heading</label><input name="story_heading" placeholder="e.g. A house that leans out over the water."></div>
+              <div class="field"><label>Story (separate paragraphs with blank line)</label><textarea name="story_body" rows="5" placeholder="Describe the property…"></textarea></div>
+              <div class="field"><label>Amenities (pipe-separated)</label><input name="amenities" placeholder="Private pool|Backwater frontage|4 beds|Power backup"></div>
+              <div class="field"><label>Setting heading</label><input name="setting_heading" placeholder="e.g. Mulki Backwaters"></div>
+              <div class="field"><label>Setting description</label><textarea name="setting_body" rows="3" placeholder="Describe the location…"></textarea></div>
+              <div class="field"><label>Location pills (pipe-separated)</label><input name="setting_pills" placeholder="Beachfront|20 min to Mangaluru"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Images</div>
+            <div class="fg">
+              <div class="field">
+                <label>Card image (thumbnail)</label>
+                <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp" onchange="previewImg(this,'prev-card')">
+                <img id="prev-card" class="img-preview" alt="">
+                <small>800×600 JPG recommended</small>
+              </div>
+              <div class="field">
+                <label>Hero image (full-width)</label>
+                <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp" onchange="previewImg(this,'prev-hero')">
+                <img id="prev-hero" class="img-preview" alt="">
+                <small>1600×900 JPG recommended</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Settings</div>
+            <div class="fg cols3">
+              <div class="field"><label>Featured on homepage?</label>
+                <select name="featured"><option value="0">No</option><option value="1">Yes</option></select>
+              </div>
+              <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="99" min="1" max="999"></div>
+              <div class="field"><label>EMI value</label><input name="emi_val" placeholder="e.g. ₹5,53,237"></div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-save" type="submit">Save property →</button>
+            <button class="btn-cancel" type="button" onclick="showPanel('properties')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ENQUIRIES PANEL -->
+    <div class="panel" id="panel-enquiries">
+      <div class="page-head">
+        <h1>Enquiries <span style="font-size:14px;font-weight:400;color:var(--muted)">(<%= stats.enquiries %>)</span></h1>
+      </div>
+      <% if (enquiries.length === 0) { %>
+      <div class="empty"><h3>No enquiries yet</h3><p>Form submissions will appear here.</p></div>
+      <% } else { %>
+      <div class="enq-list">
+        <% enquiries.forEach(function(e) { %>
+        <div class="enq-card">
+          <div class="enq-top">
+            <div class="enq-name"><%= e.name || 'Anonymous' %></div>
+            <div class="enq-date"><%= new Date(e.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) %></div>
+          </div>
+          <div class="enq-contact">
+            <% if (e.phone) { %><a href="tel:<%= e.phone %>">📞 <%= e.phone %></a><% } %>
+            <% if (e.email) { %><a href="mailto:<%= e.email %>">✉ <%= e.email %></a><% } %>
+            <% if (e.phone) { %><a href="https://wa.me/<%= e.phone.replace(/\D/g,'') %>" target="_blank" rel="noopener">💬 WhatsApp</a><% } %>
+          </div>
+          <% if (e.message || e.budget) { %>
+          <div class="enq-body"><%= e.message || e.budget %></div>
+          <% } %>
+          <div class="enq-tags">
+            <% if (e.service) { %><span class="enq-tag"><%= e.service %></span><% } %>
+            <% if (e.property_ref) { %><a class="enq-tag prop" href="/property/<%= e.property_ref %>" target="_blank"><%= e.property_ref %> ↗</a><% } %>
+            <% if (e.time_pref && e.time_pref !== 'Anytime') { %><span class="enq-tag">Prefers: <%= e.time_pref %></span><% } %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+  </main>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="mob-nav">
+  <button class="active" id="mob-properties" onclick="showPanel('properties')">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h3a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+    Properties
+  </button>
+  <button id="mob-add" onclick="showPanel('add')">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+    Add
+  </button>
+  <button id="mob-enquiries" onclick="showPanel('enquiries')">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+    Enquiries
+  </button>
+</div>
+
+<script>
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mob-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const sb = document.getElementById('sb-' + id);
+  if (sb) sb.classList.add('active');
+  const mb = document.getElementById('mob-' + id);
+  if (mb) mb.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function previewImg(input, previewId) {
+  const file = input.files[0];
+  if (!file) return;
+  const img = document.getElementById(previewId);
+  img.src = URL.createObjectURL(file);
+  img.classList.add('show');
+}
+
+// auto-slug from name
+const nameField = document.getElementById('nameField');
+const slugField = document.getElementById('slugField');
+if (nameField && slugField) {
+  nameField.addEventListener('input', function() {
+    if (!slugField.dataset.manual) {
+      slugField.value = nameField.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    }
+  });
+  slugField.addEventListener('input', function() { slugField.dataset.manual = '1'; });
+}
+
+// filter properties
+function filterProps() {
+  const q = (document.getElementById('searchProp').value || '').toLowerCase();
+  const l = document.getElementById('filterListing').value;
+  document.querySelectorAll('#propGrid .prop-card').forEach(card => {
+    const nameMatch = !q || card.dataset.name.includes(q);
+    const listMatch = !l || card.dataset.listing === l;
+    card.style.display = nameMatch && listMatch ? '' : 'none';
+  });
+}
+
+// open add panel if URL hash says so
+if (location.hash === '#add') showPanel('add');
+if (location.search.includes('tab=enquiries')) showPanel('enquiries');
+</script>
+</body>
+</html>

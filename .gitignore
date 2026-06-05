@@ -1,0 +1,7 @@
+node_modules/
+.env
+db/rma.db
+db/rma.db-shm
+db/rma.db-wal
+public/assets/img/uploads/
+*.log
