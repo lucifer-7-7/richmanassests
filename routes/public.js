@@ -3,6 +3,10 @@ const express = require('express');
 const router  = express.Router();
 const { getDB } = require('../db/db');
 
+// canonical site origin (production domain) for SEO tags
+const SITE = process.env.SITE_URL || 'https://richmanassets.com';
+const canon = (path) => SITE + path;
+
 // ── helpers ──────────────────────────────────────────────────────
 const ICON_SVGS = {
   home:   '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13 16 4l12 9M7 11v15h6v-9h6v9h6V11"/></svg>',
@@ -18,31 +22,31 @@ const ICON_SVGS = {
 const SERVICES = [
   {
     id:'buy-sell', n:'01', title:'Sales', icon:'home',
-    desc:'Builder sales, resale flats, independent houses and villas — coastal and city.',
+    desc:'Builder sales, resale flats, independent houses and villas across the coast and city.',
     long_desc:'We handle new launches from builders, resale apartments, independent houses and villas across the coast and the Ghats. Every listing is title-verified before we bring it to you.',
     offers:['Builder project sales','Resale flats & apartments','Independent houses','Villas & luxury homes','NRI property services','Market valuation','Title-clear listings','Documentation support'],
   },
   {
     id:'commercial', n:'02', title:'Commercial Spaces', icon:'ruler',
-    desc:'Office space, retail outlets and commercial sites — grade-A and investment-grade.',
+    desc:'Office space, retail outlets and commercial sites, grade-A and investment-grade.',
     long_desc:'From grade-A office floors to retail showrooms, we source, shortlist and negotiate commercial property for occupiers and investors alike.',
     offers:['Commercial office space','Retail & showroom space','Commercial sites','Industrial sites','Lease & outright purchase','Tenant representation','Investment yield analysis','Commercial legal support'],
   },
   {
     id:'plots', n:'03', title:'Plots & Sites', icon:'leaf',
     desc:'Residential layouts, beach-facing, river-facing, agricultural and industrial sites.',
-    long_desc:'We cover the full spectrum of land — residential layout plots, commercial sites, beach-facing and river-facing plots, and verified agricultural land with RTC records.',
+    long_desc:'We cover the full spectrum of land: residential layout plots, commercial sites, beach-facing and river-facing plots, and verified agricultural land with RTC records.',
     offers:['Residential layout plots','Commercial sites','Beach-facing sites','River-facing sites','Agricultural sites','Industrial sites','RTC verification','RERA-approved layouts'],
   },
   {
     id:'loans', n:'04', title:'Home & Project Loans', icon:'coins',
-    desc:'Public and private sector tie-ups — fastest sanction, lowest EMI.',
+    desc:'Public and private sector tie-ups for the fastest sanction and lowest EMI.',
     long_desc:'Direct banking partnerships with SBI, Bank of Baroda, HDFC, Karnataka Bank and others mean pre-approved rates and faster sanctions than you\'ll find over the counter.',
     offers:['Home loans (public sector)','Home loans (private sector)','Project & construction loans','Plot purchase loans','Balance transfer','Top-up loans','Pre-approved EMI','Doorstep paperwork'],
   },
   {
     id:'interior', n:'05', title:'Interior Design', icon:'sofa',
-    desc:'Homes and offices — 3D visualisation, fixed packages, turnkey execution.',
+    desc:'Homes and offices, with 3D visualisation, fixed packages and turnkey execution.',
     long_desc:'Fixed-price interior packages with full 3D renders before execution. We cover residential homes, offices and commercial fitouts, with a single point of contact from concept to handover.',
     offers:['Full home interiors','Modular kitchen & wardrobes','Office interiors','Commercial fitouts','3D visualisation','Fixed-price packages','Turnkey execution','Post-handover support'],
   },
@@ -54,8 +58,8 @@ const SERVICES = [
   },
   {
     id:'legal', n:'07', title:'Legal Services', icon:'scale',
-    desc:'Title checks, due diligence, registration — empaneled with major banks.',
-    long_desc:'Our in-house advocate is empaneled with SBI, HDFC and Karnataka Bank — title verification and loan processing move in parallel, not in sequence.',
+    desc:'Title checks, due diligence and registration, empaneled with major banks.',
+    long_desc:'Our in-house advocate is empaneled with SBI, HDFC and Karnataka Bank, so title verification and loan processing move in parallel, not in sequence.',
     offers:['Title search & verification','Due diligence reports','Sale deed drafting','Registration assistance','Encumbrance certificates','Gift & partition deeds','Power of attorney','RERA compliance'],
   },
   {
@@ -102,7 +106,10 @@ router.get('/', (req, res) => {
   const testimonials = db.prepare('SELECT * FROM testimonials WHERE active=1').all();
 
   res.render('index', {
-    title: 'RichManAssets — Premium Property Marketplace · Coastal Karnataka',
+    title: 'Real Estate in Udupi & Mangaluru: Villas, Flats, Plots, Rentals | RichManAssets',
+    description: 'Buy, rent or lease property in Udupi, Mangaluru & coastal Karnataka. Verified villas, apartments, plots, commercial space & agricultural land, plus home loans, legal & interiors under one roof.',
+    canonical: canon('/'),
+    siteUrl: SITE,
     heroSlides,
     featured,
     allListings,
@@ -129,8 +136,35 @@ router.get('/properties', (req, res) => {
 
   const properties = db.prepare(sql).all(...params);
 
+  // localized, intent-matching title + description
+  const listLabel = listing === 'rent' ? 'for Rent' : listing === 'lease' ? 'for Lease' : listing === 'sale' ? 'for Sale' : 'for Sale, Rent & Lease';
+  const typeLabel = type ? (type === 'Plot' ? 'Plots' : type + 's') : 'Property';
+  const where = area ? ` in ${area}` : ' in Udupi & Mangaluru';
+  const pageTitle = `${typeLabel} ${listLabel}${where} | RichManAssets`;
+  const pageDesc = `Browse ${properties.length} verified ${typeLabel.toLowerCase()} ${listLabel.toLowerCase()}${where} and across coastal Karnataka. Title-checked listings with photos, price and direct enquiry.`;
+
+  // canonical: keep area as a local-landing dimension, drop volatile filters
+  const canonPath = '/properties' + (area ? '?area=' + encodeURIComponent(area) : '');
+
+  // ItemList structured data for the listing results
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    'numberOfItems': properties.length,
+    'itemListElement': properties.slice(0, 20).map((p, i) => ({
+      '@type': 'ListItem',
+      'position': i + 1,
+      'url': `${SITE}/property/${p.id}`,
+      'name': `${p.name}, ${p.loc}`,
+    })),
+  };
+
   res.render('properties', {
-    title: 'Properties — Buy, Rent & Lease · RichManAssets',
+    title: pageTitle,
+    description: pageDesc,
+    canonical: canon(canonPath),
+    siteUrl: SITE,
+    jsonld: JSON.stringify(itemList),
     properties,
     areas: getAreas(db),
     q: { listing, area, type, budget },
@@ -141,13 +175,56 @@ router.get('/properties', (req, res) => {
 router.get('/property/:id', (req, res) => {
   const db = getDB();
   const p  = db.prepare('SELECT * FROM properties WHERE id=? AND active=1').get(req.params.id);
-  if (!p) return res.status(404).render('404', { title: 'Property not found — RichManAssets' });
+  if (!p) return res.status(404).render('404', { title: 'Property not found | RichManAssets' });
 
   const similar = db.prepare('SELECT * FROM properties WHERE id != ? AND active=1 AND type=? AND has_img=1 LIMIT 3').all(p.id, p.type);
   const next    = p.next_id ? db.prepare('SELECT * FROM properties WHERE id=? AND active=1').get(p.next_id) : null;
 
+  // collect absolute image urls (hero + gallery)
+  const absImg = (u) => !u ? null : (u.indexOf('http') === 0 ? u : SITE + '/' + u.replace(/^\//, ''));
+  let gallery = [];
+  try { gallery = JSON.parse(p.gallery || '[]'); } catch (_) {}
+  const images = [p.img_hero, p.img_card, ...gallery].map(absImg).filter(Boolean);
+
+  const listLabel = p.listing === 'rent' ? 'for Rent' : p.listing === 'lease' ? 'for Lease' : 'for Sale';
+  const pageTitle = `${p.name} in ${p.loc}, ${p.type} ${listLabel} at ${p.price} | RichManAssets`;
+  const pageDesc = (p.story_body ? String(p.story_body).replace(/\s+/g, ' ').slice(0, 150)
+    : `${p.type} ${listLabel.toLowerCase()} in ${p.loc}, coastal Karnataka. ${p.beds && p.beds !== '—' ? p.beds + ' beds · ' : ''}${p.sqft || ''}. Price ${p.price}.`).trim() + '…';
+
+  const productLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    'name': `${p.name}, ${p.loc}`,
+    'description': pageDesc,
+    'image': images.length ? images : undefined,
+    'category': p.type,
+    'offers': {
+      '@type': 'Offer',
+      'price': p.price_val || undefined,
+      'priceCurrency': 'INR',
+      'availability': 'https://schema.org/InStock',
+      'url': canon('/property/' + p.id),
+      'areaServed': p.area || p.loc,
+    },
+  };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: canon('/') },
+      { '@type': 'ListItem', position: 2, name: 'Properties', item: canon('/properties') },
+      { '@type': 'ListItem', position: 3, name: p.name, item: canon('/property/' + p.id) },
+    ],
+  };
+
   res.render('property', {
-    title: `${p.name} — ${p.loc} · ${p.price} · RichManAssets`,
+    title: pageTitle,
+    description: pageDesc,
+    canonical: canon('/property/' + p.id),
+    siteUrl: SITE,
+    ogType: 'product',
+    ogImage: images[0] || undefined,
+    jsonld: JSON.stringify([productLd, breadcrumbLd]),
     p, similar, next,
   });
 });
@@ -155,7 +232,10 @@ router.get('/property/:id', (req, res) => {
 // ── CONTACT ──────────────────────────────────────────────────────
 router.get('/contact', (req, res) => {
   res.render('contact', {
-    title: 'Enquire — Talk to a specialist · RichManAssets',
+    title: 'Contact & Enquire: Property Specialists in Udupi & Mangaluru | RichManAssets',
+    description: 'Talk to a RichManAssets property specialist in Udupi or Mangaluru. Call, WhatsApp or send your brief for a same-day response on buying, renting, plots, loans, legal and interiors.',
+    canonical: canon('/contact'),
+    siteUrl: SITE,
     ref: req.query.ref || '',
   });
 });
@@ -163,7 +243,10 @@ router.get('/contact', (req, res) => {
 // ── SERVICES ─────────────────────────────────────────────────────
 router.get('/services', (req, res) => {
   res.render('services', {
-    title: 'Services — Real Estate, Loans, Legal, Construction & Interiors · RichManAssets',
+    title: 'Real Estate Services in Udupi & Mangaluru: Sales, Loans, Legal & Interiors | RichManAssets',
+    description: 'One team for everything property in coastal Karnataka: builder & resale sales, commercial space, plots, home loans, legal due-diligence, construction and interiors.',
+    canonical: canon('/services'),
+    siteUrl: SITE,
     services: withIcons(SERVICES),
     serviceDetails: withIcons(SERVICES),
   });
@@ -173,8 +256,26 @@ router.get('/services', (req, res) => {
 router.get('/about', (req, res) => {
   const db = getDB();
   const testimonials = db.prepare('SELECT * FROM testimonials WHERE active=1').all();
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    'mainEntity': [
+      { '@type': 'Question', name: 'Which areas do you cover for property in coastal Karnataka?',
+        acceptedAnswer: { '@type': 'Answer', text: 'We cover Udupi, Mangaluru, Manipal, Surathkal, Mulki, Kapu, Padubidri, Maravanthe and the wider Dakshina Kannada and Udupi districts, plus hill stations like Sakleshpur and Chikmagalur.' } },
+      { '@type': 'Question', name: 'Do you help with home loans and legal paperwork?',
+        acceptedAnswer: { '@type': 'Answer', text: 'Yes. We have direct tie-ups with SBI, Bank of Baroda, HDFC, Karnataka Bank and others for fast, pre-approved home and project loans, and an in-house advocate for title checks, due diligence and registration.' } },
+      { '@type': 'Question', name: 'Are your property listings title-verified?',
+        acceptedAnswer: { '@type': 'Answer', text: 'Every listing is title-checked and verified before we publish it. We only market title-clear property across Udupi and Mangaluru.' } },
+      { '@type': 'Question', name: 'Do you work with NRI buyers and investors?',
+        acceptedAnswer: { '@type': 'Answer', text: 'Yes. We offer end-to-end NRI services including remote site visits, documentation, loans, registration and full property management after purchase.' } },
+    ],
+  };
   res.render('about', {
-    title: 'About RichManAssets — Premium Property Consultants in Udupi, Mangaluru & Coastal Karnataka',
+    title: 'About RichManAssets: Property Consultants in Udupi & Mangaluru, Coastal Karnataka',
+    description: 'RichManAssets (Vittu Bharat Associates LLP) is a coastal-Karnataka real-estate firm in Udupi & Mangaluru. 15+ years, 1,200+ families, ₹500 Cr+ transacted across sales, loans, legal, construction and interiors under one roof.',
+    canonical: canon('/about'),
+    siteUrl: SITE,
+    jsonld: JSON.stringify(faqLd),
     testimonials,
   });
 });
@@ -182,7 +283,10 @@ router.get('/about', (req, res) => {
 // ── LOANS ─────────────────────────────────────────────────────────
 router.get('/loans', (req, res) => {
   res.render('loans', {
-    title: 'Home Loans & EMI — Partner Bank Rates · RichManAssets',
+    title: 'Home Loans & EMI in Udupi & Mangaluru: Partner Bank Rates | RichManAssets',
+    description: 'Pre-approved home and project loans in coastal Karnataka from SBI, Bank of Baroda, HDFC, Karnataka Bank and more. Compare EMI, check eligibility and get doorstep paperwork.',
+    canonical: canon('/loans'),
+    siteUrl: SITE,
   });
 });
 

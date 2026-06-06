@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Edit <%= p.name %> — Admin · RichManAssets</title>
+<title>Edit <%= p.name %> · Admin · RichManAssets</title>
 <meta name="robots" content="noindex,nofollow"/>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -95,10 +95,18 @@
         <div class="field"><label>Story kicker</label><input name="story_kicker" value="<%= p.story_kicker || '' %>"></div>
         <div class="field"><label>Story heading</label><input name="story_heading" value="<%= p.story_heading || '' %>"></div>
         <div class="field"><label>Story body</label><textarea name="story_body" rows="5"><%= p.story_body || '' %></textarea></div>
-        <div class="field"><label>Amenities (pipe-separated)</label><input name="amenities" value="<%= p.amenities || '' %>"></div>
+        <div class="field">
+          <label>Amenities <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#928A79">(type and press Enter or comma)</span></label>
+          <div class="tag-input" id="amen-tags" data-init="<%= (p.amenities||'').replace(/"/g,'&quot;') %>"></div>
+          <input type="hidden" name="amenities" id="amenities-hidden" value="<%= p.amenities || '' %>">
+        </div>
         <div class="field"><label>Setting heading</label><input name="setting_heading" value="<%= p.setting_heading || '' %>"></div>
         <div class="field"><label>Setting body</label><textarea name="setting_body" rows="3"><%= p.setting_body || '' %></textarea></div>
-        <div class="field"><label>Setting pills (pipe-separated)</label><input name="setting_pills" value="<%= p.setting_pills || '' %>"></div>
+        <div class="field">
+          <label>Location pills <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#928A79">(type and press Enter or comma)</span></label>
+          <div class="tag-input" id="pills-tags" data-init="<%= (p.setting_pills||'').replace(/"/g,'&quot;') %>"></div>
+          <input type="hidden" name="setting_pills" id="setting_pills-hidden" value="<%= p.setting_pills || '' %>">
+        </div>
         <div class="field"><label>EMI label</label><input name="emi_label" value="<%= p.emi_label || '' %>" placeholder="e.g. 85% loan · 20y · 8.5%"></div>
         <div class="field"><label>EMI value</label><input name="emi_val" value="<%= p.emi_val || '' %>" placeholder="e.g. ₹5,53,237"></div>
       </div>
@@ -107,15 +115,43 @@
 
       <div class="fg">
         <div class="field">
-          <label>Card image (replace)</label>
-          <% if (p.img_card) { %><img class="curr-img" src="/<%= p.img_card %>" alt="Current card"><small>Current image above. Upload new to replace.</small><% } %>
-          <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp">
+          <label>Card image (thumbnail)</label>
+          <% if (p.img_card) { %><img class="curr-img" src="/<%= p.img_card %>" alt="Current card"><small>Current above · Upload to replace</small><% } %>
+          <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp" onchange="prevEdit(this,'ec-card')">
+          <img id="ec-card" class="curr-img" alt="" style="display:none">
+          <small>800×600 JPG recommended · listing grids</small>
         </div>
         <div class="field">
-          <label>Hero image (replace)</label>
-          <% if (p.img_hero) { %><img class="curr-img" src="/<%= p.img_hero %>" alt="Current hero"><small>Current image above. Upload new to replace.</small><% } %>
-          <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp">
+          <label>Hero image (full-width)</label>
+          <% if (p.img_hero) { %><img class="curr-img" src="/<%= p.img_hero %>" alt="Current hero"><small>Current above · Upload to replace</small><% } %>
+          <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp" onchange="prevEdit(this,'ec-hero')">
+          <img id="ec-hero" class="curr-img" alt="" style="display:none">
+          <small>1600×900 JPG recommended · property page header</small>
         </div>
+      </div>
+
+      <hr style="border:0;border-top:1px solid #f0ede7;margin:20px 0">
+
+      <div class="field">
+        <label>Gallery images</label>
+        <% var galleryArr = []; try { galleryArr = JSON.parse(p.gallery || '[]'); } catch(_) {} %>
+        <% if (galleryArr.length > 0) { %>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+          <% galleryArr.forEach(function(url, idx) { %>
+          <div style="position:relative;display:inline-block">
+            <img src="/<%= url.startsWith('http') ? '' : '' %><%= url %>" alt="Gallery <%= idx+1 %>" style="width:90px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #e0ddd6">
+            <label style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);border-radius:3px;padding:2px 4px;cursor:pointer;display:flex;align-items:center;gap:2px">
+              <input type="checkbox" name="gallery_remove[]" value="<%= idx %>" style="width:11px;height:11px;accent-color:#c62828">
+              <span style="font-size:9px;color:#fff;letter-spacing:.06em">DEL</span>
+            </label>
+          </div>
+          <% }) %>
+        </div>
+        <small style="display:block;margin-bottom:8px">Tick DEL on images to remove. Add new below.</small>
+        <% } %>
+        <input type="file" name="gallery" multiple accept="image/jpeg,image/png,image/webp" onchange="prevGalleryEdit(this,'ec-gallery')">
+        <div id="ec-gallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+        <small>1200×800 JPG recommended · up to 10 · select multiple files at once</small>
       </div>
 
       <div class="fg">
@@ -136,5 +172,77 @@
     </form>
   </div>
 </div>
+
+<style>
+  .tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border:1px solid #e0ddd6;border-radius:7px;min-height:42px;cursor:text;background:#fff}
+  .tag-input:focus-within{border-color:#17150F}
+  .tag-chip{display:inline-flex;align-items:center;gap:5px;background:#f0ede7;border-radius:4px;padding:3px 8px;font-size:12.5px;color:#17150F}
+  .tag-chip button{background:none;border:0;cursor:pointer;color:#928A79;font-size:14px;line-height:1;padding:0 1px}
+  .tag-chip button:hover{color:#c62828}
+  .tag-typeahead{border:0;outline:0;flex:1;min-width:120px;font:inherit;font-size:13.5px;background:none;padding:2px 4px}
+</style>
+<script>
+function prevEdit(input, previewId) {
+  var f = input.files[0]; if (!f) return;
+  var img = document.getElementById(previewId);
+  img.src = URL.createObjectURL(f); img.style.display = 'block';
+}
+function prevGalleryEdit(input, containerId) {
+  var c = document.getElementById(containerId); c.innerHTML = '';
+  Array.from(input.files).forEach(function(f) {
+    var img = document.createElement('img');
+    img.src = URL.createObjectURL(f);
+    img.style.cssText = 'width:90px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #e0ddd6';
+    c.appendChild(img);
+  });
+}
+
+// ── tag-input ──
+function initTagInput(containerEl, hiddenEl) {
+  if (!containerEl || !hiddenEl) return;
+  var chips = [];
+  var input = document.createElement('input');
+  input.className = 'tag-typeahead';
+  input.placeholder = 'Type and press Enter…';
+  containerEl.appendChild(input);
+
+  function sync() { hiddenEl.value = chips.join('|'); }
+  function addChip(val) {
+    val = val.trim().replace(/,/g,'');
+    if (!val || chips.indexOf(val) !== -1) return;
+    chips.push(val);
+    var chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.textContent = val;
+    var del = document.createElement('button');
+    del.type = 'button'; del.textContent = '×';
+    del.addEventListener('click', function() {
+      chips.splice(chips.indexOf(val), 1); chip.remove(); sync();
+    });
+    chip.appendChild(del);
+    containerEl.insertBefore(chip, input);
+    sync();
+  }
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault(); addChip(input.value); input.value = '';
+    } else if (e.key === 'Backspace' && !input.value && chips.length) {
+      chips.pop();
+      var all = containerEl.querySelectorAll('.tag-chip');
+      all[all.length-1].remove(); sync();
+    }
+  });
+  input.addEventListener('blur', function() {
+    if (input.value.trim()) { addChip(input.value); input.value = ''; }
+  });
+  containerEl.addEventListener('click', function() { input.focus(); });
+
+  // pre-populate
+  (hiddenEl.value || '').split('|').forEach(function(v) { if (v.trim()) addChip(v.trim()); });
+}
+
+initTagInput(document.getElementById('amen-tags'), document.getElementById('amenities-hidden'));
+initTagInput(document.getElementById('pills-tags'), document.getElementById('setting_pills-hidden'));
+</script>
 </body>
 </html>

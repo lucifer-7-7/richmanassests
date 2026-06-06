@@ -1,17 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
-<%- include('partials/head', {
-  title: 'Properties — Buy, Rent & Lease · RichManAssets',
-  description: 'Browse villas, estates, houses, apartments, plots and commercial properties across coastal Karnataka. Filter by location, type and budget.',
-  canonical: 'https://richmanassets.com/properties'
-}) %>
-<link rel="stylesheet" href="/assets/market.css?v=2">
+<%- include('partials/head') %>
+<link rel="stylesheet" href="/assets/market.css?v=3">
 <style>
   .mkt-hero{padding:clamp(110px,14vw,160px) 0 clamp(40px,6vw,70px);background:var(--ink);color:var(--paper)}
   .mkt-hero h1{font-family:var(--f-display);font-size:clamp(34px,5.5vw,72px);font-weight:400;letter-spacing:-.02em;line-height:1}
   .mkt-hero h1 .it{font-style:italic;color:var(--accent-soft)}
   .mkt-hero p{margin-top:14px;font-size:15px;color:rgba(247,244,237,.7);max-width:44ch}
+
   .filter-bar{background:var(--paper-2);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40;padding:14px 0}
   .filter-form{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
   .filter-form select,.filter-form input[type=text]{
@@ -22,10 +19,30 @@
   .filter-form select:focus,.filter-form input:focus{border-color:var(--ink)}
   .filter-form .btn-apply{background:var(--ink);color:var(--paper);border-radius:6px;padding:10px 22px;font-size:13px;letter-spacing:.04em;border:0;cursor:pointer;transition:.3s}
   .filter-form .btn-apply:hover{background:var(--accent)}
-  .filter-form .btn-reset{background:none;border:1px solid var(--line);border-radius:6px;padding:10px 16px;font-size:13px;color:var(--ink-3);cursor:pointer;transition:.3s}
+  .filter-form .btn-reset{background:none;border:1px solid var(--line);border-radius:6px;padding:10px 16px;font-size:13px;color:var(--ink-3);cursor:pointer;transition:.3s;text-decoration:none;display:inline-flex;align-items:center}
   .filter-form .btn-reset:hover{border-color:var(--ink);color:var(--ink)}
+  @media(max-width:560px){
+    .filter-form{gap:8px}
+    .filter-form select{flex:1 1 calc(50% - 4px);min-width:0}
+    .filter-form .btn-apply,.filter-form .btn-reset{flex:1 1 auto;justify-content:center}
+  }
+
   .results-meta{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:28px 0 16px}
-  .plist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:clamp(16px,2vw,26px);padding-bottom:80px}
+
+  /* responsive grid, all properties visible */
+  .plist-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:clamp(16px,2vw,26px);
+    padding-bottom:clamp(50px,8vw,90px);
+  }
+  @media(max-width:680px){
+    .plist-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  }
+  @media(max-width:480px){
+    .plist-grid{grid-template-columns:1fr}
+  }
+
   .empty-state{padding:80px 0;text-align:center;color:var(--ink-3)}
   .empty-state h3{font-family:var(--f-display);font-size:clamp(22px,3vw,34px);margin-bottom:12px}
 </style>
@@ -37,7 +54,7 @@
   <div class="wrap">
     <span class="kicker" style="color:var(--accent-soft);margin-bottom:16px;display:block"><span class="gold-line"></span>All listings</span>
     <h1>Find your <span class="it">perfect</span><br>property.</h1>
-    <p>Villas, estates, plots, commercial — across coastal Karnataka and the Western Ghats.</p>
+    <p>Villas, estates, plots and commercial across coastal Karnataka and the Western Ghats.</p>
   </div>
 </section>
 
@@ -89,7 +106,7 @@
     <article class="plist">
       <div class="ph">
         <% if (p.has_img && p.img_card) { %>
-        <img src="/<%= p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
+        <img src="<%= p.img_card.startsWith('http') ? p.img_card : '/' + p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
         <% } else { %>
         <div class="ph-placeholder"><span>Photos on request</span></div>
         <% } %>
@@ -122,10 +139,13 @@
 <%- include('partials/footer') %>
 
 <script>
-  const nav = document.getElementById('nav');
-  const onScroll = () => nav.classList.toggle('solid', window.scrollY > 60);
-  onScroll(); addEventListener('scroll', onScroll, { passive: true });
-  nav.classList.add('solid');
+  var nav = document.getElementById('nav');
+  if (nav) {
+    var onScroll = function () { nav.classList.toggle('solid', window.scrollY > 60); };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    nav.classList.add('solid');
+  }
 </script>
 </body>
 </html>

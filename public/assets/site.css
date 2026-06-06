@@ -159,7 +159,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   border-bottom:1px solid rgba(247,244,237,.12);
 }
 @media(min-width:640px){.site-foot .foot-top{grid-template-columns:1fr 1fr;gap:32px 48px}}
-@media(min-width:900px){.site-foot .foot-top{grid-template-columns:1.4fr 1fr 1fr}}
+@media(min-width:900px){.site-foot .foot-top{grid-template-columns:1.6fr 1fr 1fr 1fr}}
 .site-foot h3{font-family:var(--f-display);font-weight:500;font-size:clamp(26px,4vw,48px);line-height:1.04;letter-spacing:-.01em}
 .site-foot h3 .it{font-style:italic;color:var(--accent-soft)}
 .foot-col h5{font-family:var(--f-mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent-soft);margin-bottom:14px;font-weight:400}
@@ -177,6 +177,47 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .floaters .wa{background:#25D366}
 .floaters .call{background:var(--gold-deep)}
 .floaters a svg{width:24px;height:24px}
+
+/* ══════════════════════════════════════════
+   MOBILE BOTTOM TAB BAR (app-style nav)
+   ══════════════════════════════════════════ */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:70;
+  display:none;grid-template-columns:repeat(5,1fr);align-items:center;
+  background:rgba(247,244,237,.96);backdrop-filter:blur(18px) saturate(1.2);
+  border-top:1px solid var(--line-soft);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));
+  box-shadow:0 -8px 30px -16px rgba(10,9,6,.4);
+}
+.tabbar .tab{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:10px;letter-spacing:.01em;color:var(--ink-3);
+  padding:5px 2px;transition:color .2s;
+}
+.tabbar .tab svg{width:22px;height:22px;transition:stroke .2s}
+.tabbar .tab span{font-family:var(--f-sans);font-weight:500;line-height:1}
+.tabbar .tab.is-active{color:var(--ink)}
+.tabbar .tab.is-active svg{stroke:var(--accent)}
+/* raised centre CTA */
+.tabbar .tab-cta{color:var(--ink)}
+.tabbar .tab-cta .cta-ring{
+  width:46px;height:46px;border-radius:50%;
+  background:var(--ink);color:var(--paper);
+  display:grid;place-items:center;margin-top:-20px;margin-bottom:1px;
+  box-shadow:0 10px 22px -6px rgba(10,9,6,.55);border:3px solid var(--paper);
+}
+.tabbar .tab-cta .cta-ring svg{width:22px;height:22px;stroke:currentColor}
+.tabbar .tab-cta.is-active .cta-ring,.tabbar .tab-cta:active .cta-ring{background:var(--gold-deep)}
+
+@media(max-width:760px){
+  .tabbar{display:grid}
+  body:not(.has-prop-cta) .site-foot{padding-bottom:88px}
+  .floaters{bottom:78px;right:14px}
+  .floaters a{width:48px;height:48px}
+  .floaters a svg{width:22px;height:22px}
+}
+/* property pages have their own sticky CTA → hide global tabbar there */
+body.has-prop-cta .tabbar{display:none}
 
 /* ══════════════════════════════════════════
    SECTION SPACING

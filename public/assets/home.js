@@ -103,38 +103,73 @@
     });
   }
 
+  /* ---- GSAP DRAG SCROLL ---- */
+  function initDragScroll(outerId) {
+    var el = $('#' + outerId);
+    if (!el) return;
+    var reduce   = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var dragging = false, startX = 0, startScroll = 0, lastX = 0, lastT = 0, vel = 0;
+    var scrollTo = (typeof gsap !== 'undefined')
+      ? gsap.quickTo(el, 'scrollLeft', { duration: 0.7, ease: 'power3.out' })
+      : null;
+
+    el.addEventListener('pointerdown', function (e) {
+      dragging = true; startX = e.clientX; startScroll = el.scrollLeft;
+      lastX = e.clientX; lastT = Date.now(); vel = 0;
+      el.setPointerCapture(e.pointerId);
+      el.style.cursor = 'grabbing';
+      if (scrollTo) gsap.killTweensOf(el);
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      el.scrollLeft = startScroll + (startX - e.clientX);
+      var now = Date.now(), dt = now - lastT || 1;
+      vel = (lastX - e.clientX) / dt;
+      lastX = e.clientX; lastT = now;
+    });
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      el.style.cursor = 'grab';
+      if (reduce || !scrollTo) return;
+      var max = el.scrollWidth - el.clientWidth;
+      scrollTo(Math.max(0, Math.min(el.scrollLeft + vel * 220, max)));
+    }
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', endDrag);
+    el.addEventListener('click', function (e) {
+      if (Math.abs(el.scrollLeft - startScroll) > 4) e.stopPropagation();
+    }, true);
+  }
+
   /* ---- TABS FILTERING ---- */
   function initTabs() {
-    function setupFilter(tabsId, gridId, cardSelector, dataAttr) {
-      var tabs = $('#' + tabsId);
-      var grid = $('#' + gridId);
+    function setupFilter(tabsId, gridId, cardSelector, dataAttr, outerId, showMoreBtnId) {
+      var tabs  = $('#' + tabsId);
+      var grid  = $('#' + gridId);
+      var outer = outerId ? $('#' + outerId) : null;
       if (!tabs || !grid) return;
       tabs.addEventListener('click', function (e) {
         var btn = e.target.closest('button');
         if (!btn) return;
         tabs.querySelectorAll('button').forEach(function (b) { b.classList.remove('on'); });
         btn.classList.add('on');
-        
+
         var filterVal = btn.dataset.filter || btn.dataset.sector;
         var cards = grid.querySelectorAll(cardSelector);
-        
+
         cards.forEach(function (card) {
           var cardVal = card.dataset[dataAttr];
-          if (filterVal === 'all' || cardVal === filterVal) {
-            card.classList.remove('is-hidden');
-          } else {
-            card.classList.add('is-hidden');
-          }
+          var matches = filterVal === 'all' || cardVal === filterVal;
+          card.classList.toggle('is-hidden', !matches);
         });
-        
-        grid.scrollLeft = 0;
+
+        if (outer) outer.scrollLeft = 0;
         if (window.ScrollTrigger) ScrollTrigger.refresh();
       });
     }
 
-    setupFilter('propTabs', 'propGrid', '.plist', 'filterCat');
-    setupFilter('plotTabs', 'plotGrid', '.plist', 'filterCat');
-    setupFilter('interiorTabs', 'interiorGrid', '.int-card', 'type');
+    setupFilter('interiorTabs', 'interiorGrid', '.int-card', 'type', 'interiorOuter');
     setupFilter('bankTabs', 'bankGrid', '.bank-card', 'sector');
   }
 
@@ -202,6 +237,12 @@
     initTabs();
     initHomeEmi();
     initLenis();
+    // drag-scroll for themed property strips + interior
+    initDragScroll('saleOuter');
+    initDragScroll('rentOuter');
+    initDragScroll('commercialOuter');
+    initDragScroll('landOuter');
+    initDragScroll('interiorOuter');
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
 

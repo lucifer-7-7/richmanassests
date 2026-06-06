@@ -1,12 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-<%- include('partials/head', {
-  title: 'Services — Real Estate, Loans, Legal, Construction & Interiors · RichManAssets',
-  description: 'Seven service lines, one accountable team: buying & selling, rentals & lease, home loans, construction, interiors, legal and property management.',
-  canonical: 'https://richmanassets.com/services'
-}) %>
-<link rel="stylesheet" href="/assets/market.css?v=2">
+<%- include('partials/head') %>
+<link rel="stylesheet" href="/assets/market.css?v=3">
 <style>
   .page-top{padding:120px 0 30px}
   .page-top h1{font-family:var(--f-display);font-weight:500;font-size:clamp(34px,5.6vw,72px);line-height:1;letter-spacing:-.015em;margin-top:14px;max-width:16ch}
@@ -32,7 +28,7 @@
 <header class="page-top wrap">
   <div class="crumb"><a href="/">Home</a><span class="sep">/</span><span>Services</span></div>
   <h1>Everything property, under <span class="it">one roof.</span></h1>
-  <p>Most people juggle a broker, a banker, a lawyer and a contractor. We put them on one team — so the right hand always knows what the left is doing.</p>
+  <p>Most people juggle a broker, a banker, a lawyer and a contractor. We put them on one team, so the right hand always knows what the left is doing.</p>
   <div class="svc-grid" style="margin-top:36px">
     <% services.forEach(function(s) { %>
     <a class="svc-tile" href="#<%= s.id %>">
@@ -73,7 +69,7 @@
     <div>
       <span class="kicker" style="color:var(--gold)">Not sure where to start?</span>
       <h2 style="margin-top:14px">Tell us the goal. <span class="it">We'll map the path.</span></h2>
-      <p class="lead-sub" style="margin-inline:auto">One conversation and we'll tell you which services you actually need — and which you don't.</p>
+      <p class="lead-sub" style="margin-inline:auto">One conversation and we'll tell you which services you actually need, and which you don't.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:24px">
         <a class="btn btn-dark" href="/contact"><span>Talk to a specialist</span><span class="arr">→</span></a>
         <a class="btn btn-ghost" href="https://wa.me/919036001234?text=Hi%20RichManAssets%2C%20I%27d%20like%20to%20discuss%20your%20services." target="_blank" rel="noopener"><span>WhatsApp us</span></a>

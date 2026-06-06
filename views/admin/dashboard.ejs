@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Admin — RichManAssets</title>
+<title>Admin · RichManAssets</title>
 <meta name="robots" content="noindex,nofollow"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -334,10 +334,18 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
               <div class="field"><label>Kicker line</label><input name="story_kicker" placeholder="e.g. Where the river bends"></div>
               <div class="field"><label>Heading</label><input name="story_heading" placeholder="e.g. A house that leans out over the water."></div>
               <div class="field"><label>Story (separate paragraphs with blank line)</label><textarea name="story_body" rows="5" placeholder="Describe the property…"></textarea></div>
-              <div class="field"><label>Amenities (pipe-separated)</label><input name="amenities" placeholder="Private pool|Backwater frontage|4 beds|Power backup"></div>
+              <div class="field">
+                <label>Amenities <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#928A79">(type and press Enter or comma)</span></label>
+                <div class="tag-input" id="amen-tags-add" data-target="amenities-add"></div>
+                <input type="hidden" name="amenities" id="amenities-add">
+              </div>
               <div class="field"><label>Setting heading</label><input name="setting_heading" placeholder="e.g. Mulki Backwaters"></div>
               <div class="field"><label>Setting description</label><textarea name="setting_body" rows="3" placeholder="Describe the location…"></textarea></div>
-              <div class="field"><label>Location pills (pipe-separated)</label><input name="setting_pills" placeholder="Beachfront|20 min to Mangaluru"></div>
+              <div class="field">
+                <label>Location pills <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#928A79">(type and press Enter or comma)</span></label>
+                <div class="tag-input" id="pills-tags-add" data-target="setting_pills-add"></div>
+                <input type="hidden" name="setting_pills" id="setting_pills-add">
+              </div>
             </div>
           </div>
 
@@ -346,16 +354,22 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
             <div class="fg">
               <div class="field">
                 <label>Card image (thumbnail)</label>
-                <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp" onchange="previewImg(this,'prev-card')">
-                <img id="prev-card" class="img-preview" alt="">
-                <small>800×600 JPG recommended</small>
+                <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp" onchange="previewImg(this,'prev-card-add')">
+                <img id="prev-card-add" class="img-preview" alt="">
+                <small>800×600 JPG recommended · shown in listing grids</small>
               </div>
               <div class="field">
                 <label>Hero image (full-width)</label>
-                <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp" onchange="previewImg(this,'prev-hero')">
-                <img id="prev-hero" class="img-preview" alt="">
-                <small>1600×900 JPG recommended</small>
+                <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp" onchange="previewImg(this,'prev-hero-add')">
+                <img id="prev-hero-add" class="img-preview" alt="">
+                <small>1600×900 JPG recommended · shown at top of property page</small>
               </div>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label>Gallery images <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#928A79">(up to 10 images, shown in photo strip on property page)</span></label>
+              <input type="file" name="gallery" multiple accept="image/jpeg,image/png,image/webp" onchange="previewGallery(this,'gallery-prev-add')">
+              <div class="gallery-prev" id="gallery-prev-add"></div>
+              <small>1200×800 JPG recommended · select multiple files at once</small>
             </div>
           </div>
 
@@ -477,6 +491,93 @@ function filterProps() {
 // open add panel if URL hash says so
 if (location.hash === '#add') showPanel('add');
 if (location.search.includes('tab=enquiries')) showPanel('enquiries');
+
+// ── gallery multi-preview ──
+function previewGallery(input, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  Array.from(input.files).forEach(function(file) {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    img.style.cssText = 'width:80px;height:54px;object-fit:cover;border-radius:5px;border:1px solid #e0ddd6';
+    container.appendChild(img);
+  });
+}
+
+// ── tag-input (amenities + pills) ──
+(function() {
+  // inject styles once
+  var style = document.createElement('style');
+  style.textContent = [
+    '.tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border:1px solid #e0ddd6;border-radius:7px;min-height:42px;cursor:text;background:#fff}',
+    '.tag-input:focus-within{border-color:#17150F}',
+    '.tag-chip{display:inline-flex;align-items:center;gap:5px;background:#f0ede7;border-radius:4px;padding:3px 8px;font-size:12.5px;color:#17150F}',
+    '.tag-chip button{background:none;border:0;cursor:pointer;color:#928A79;font-size:14px;line-height:1;padding:0 1px}',
+    '.tag-chip button:hover{color:#17150F}',
+    '.tag-typeahead{border:0;outline:0;flex:1;min-width:120px;font:inherit;font-size:13.5px;background:none;padding:2px 4px}',
+    '.gallery-prev{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}',
+  ].join('');
+  document.head.appendChild(style);
+
+  function initTagInput(containerEl, hiddenInputId) {
+    if (!containerEl) return;
+    var hidden = document.getElementById(hiddenInputId);
+    var chips = [];
+
+    var input = document.createElement('input');
+    input.className = 'tag-typeahead';
+    input.placeholder = 'Type and press Enter…';
+    containerEl.appendChild(input);
+
+    function sync() {
+      if (hidden) hidden.value = chips.join('|');
+    }
+    function addChip(val) {
+      val = val.trim();
+      if (!val || chips.indexOf(val) !== -1) return;
+      chips.push(val);
+      var chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      chip.textContent = val;
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.textContent = '×';
+      del.addEventListener('click', function() {
+        chips.splice(chips.indexOf(val), 1);
+        chip.remove();
+        sync();
+      });
+      chip.appendChild(del);
+      containerEl.insertBefore(chip, input);
+      sync();
+    }
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        addChip(input.value.replace(/,/g,''));
+        input.value = '';
+      } else if (e.key === 'Backspace' && !input.value && chips.length) {
+        var last = chips[chips.length - 1];
+        chips.pop();
+        containerEl.querySelectorAll('.tag-chip')[containerEl.querySelectorAll('.tag-chip').length - 1].remove();
+        sync();
+      }
+    });
+    input.addEventListener('blur', function() {
+      if (input.value.trim()) { addChip(input.value); input.value = ''; }
+    });
+    containerEl.addEventListener('click', function() { input.focus(); });
+
+    // pre-populate from existing value
+    if (hidden && hidden.value) {
+      hidden.value.split('|').forEach(function(v) { addChip(v); });
+    }
+  }
+
+  initTagInput(document.getElementById('amen-tags-add'), 'amenities-add');
+  initTagInput(document.getElementById('pills-tags-add'), 'setting_pills-add');
+})();
 </script>
 </body>
 </html>

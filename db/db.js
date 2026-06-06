@@ -72,6 +72,19 @@ function initDB() {
     );
   `);
 
+  // migrate: add gallery column if not present (safe on existing DBs)
+  try { db.exec(`ALTER TABLE properties ADD COLUMN gallery TEXT`); } catch (_) {}
+
+  // migrate: strip em/en dashes from prose copy on already-seeded rows (idempotent).
+  // Leaves beds/baths/sqft '—' placeholder sentinels untouched (those have no surrounding spaces).
+  try {
+    const proseCols = ['story_body','setting_body','story_heading','story_kicker','setting_heading','setting_pills'];
+    for (const c of proseCols) {
+      db.exec(`UPDATE properties SET ${c} = REPLACE(${c}, ' — ', ', ') WHERE ${c} LIKE '% — %'`);
+      db.exec(`UPDATE properties SET ${c} = REPLACE(${c}, '–', ' to ') WHERE ${c} LIKE '%–%'`);
+    }
+  } catch (_) {}
+
   // seed if empty
   const count = db.prepare('SELECT COUNT(*) as c FROM properties').get();
   if (count.c === 0) {

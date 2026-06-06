@@ -1,37 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-<%- include('partials/head', {
-  title: p.name + ' — ' + p.loc + ' · ' + p.price + ' · RichManAssets',
-  description: p.name + ', ' + p.loc + ' — ' + (p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease') + ' at ' + p.price + '. ' + (p.story_body ? p.story_body.substring(0, 140).replace(/\n/g, ' ') + '…' : ''),
-  canonical: 'https://richmanassets.com/property/' + p.id,
-  ogImage: p.img_hero ? 'https://richmanassets.com/' + p.img_hero : undefined,
-  ogType: 'article'
-}) %>
+<%- include('partials/head') %>
 <link rel="stylesheet" href="/assets/property.css">
-
-<!-- JSON-LD: Property listing -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Residence",
-  "name": "<%= p.name %>",
-  "description": "<%= (p.story_body || '').substring(0, 200).replace(/\n/g, ' ').replace(/"/g, '\\"') %>",
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "<%= p.loc %>",
-    "addressRegion": "Karnataka",
-    "addressCountry": "IN"
-  },
-  "offers": {
-    "@type": "Offer",
-    "price": "<%= p.price %>",
-    "priceCurrency": "INR",
-    "availability": "https://schema.org/InStock"
-  }<% if (p.img_hero) { %>,
-  "image": "https://richmanassets.com/<%= p.img_hero %>"<% } %>
-}
-</script>
 </head>
 <body data-screen-label="<%= p.name %>" class="has-prop-cta">
 
@@ -51,7 +22,7 @@
 
 <header class="phero">
   <% if (p.img_hero) { %>
-  <img src="/<%= p.img_hero %>" alt="<%= p.name %>, <%= p.loc %>">
+  <img src="<%= p.img_hero.indexOf('http')===0 ? p.img_hero : '/' + p.img_hero %>" alt="<%= p.name %>, <%= p.loc %>" fetchpriority="high">
   <% } else { %>
   <div style="background:var(--paper-2);height:100%"></div>
   <% } %>
@@ -66,6 +37,92 @@
     <div class="pprice"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
   </div>
 </header>
+
+<% var galleryImgs = []; try { galleryImgs = JSON.parse(p.gallery || '[]'); } catch(_) {} %>
+<% if (galleryImgs.length > 0) { %>
+<section class="prop-gallery">
+  <div class="gallery-scroll" id="galleryScroll">
+    <% galleryImgs.forEach(function(url, i) { %>
+    <button class="gal-thumb" type="button" onclick="openLightbox(<%= i %>)" aria-label="View photo <%= i+1 %>">
+      <img src="/<%= url.replace(/^\//, '') %>" alt="<%= p.name %> photo <%= i+1 %>" loading="lazy">
+    </button>
+    <% }) %>
+  </div>
+  <div class="gal-count"><%= galleryImgs.length %> photos</div>
+</section>
+
+<!-- Lightbox -->
+<div class="gal-lb" id="galLb" aria-hidden="true">
+  <button class="lb-close" onclick="closeLightbox()" aria-label="Close">✕</button>
+  <button class="lb-prev" onclick="lbMove(-1)" aria-label="Previous">&#8592;</button>
+  <button class="lb-next" onclick="lbMove(1)" aria-label="Next">&#8594;</button>
+  <img class="lb-img" id="lbImg" alt="">
+  <div class="lb-counter" id="lbCounter"></div>
+</div>
+
+<style>
+.prop-gallery{padding:clamp(14px,2vw,24px) 0;position:relative;background:var(--paper)}
+.gallery-scroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:0 clamp(20px,5vw,72px);cursor:grab}
+.gallery-scroll:active{cursor:grabbing}
+.gallery-scroll::-webkit-scrollbar{display:none}
+.gal-thumb{flex:none;width:clamp(180px,22vw,280px);aspect-ratio:3/2;border-radius:8px;overflow:hidden;border:0;padding:0;cursor:pointer;position:relative}
+.gal-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.gal-thumb:hover img{transform:scale(1.05)}
+.gal-count{font-family:var(--f-mono,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted,#928A79);text-align:right;padding:8px clamp(20px,5vw,72px) 0}
+/* lightbox */
+.gal-lb{display:none;position:fixed;inset:0;background:rgba(10,8,5,.94);z-index:200;align-items:center;justify-content:center}
+.gal-lb.open{display:flex}
+.lb-img{max-width:90vw;max-height:88vh;object-fit:contain;border-radius:4px}
+.lb-close{position:absolute;top:18px;right:22px;background:none;border:0;color:#fff;font-size:22px;cursor:pointer;opacity:.8;line-height:1}
+.lb-close:hover{opacity:1}
+.lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:0;color:#fff;font-size:26px;padding:14px 18px;cursor:pointer;border-radius:4px;line-height:1}
+.lb-prev{left:14px}.lb-next{right:14px}
+.lb-prev:hover,.lb-next:hover{background:rgba(255,255,255,.22)}
+.lb-counter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-family:var(--f-mono,monospace);font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.1em}
+@media(max-width:600px){.lb-prev{left:6px;padding:10px 12px}.lb-next{right:6px;padding:10px 12px}}
+</style>
+<script>
+var _galImgs = <%- JSON.stringify(galleryImgs) %>;
+var _lbIdx = 0;
+function openLightbox(i) {
+  _lbIdx = i;
+  var lb = document.getElementById('galLb');
+  lb.classList.add('open'); lb.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+  _lbShow();
+}
+function closeLightbox() {
+  var lb = document.getElementById('galLb');
+  lb.classList.remove('open'); lb.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+}
+function lbMove(dir) { _lbIdx = (_lbIdx + dir + _galImgs.length) % _galImgs.length; _lbShow(); }
+function _lbShow() {
+  var url = _galImgs[_lbIdx]; if (!url) return;
+  document.getElementById('lbImg').src = '/' + url.replace(/^\//,'');
+  document.getElementById('lbCounter').textContent = (_lbIdx+1) + ' / ' + _galImgs.length;
+}
+document.addEventListener('keydown', function(e) {
+  var lb = document.getElementById('galLb');
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') lbMove(-1);
+  if (e.key === 'ArrowRight') lbMove(1);
+});
+// drag-scroll gallery strip
+(function(){
+  var el = document.getElementById('galleryScroll');
+  if (!el) return;
+  var down=false,sx=0,sl=0;
+  el.addEventListener('pointerdown',function(e){down=true;sx=e.clientX;sl=el.scrollLeft;el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',function(e){if(!down)return;el.scrollLeft=sl+(sx-e.clientX);});
+  el.addEventListener('pointerup',function(){down=false;});
+  el.addEventListener('pointercancel',function(){down=false;});
+  // prevent lightbox open when it was a drag
+  el.addEventListener('click',function(e){if(Math.abs(el.scrollLeft-sl)>5)e.stopPropagation();},true);
+})();
+</script>
+<% } %>
 
 <section class="specs">
   <div class="wrap"><div class="specs-in">
@@ -114,7 +171,7 @@
             </a>
           </div>
         </div>
-        <p class="bc-note">Talk to a real specialist — same-day reply. No pressure, honest advice on price &amp; papers.</p>
+        <p class="bc-note">Talk to a real specialist for a same-day reply. No pressure, honest advice on price &amp; papers.</p>
       </div>
     </aside>
   </div>

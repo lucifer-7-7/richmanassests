@@ -1,12 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-<%- include('partials/head', {
-  title: 'Home Loans & EMI — Partner Bank Rates · RichManAssets',
-  description: 'Pre-approved home loan offers from partner banks. Fast eligibility, honest EMI advice, and the lowest rate we can negotiate for you.',
-  canonical: 'https://richmanassets.com/loans'
-}) %>
-<link rel="stylesheet" href="/assets/market.css?v=2">
+<%- include('partials/head') %>
+<link rel="stylesheet" href="/assets/market.css?v=3">
 <style>
   .page-top{padding:118px 0 40px}
   .page-top h1{font-family:var(--f-display);font-weight:500;font-size:clamp(34px,5.6vw,72px);line-height:1;letter-spacing:-.015em;margin-top:14px;max-width:18ch}
@@ -40,7 +36,7 @@
 <header class="page-top wrap">
   <div class="crumb"><a href="/">Home</a><span class="sep">/</span><span>Home Loans</span></div>
   <h1>Found the home. <span class="it">We'll find the loan.</span></h1>
-  <p>Pre-approved offers from our partner banks, honest eligibility advice, and the lowest EMI we can negotiate — handled by bankers, not call centres.</p>
+  <p>Pre-approved offers from our partner banks, honest eligibility advice, and the lowest EMI we can negotiate, handled by bankers, not call centres.</p>
 </header>
 
 <section class="wrap">
@@ -57,8 +53,8 @@
         <div class="emi-big" id="emiResult">₹43,<span class="it">391</span></div>
       </div>
       <div class="emi-breakdown">
-        <div><div class="v" id="emiTotal">—</div><div class="k">Total payable</div></div>
-        <div><div class="v" id="emiInterest">—</div><div class="k">Total interest</div></div>
+        <div><div class="v" id="emiTotal">₹0</div><div class="k">Total payable</div></div>
+        <div><div class="v" id="emiInterest">₹0</div><div class="k">Total interest</div></div>
       </div>
     </div>
   </div>
@@ -67,7 +63,7 @@
     <div class="loan-pt">
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;color:var(--accent)"><ellipse cx="11" cy="8" rx="7" ry="3.2"/><path d="M4 8v6c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2V8"/><path d="M14 17v5c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2v-6"/></svg>
       <h4>Partner-bank rates</h4>
-      <p>Direct tie-ups with SBI, HDFC, Axis and ICICI mean we get rates that aren't on the counter — and we pass them to you.</p>
+      <p>Direct tie-ups with SBI, HDFC, Axis and ICICI mean we get rates that aren't on the counter, and we pass them to you.</p>
     </div>
     <div class="loan-pt">
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;color:var(--accent)"><path d="M8 4h12l6 6v18H8z"/><path d="M20 4v6h6M12 17h10M12 22h10"/></svg>
@@ -77,12 +73,12 @@
     <div class="loan-pt">
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;color:var(--accent)"><path d="M16 3 5 7v8c0 7 5 12 11 14 6-2 11-7 11-14V7z"/><path d="M11 16l4 4 7-8"/></svg>
       <h4>In-house legal desk</h4>
-      <p>Our empaneled advocate handles title verification and registration in parallel with your loan — so handover isn't delayed.</p>
+      <p>Our empaneled advocate handles title verification and registration in parallel with your loan, so handover isn't delayed.</p>
     </div>
     <div class="loan-pt">
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;color:var(--accent)"><circle cx="13" cy="12" r="6"/><path d="M4 28c0-5 4-8 9-8s9 3 9 8M22 11l3 3 5-5"/></svg>
       <h4>Honest eligibility check</h4>
-      <p>We tell you upfront what you'll qualify for — not what sounds good. If it's not viable, we tell you that too.</p>
+      <p>We tell you upfront what you'll qualify for, not what sounds good. If it's not viable, we tell you that too.</p>
     </div>
   </div>
 </section>

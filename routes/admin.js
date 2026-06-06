@@ -88,8 +88,9 @@ router.get('/', requireAdmin, (req, res) => {
 
 // ── ADD PROPERTY ─────────────────────────────────────────────────
 router.post('/property', requireAdmin, upload.fields([
-  { name: 'img_card', maxCount: 1 },
-  { name: 'img_hero', maxCount: 1 },
+  { name: 'img_card',  maxCount: 1  },
+  { name: 'img_hero',  maxCount: 1  },
+  { name: 'gallery',   maxCount: 10 },
 ]), async (req, res) => {
     const db   = getDB();
     const body = req.body;
@@ -99,17 +100,26 @@ router.post('/property', requireAdmin, upload.fields([
     let imgCard = files.img_card ? await resolveImg(files.img_card[0], propId + '-card') : null;
     let imgHero = files.img_hero ? await resolveImg(files.img_hero[0], propId + '-hero') : null;
 
+    // gallery: upload each, store JSON array
+    let galleryUrls = null;
+    if (files.gallery && files.gallery.length) {
+      const urls = await Promise.all(
+        files.gallery.map((f, i) => resolveImg(f, propId + '-gallery-' + i))
+      );
+      galleryUrls = JSON.stringify(urls.filter(Boolean));
+    }
+
     try {
       db.prepare(`
         INSERT INTO properties
           (id, name, loc, area, type, listing, price, price_val, price_note,
-           beds, baths, sqft, subtype, featured, has_img, img_card, img_hero,
+           beds, baths, sqft, subtype, featured, has_img, img_card, img_hero, gallery,
            story_kicker, story_heading, story_body, amenities,
            setting_heading, setting_body, setting_pills,
            emi_label, emi_val, sort_order, active)
         VALUES
           (@id, @name, @loc, @area, @type, @listing, @price, @price_val, @price_note,
-           @beds, @baths, @sqft, @subtype, @featured, @has_img, @img_card, @img_hero,
+           @beds, @baths, @sqft, @subtype, @featured, @has_img, @img_card, @img_hero, @gallery,
            @story_kicker, @story_heading, @story_body, @amenities,
            @setting_heading, @setting_body, @setting_pills,
            @emi_label, @emi_val, @sort_order, 1)
@@ -131,6 +141,7 @@ router.post('/property', requireAdmin, upload.fields([
         has_img:       (imgCard || imgHero) ? 1 : 0,
         img_card:      imgCard,
         img_hero:      imgHero,
+        gallery:       galleryUrls,
         story_kicker:  body.story_kicker || null,
         story_heading: body.story_heading || null,
         story_body:    body.story_body || null,
@@ -160,8 +171,9 @@ router.get('/property/:id/edit', requireAdmin, (req, res) => {
 
 // ── SAVE EDIT ─────────────────────────────────────────────────────
 router.post('/property/:id/edit', requireAdmin, upload.fields([
-  { name: 'img_card', maxCount: 1 },
-  { name: 'img_hero', maxCount: 1 },
+  { name: 'img_card',  maxCount: 1  },
+  { name: 'img_hero',  maxCount: 1  },
+  { name: 'gallery',   maxCount: 10 },
 ]), async (req, res) => {
     const db   = getDB();
     const body = req.body;
@@ -174,6 +186,20 @@ router.post('/property/:id/edit', requireAdmin, upload.fields([
     const imgCard = files.img_card ? await resolveImg(files.img_card[0], id + '-card') : existing.img_card;
     const imgHero = files.img_hero ? await resolveImg(files.img_hero[0], id + '-hero') : existing.img_hero;
 
+    // gallery: new uploads append to existing; send gallery_remove[] ids to remove specific ones
+    let existingGallery = [];
+    try { existingGallery = JSON.parse(existing.gallery || '[]'); } catch(_) {}
+    // handle removals (indices sent as gallery_remove[]=0&gallery_remove[]=2)
+    const removeIdxs = [].concat(body.gallery_remove || []).map(Number);
+    existingGallery = existingGallery.filter((_, i) => !removeIdxs.includes(i));
+    if (files.gallery && files.gallery.length) {
+      const newUrls = await Promise.all(
+        files.gallery.map((f, i) => resolveImg(f, id + '-gallery-' + Date.now() + '-' + i))
+      );
+      existingGallery = existingGallery.concat(newUrls.filter(Boolean));
+    }
+    const galleryUrls = existingGallery.length ? JSON.stringify(existingGallery) : null;
+
     try {
       db.prepare(`
         UPDATE properties SET
@@ -181,6 +207,7 @@ router.post('/property/:id/edit', requireAdmin, upload.fields([
           price=@price, price_val=@price_val, price_note=@price_note,
           beds=@beds, baths=@baths, sqft=@sqft, subtype=@subtype,
           featured=@featured, has_img=@has_img, img_card=@img_card, img_hero=@img_hero,
+          gallery=@gallery,
           story_kicker=@story_kicker, story_heading=@story_heading, story_body=@story_body,
           amenities=@amenities, setting_heading=@setting_heading, setting_body=@setting_body,
           setting_pills=@setting_pills, emi_label=@emi_label, emi_val=@emi_val, sort_order=@sort_order
@@ -203,6 +230,7 @@ router.post('/property/:id/edit', requireAdmin, upload.fields([
         has_img:       (imgCard || imgHero) ? 1 : 0,
         img_card:      imgCard,
         img_hero:      imgHero,
+        gallery:       galleryUrls,
         story_kicker:  body.story_kicker || null,
         story_heading: body.story_heading || null,
         story_body:    body.story_body || null,

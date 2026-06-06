@@ -1,22 +1,38 @@
+<%
+  var _site = (typeof locals.siteUrl !== 'undefined' && locals.siteUrl) ? locals.siteUrl : 'https://richmanassets.com';
+  var _canonical = (typeof locals.canonical !== 'undefined' && locals.canonical) ? locals.canonical : _site;
+  var _desc = (typeof locals.description !== 'undefined' && locals.description)
+    ? locals.description
+    : 'Buy, rent or lease premium property across Udupi, Mangaluru and coastal Karnataka. Villas, flats, plots, commercial and agricultural land, plus home loans, legal and interiors.';
+  var _ogImg = (typeof locals.ogImage !== 'undefined' && locals.ogImage) ? locals.ogImage : (_site + '/assets/img/site-hero.jpg');
+  if (_ogImg.indexOf('http') !== 0) _ogImg = _site + (_ogImg.charAt(0) === '/' ? '' : '/') + _ogImg;
+  var _ogType = (typeof locals.ogType !== 'undefined' && locals.ogType) ? locals.ogType : 'website';
+  var _robots = (typeof locals.robots !== 'undefined' && locals.robots) ? locals.robots : 'index,follow,max-image-preview:large';
+%>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title><%= title %></title>
-<meta name="description" content="<%= description || 'Buy, rent or lease premium property across coastal Karnataka and the Western Ghats. Villas, plots, commercial and agricultural land, plus loans, legal and interiors.' %>"/>
-<% if (typeof canonical !== 'undefined') { %><link rel="canonical" href="<%= canonical %>"/><% } %>
+<meta name="description" content="<%= _desc %>"/>
+<meta name="robots" content="<%= _robots %>"/>
+<link rel="canonical" href="<%= _canonical %>"/>
+<meta name="theme-color" content="#17150F"/>
+<meta name="geo.region" content="IN-KA"/>
+<meta name="geo.placename" content="Udupi, Mangaluru"/>
 
 <!-- Open Graph -->
-<meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>"/>
+<meta property="og:type" content="<%= _ogType %>"/>
 <meta property="og:title" content="<%= title %>"/>
-<meta property="og:description" content="<%= description || 'Premium property marketplace across coastal Karnataka.' %>"/>
-<meta property="og:image" content="<%= typeof ogImage !== 'undefined' ? ogImage : '/assets/img/site-hero.jpg' %>"/>
-<meta property="og:url" content="<%= typeof canonical !== 'undefined' ? canonical : '' %>"/>
+<meta property="og:description" content="<%= _desc %>"/>
+<meta property="og:image" content="<%= _ogImg %>"/>
+<meta property="og:url" content="<%= _canonical %>"/>
 <meta property="og:site_name" content="RichManAssets"/>
+<meta property="og:locale" content="en_IN"/>
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="<%= title %>"/>
-<meta name="twitter:description" content="<%= description || '' %>"/>
-<meta name="twitter:image" content="<%= typeof ogImage !== 'undefined' ? ogImage : '/assets/img/site-hero.jpg' %>"/>
+<meta name="twitter:description" content="<%= _desc %>"/>
+<meta name="twitter:image" content="<%= _ogImg %>"/>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,5 +42,65 @@
 <!-- Smooth scroll library -->
 <link rel="stylesheet" href="https://unpkg.com/lenis@1.1.13/dist/lenis.css">
 
-<link rel="stylesheet" href="/assets/site.css?v=2">
-<link rel="stylesheet" href="/assets/market.css?v=2">
+<link rel="stylesheet" href="/assets/site.css?v=3">
+<link rel="stylesheet" href="/assets/market.css?v=3">
+
+<!-- Sitewide structured data: local real-estate agent + site search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "@id": "<%= _site %>/#organization",
+  "name": "RichManAssets",
+  "alternateName": "RichManAssets, Vittu Bharat Associates LLP",
+  "description": "Premium property marketplace and real-estate consultants for Udupi, Mangaluru and coastal Karnataka. Villas, flats, plots, commercial space, rentals, home loans, legal and interiors.",
+  "url": "<%= _site %>",
+  "logo": "<%= _site %>/assets/img/site-hero.jpg",
+  "image": "<%= _site %>/assets/img/site-hero.jpg",
+  "telephone": "+919036001234",
+  "email": "hello@richmanassets.com",
+  "priceRange": "₹₹₹",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Mangaluru",
+    "addressRegion": "Karnataka",
+    "postalCode": "575001",
+    "addressCountry": "IN"
+  },
+  "geo": { "@type": "GeoCoordinates", "latitude": 12.9141, "longitude": 74.8560 },
+  "areaServed": [
+    { "@type": "City", "name": "Udupi" },
+    { "@type": "City", "name": "Mangaluru" },
+    { "@type": "City", "name": "Manipal" },
+    { "@type": "City", "name": "Surathkal" },
+    { "@type": "City", "name": "Kapu" },
+    { "@type": "City", "name": "Mulki" },
+    { "@type": "AdministrativeArea", "name": "Dakshina Kannada" },
+    { "@type": "AdministrativeArea", "name": "Udupi District" }
+  ],
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "09:30", "closes": "19:00"
+  }],
+  "sameAs": []
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "<%= _site %>/#website",
+  "url": "<%= _site %>",
+  "name": "RichManAssets",
+  "publisher": { "@id": "<%= _site %>/#organization" },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": { "@type": "EntryPoint", "urlTemplate": "<%= _site %>/properties?area={search_term_string}" },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<% if (typeof jsonld !== 'undefined' && jsonld) { %>
+<script type="application/ld+json"><%- jsonld %></script>
+<% } %>

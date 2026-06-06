@@ -1,12 +1,8 @@
 <!doctype html>
 <html lang="en" class="loading">
 <head>
-<%- include('partials/head', {
-  title: 'RichManAssets — Premium Property Marketplace · Coastal Karnataka',
-  description: 'Buy, rent or lease premium property across coastal Karnataka and the Western Ghats. Villas, plots, commercial and agricultural land, plus loans, legal and interiors.',
-  canonical: 'https://richmanassets.com/'
-}) %>
-<link rel="stylesheet" href="/assets/home.css?v=2">
+<%- include('partials/head') %>
+<link rel="stylesheet" href="/assets/home.css?v=3">
 <style>
   .loans-cta{background:var(--paper-2)}
   .loans-in{display:grid;gap:30px;align-items:center;padding:clamp(48px,7vw,96px) 0}
@@ -39,32 +35,13 @@
     .bank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));overflow:visible;padding-bottom:0}
     .bank-card{width:auto;padding:clamp(16px,2vw,24px) 14px}
   }
-  .bank-card:hover{border-color:var(--accent);box-shadow:0 6px 20px -10px rgba(154,123,63,.24);transform:translateY(-2px)}
+  .bank-card:hover{border-color:var(--accent);transform:translateY(-2px)}
   .bank-logo-wrap{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;width:100%}
   .bank-logo-wrap img{max-height:40px;max-width:110px;width:auto;object-fit:contain;display:block}
   .bank-name{font-size:10.5px;color:var(--ink-3);line-height:1.3;letter-spacing:.01em;text-align:center}
 </style>
 
-<!-- JSON-LD: Organization -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "RealEstateAgent",
-  "name": "RichManAssets",
-  "description": "Premium property marketplace across coastal Karnataka and the Western Ghats.",
-  "url": "https://richmanassets.com",
-  "telephone": "+919036001234",
-  "email": "hello@richmanassets.com",
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Mangaluru",
-    "addressRegion": "Karnataka",
-    "addressCountry": "IN"
-  },
-  "areaServed": ["Mangaluru", "Udupi", "Dakshina Kannada", "Sakleshpur", "Chikmagalur"],
-  "sameAs": []
-}
-</script>
+<link rel="preload" as="image" href="<%= heroSlides[0] && heroSlides[0].img_hero ? (heroSlides[0].img_hero.indexOf('http')===0 ? heroSlides[0].img_hero : '/' + heroSlides[0].img_hero) : '/assets/img/site-hero.jpg' %>" fetchpriority="high">
 </head>
 <body data-screen-label="Home">
 
@@ -85,15 +62,15 @@
     <% heroSlides.forEach(function(p, i) { %>
     <div class="hero-slide<%= i === 0 ? ' is-active' : '' %>">
       <div class="hero-media">
-        <img src="/<%= p.img_hero %>"
-             alt="<%= p.name %>, <%= p.loc %>"
-             <%= i === 0 ? '' : 'loading="lazy"' %>>
+        <img src="<%= p.img_hero && p.img_hero.indexOf('http')===0 ? p.img_hero : '/' + p.img_hero %>"
+             alt="<%= p.name %>, <%= p.loc %> property for <%= p.listing === 'rent' ? 'rent' : 'sale' %> in coastal Karnataka"
+             <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %>>
       </div>
       <div class="hero-grad"></div>
       <div class="hero-ui"><div class="wrap hero-ui-in">
         <div class="hero-meta">
           <div class="hero-eyebrow"><span class="ln"></span>Featured &middot; <%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></div>
-          <h1 class="hero-name"><%= p.name %></h1>
+          <h2 class="hero-name"><%= p.name %></h2>
           <div class="hero-loc">
             <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
             <%= p.loc %> <span class="sep"></span> <%= p.type %> <span class="sep"></span> <%= p.beds %> beds
@@ -119,7 +96,7 @@
 <!-- SEARCH BAND -->
 <section class="search-band" data-screen-label="Search">
   <div class="search-lead">
-    <h2>Start your <span class="it">search.</span></h2>
+    <h1>Real estate in <span class="it">Udupi &amp; Mangaluru.</span></h1>
     <span class="hint">Buy &middot; Rent &middot; Lease</span>
   </div>
   <div class="wrap">
@@ -181,142 +158,117 @@
   </div>
 </section>
 
-<!-- PROPERTIES & SPACES SHOWCASE -->
-<section class="sec-tight intro" data-screen-label="Properties">
+<!-- FOR SALE: PREMIUM HOMES -->
+<section class="sec-tight intro" data-screen-label="For sale">
   <div class="intro-head">
-    <h2 class="fx">Premium properties & <span class="it">spaces.</span></h2>
-    <p class="sub fx">Builder sales, resale apartments, villas, independent homes, rentals, and commercial hubs.</p>
+    <h2 class="fx">Homes <span class="it">for sale.</span></h2>
+    <p class="sub fx">Villas, beach houses, estates and builder apartments. Title-clear and ready to view across coastal Karnataka.</p>
   </div>
-
-  <div class="mkt-tabs-wrap">
-    <div class="mkt-tabs" id="propTabs">
-      <button class="mkt-tab on" data-filter="all">All Properties</button>
-      <button class="mkt-tab" data-filter="builder">Builder Sales</button>
-      <button class="mkt-tab" data-filter="resale">Resale Flats</button>
-      <button class="mkt-tab" data-filter="villa">Villas</button>
-      <button class="mkt-tab" data-filter="house">Independent Houses</button>
-      <button class="mkt-tab" data-filter="rent">Rental Properties</button>
-      <button class="mkt-tab" data-filter="comm-office">Commercial Office Space</button>
-      <button class="mkt-tab" data-filter="comm-retail">Commercial Space</button>
-      <button class="mkt-tab" data-filter="mixed">Residential/Commercial</button>
-    </div>
-  </div>
-
-  <div class="h-scroll-wrap">
-    <div class="h-scroll" id="propGrid">
-      <% allListings.forEach(function(p) { 
-        if (p.type === 'Plot' || p.type === 'Agricultural') return;
-        let pFilter = '';
-        if (p.subtype === 'Builder sales') pFilter = 'builder';
-        else if (p.subtype === 'Resale flats') pFilter = 'resale';
-        else if (p.type === 'Villa') pFilter = 'villa';
-        else if (p.subtype === 'Independent house' || p.type === 'House') pFilter = 'house';
-        else if (p.listing === 'rent') pFilter = 'rent';
-        else if (p.subtype === 'Commercial office space') pFilter = 'comm-office';
-        else if (p.subtype === 'Commercial space') pFilter = 'comm-retail';
-        else if (p.subtype === 'Residential/commercial') pFilter = 'mixed';
+  <div class="rma-scroll-outer" id="saleOuter">
+    <div class="rma-scroll-row" id="saleGrid">
+      <% var saleIdx = 0; allListings.forEach(function(p) {
+        if (p.listing !== 'sale') return;
+        if (['Villa','House','Estate','Apartment'].indexOf(p.type) === -1) return;
+        if (saleIdx >= 8) return; saleIdx++;
       %>
-      <article class="plist fx" data-filter-cat="<%= pFilter %>">
-        <div class="ph">
-          <% if (p.has_img && p.img_card) { %>
-          <img src="/<%= p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
-          <% } else { %>
-          <div class="ph-placeholder"><span>Photos on request</span></div>
-          <% } %>
-          <span class="badge <%= p.listing %>"><%= p.badge_txt || (p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease') %></span>
-          <button class="fav" aria-label="Save">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14S2 10 2 5.8C2 3.5 3.8 2 5.8 2 7 2 8 3 8 3s1-1 2.2-1C12.2 2 14 3.5 14 5.8 14 10 8 14 8 14z"/></svg>
-          </button>
-        </div>
-        <div class="body">
-          <div class="price"><%= p.price %><% if (p.price_note) { %><small><%= p.price_note %></small><% } %></div>
-          <h3><%= p.name %></h3>
-          <div class="loc">
-            <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
-            <%= p.loc %> · <%= p.type %>
-          </div>
-          <div class="meta">
-            <% if (p.beds && p.beds !== '—') { %><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8v9M2 17h13M2 12h13a0 0 0 0 1 0 0v5M5 8h7a3 3 0 0 1 3 3"/></svg> <%= p.beds %> Beds</span><% } %>
-            <% if (p.sqft) { %><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="13" height="13" rx="1"/><path d="M2 6h3M2 11h3M6 2v3M11 2v3"/></svg> <%= p.sqft %> sqft</span><% } %>
-          </div>
-          <div class="cta">
-            <a class="v" href="/property/<%= p.id %>"><%= p.has_img ? 'View details' : 'Enquire' %></a>
-            <a class="w" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I am interested in ' + p.name + ' (' + p.loc + ').') %>" aria-label="WhatsApp" target="_blank" rel="noopener">
-              <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
+      <%- include('partials/property-card', { p: p, filterCat: '' }) %>
       <% }) %>
     </div>
+  </div>
+  <div class="rma-show-more-wrap">
+    <a class="rma-btn-show" href="/properties?listing=sale">
+      Show all homes for sale
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
   </div>
 </section>
 
-<!-- PLOTS & SITES SHOWCASE -->
-<section class="sec-tight intro" data-screen-label="Plots">
+<!-- RENTALS -->
+<section class="sec-tight intro" data-screen-label="Rentals">
   <div class="intro-head">
-    <h2 class="fx">Premium plots & <span class="it">sites.</span></h2>
-    <p class="sub fx">Residential layouts, layout plots, commercial sites, beach & river facing land, industrial sites, and agricultural properties.</p>
+    <h2 class="fx">Rentals, <span class="it">move-in ready.</span></h2>
+    <p class="sub fx">Fully furnished beachfront and city homes available on straightforward long-term agreements.</p>
   </div>
-
-  <div class="mkt-tabs-wrap">
-    <div class="mkt-tabs" id="plotTabs">
-      <button class="mkt-tab on" data-filter="all">All Plots</button>
-      <button class="mkt-tab" data-filter="res-plot">Residential Plots</button>
-      <button class="mkt-tab" data-filter="layout">Layout Plots</button>
-      <button class="mkt-tab" data-filter="comm-site">Commercial Sites</button>
-      <button class="mkt-tab" data-filter="beach">Beach Facing</button>
-      <button class="mkt-tab" data-filter="industrial">Industrial Sites</button>
-      <button class="mkt-tab" data-filter="river">River Facing</button>
-      <button class="mkt-tab" data-filter="agri">Agriculture Sites</button>
-    </div>
-  </div>
-
-  <div class="h-scroll-wrap">
-    <div class="h-scroll" id="plotGrid">
-      <% allListings.forEach(function(p) { 
-        if (p.type !== 'Plot' && p.type !== 'Agricultural') return;
-        let pFilter = '';
-        if (p.subtype === 'Residential plots') pFilter = 'res-plot';
-        else if (p.subtype === 'Layout plots') pFilter = 'layout';
-        else if (p.subtype === 'Commercial sites') pFilter = 'comm-site';
-        else if (p.subtype === 'Beach facing sites') pFilter = 'beach';
-        else if (p.subtype === 'Industrial sites') pFilter = 'industrial';
-        else if (p.subtype === 'River facing sites') pFilter = 'river';
-        else if (p.subtype === 'Agriculture sites' || p.type === 'Agricultural') pFilter = 'agri';
+  <div class="rma-scroll-outer" id="rentOuter">
+    <div class="rma-scroll-row" id="rentGrid">
+      <% var rentIdx = 0; allListings.forEach(function(p) {
+        if (p.listing !== 'rent') return;
+        if (rentIdx >= 8) return; rentIdx++;
       %>
-      <article class="plist fx" data-filter-cat="<%= pFilter %>">
-        <div class="ph">
-          <% if (p.has_img && p.img_card) { %>
-          <img src="/<%= p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
-          <% } else { %>
-          <div class="ph-placeholder"><span>Photos on request</span></div>
-          <% } %>
-          <span class="badge <%= p.listing %>"><%= p.badge_txt || (p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease') %></span>
-          <button class="fav" aria-label="Save">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14S2 10 2 5.8C2 3.5 3.8 2 5.8 2 7 2 8 3 8 3s1-1 2.2-1C12.2 2 14 3.5 14 5.8 14 10 8 14 8 14z"/></svg>
-          </button>
-        </div>
-        <div class="body">
-          <div class="price"><%= p.price %></div>
-          <h3><%= p.name %></h3>
-          <div class="loc">
-            <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
-            <%= p.loc %> · <%= p.type %>
-          </div>
-          <div class="meta">
-            <% if (p.sqft) { %><span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="13" height="13" rx="1"/><path d="M2 6h3M2 11h3M6 2v3M11 2v3"/></svg> <%= p.sqft %></span><% } %>
-          </div>
-          <div class="cta">
-            <a class="v" href="/property/<%= p.id %>">Enquire</a>
-            <a class="w" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I am interested in ' + p.name + ' (' + p.loc + ').') %>" aria-label="WhatsApp" target="_blank" rel="noopener">
-              <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
+      <%- include('partials/property-card', { p: p, filterCat: '' }) %>
       <% }) %>
     </div>
+  </div>
+  <div class="rma-show-more-wrap">
+    <a class="rma-btn-show" href="/properties?listing=rent">
+      Show all rentals
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- COMMERCIAL -->
+<section class="sec-tight intro" data-screen-label="Commercial">
+  <div class="intro-head">
+    <h2 class="fx">Commercial <span class="it">spaces.</span></h2>
+    <p class="sub fx">Grade-A office floors, retail complexes and event estates, for lease and for sale.</p>
+  </div>
+  <div class="rma-scroll-outer" id="commercialOuter">
+    <div class="rma-scroll-row" id="commercialGrid">
+      <% var commIdx = 0; allListings.forEach(function(p) {
+        if (p.type !== 'Commercial') return;
+        if (commIdx >= 8) return; commIdx++;
+      %>
+      <%- include('partials/property-card', { p: p, filterCat: '' }) %>
+      <% }) %>
+    </div>
+  </div>
+  <div class="rma-show-more-wrap">
+    <a class="rma-btn-show" href="/properties?type=Commercial">
+      Show all commercial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- PLOTS & AGRICULTURE -->
+<section class="sec-tight intro" data-screen-label="Land">
+  <div class="intro-head">
+    <h2 class="fx">Plots & <span class="it">agriculture.</span></h2>
+    <p class="sub fx">Residential layouts, beach and river-facing sites, industrial land and yielding coffee plantations.</p>
+  </div>
+  <div class="rma-scroll-outer" id="landOuter">
+    <div class="rma-scroll-row" id="landGrid">
+      <% var landIdx = 0; allListings.forEach(function(p) {
+        if (p.type !== 'Plot' && p.type !== 'Agricultural') return;
+        if (landIdx >= 8) return; landIdx++;
+      %>
+      <%- include('partials/property-card', { p: p, filterCat: '' }) %>
+      <% }) %>
+    </div>
+  </div>
+  <div class="rma-show-more-wrap">
+    <a class="rma-btn-show" href="/properties?type=Plot">
+      Show all plots & land
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- BROWSE BY LOCATION (local SEO internal links) -->
+<section class="sec-tight intro" data-screen-label="Locations">
+  <div class="intro-head">
+    <h2 class="fx">Property across <span class="it">coastal Karnataka.</span></h2>
+    <p class="sub fx">Find homes, plots and commercial space in Udupi, Mangaluru and every town along the coast and the Western Ghats.</p>
+  </div>
+  <div class="loc-links">
+    <% areas.forEach(function(a) { %>
+    <a class="loc-chip fx" href="/properties?area=<%= encodeURIComponent(a) %>">Property in <%= a %></a>
+    <% }) %>
+    <a class="loc-chip alt fx" href="/properties?type=Villa">Villas for sale</a>
+    <a class="loc-chip alt fx" href="/properties?type=Plot">Plots &amp; sites</a>
+    <a class="loc-chip alt fx" href="/properties?listing=rent">Homes for rent</a>
+    <a class="loc-chip alt fx" href="/properties?type=Commercial">Commercial space</a>
   </div>
 </section>
 
@@ -353,8 +305,8 @@
     </div>
   </div>
 
-  <div class="h-scroll-wrap">
-    <div class="interior-gallery" id="interiorGrid">
+  <div class="rma-scroll-outer" id="interiorOuter">
+    <div class="rma-scroll-row interior-gallery" id="interiorGrid">
       <div class="int-card fx" data-type="home">
         <div class="media"><img src="/assets/img/mermaid-card.jpg" alt="Luxury Living Room Design" loading="lazy"></div>
         <div class="body">
@@ -410,6 +362,12 @@
         </div>
       </div>
     </div>
+  </div>
+  <div class="rma-show-more-wrap">
+    <a class="rma-btn-show" href="/services#interiors">
+      Explore interior services
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
   </div>
 </section>
 

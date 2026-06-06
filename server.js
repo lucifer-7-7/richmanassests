@@ -41,6 +41,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use((req, res, next) => {
   res.locals.flash  = req.session.flash || null;
   res.locals.admin  = req.session.admin || false;
+  res.locals.path   = req.path;
   delete req.session.flash;
   next();
 });

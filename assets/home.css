@@ -152,13 +152,7 @@ html.loading,html.loading body{overflow:hidden}
 }
 .feat-scroll-outer:active{cursor:grabbing}
 .feat-scroll-outer::-webkit-scrollbar{display:none}
-/* right fade — desktop only */
-.feat-scroll-outer::after{
-  content:"";pointer-events:none;position:absolute;
-  top:0;right:0;bottom:0;width:80px;
-  background:linear-gradient(to left,var(--paper) 0%,transparent 100%);z-index:2;
-}
-@media(max-width:768px){.feat-scroll-outer::after{display:none}}
+
 .feat-grid{display:flex;gap:20px;padding:4px clamp(16px,5vw,72px);width:max-content}
 /* card width: ~78vw on mobile, fixed on larger screens */
 .feat-grid .plist{width:min(78vw,340px);flex:none;border-radius:var(--r);border-color:transparent;background:transparent}

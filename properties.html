@@ -29,14 +29,7 @@
   .hscroll-outer:active{cursor:grabbing}
   .hscroll-outer::-webkit-scrollbar{display:none}
 
-  /* right-edge scroll hint gradient — desktop only */
-  .hscroll-outer::after{
-    content:"";pointer-events:none;position:absolute;
-    top:0;right:0;bottom:0;width:80px;
-    background:linear-gradient(to left,var(--paper) 0%,transparent 100%);
-    z-index:2;
-  }
-  @media(max-width:768px){.hscroll-outer::after{display:none}}
+
 
   .hscroll-row{
     display:flex;gap:20px;
