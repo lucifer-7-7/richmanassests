@@ -29,37 +29,37 @@ html.loading,html.loading body{overflow:hidden}
 .loader{
   position:fixed;inset:0;z-index:200;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:var(--ink);
-  transition:opacity .65s cubic-bezier(.4,0,.2,1),visibility .65s;
+  background:var(--paper);
+  transition:opacity .5s cubic-bezier(.25,1,.5,1),visibility .5s;
 }
 .loader.done{opacity:0;visibility:hidden;pointer-events:none}
 
 .loader-brand{
-  display:flex;flex-direction:column;align-items:center;gap:5px;
-  animation:lUp .8s cubic-bezier(.22,.61,.27,1) both;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  animation:lFadeIn .6s cubic-bezier(.25,1,.5,1) both;
 }
-@keyframes lUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes lFadeIn{from{opacity:0}to{opacity:1}}
 
 .loader-brand .mark{
-  font-family:var(--f-display);font-size:38px;font-weight:400;
-  letter-spacing:-.025em;color:var(--paper);line-height:1;
+  font-family:var(--f-sans);font-size:16px;font-weight:400;
+  letter-spacing:.12em;color:var(--ink);line-height:1;
+  text-transform:uppercase;
 }
-.loader-brand .mark b{font-weight:500}
-.loader-brand .mark i{font-style:italic;color:var(--gold)}
+.loader-brand .mark b{font-weight:700}
+.loader-brand .mark i{font-style:normal;font-weight:300;color:var(--accent)}
 .loader-brand .sub{
-  font-family:var(--f-mono);font-size:8.5px;letter-spacing:.38em;
-  text-transform:uppercase;color:rgba(247,244,237,.36);
+  font-family:var(--f-mono);font-size:7.5px;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--muted);
 }
 .loader-bar{
-  width:44px;height:1px;background:rgba(247,244,237,.12);
-  margin-top:26px;overflow:hidden;
-  animation:lFade .3s ease .15s both;
+  width:32px;height:1px;background:var(--line-soft);
+  margin-top:14px;overflow:hidden;
+  animation:lFadeIn .3s ease .1s both;
 }
-@keyframes lFade{from{opacity:0}to{opacity:1}}
 .loader-bar i{
-  display:block;height:100%;background:var(--gold);
+  display:block;height:100%;background:var(--ink);
   transform:translateX(-100%);
-  animation:lProg 1s cubic-bezier(.4,0,.2,1) .25s forwards;
+  animation:lProg .8s cubic-bezier(.25,1,.5,1) .15s forwards;
 }
 @keyframes lProg{to{transform:translateX(0)}}
 
