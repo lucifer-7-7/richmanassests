@@ -76,7 +76,7 @@ router.get('/', requireAdmin, (req, res) => {
     total:       db.prepare('SELECT COUNT(*) as c FROM properties').get().c,
     active:      db.prepare('SELECT COUNT(*) as c FROM properties WHERE active=1').get().c,
     enquiries:   db.prepare('SELECT COUNT(*) as c FROM enquiries').get().c,
-    newEnquiries: db.prepare("SELECT COUNT(*) as c FROM enquiries WHERE date(created_at)=date('now')").get().c,
+    unreadEnquiries: db.prepare("SELECT COUNT(*) as c FROM enquiries WHERE is_read=0").get().c,
   };
 
   res.render('admin/dashboard', {
@@ -263,6 +263,26 @@ router.post('/property/:id/delete', requireAdmin, (req, res) => {
   db.prepare('DELETE FROM properties WHERE id=?').run(req.params.id);
   req.session.flash = { type:'ok', msg: `"${p ? p.name : req.params.id}" deleted.` };
   res.redirect('/admin');
+});
+
+// ── ENQUIRY ACTIONS ──────────────────────────────────────────────
+router.post('/enquiries/:id/toggle-read', requireAdmin, (req, res) => {
+  const db = getDB();
+  db.prepare('UPDATE enquiries SET is_read = CASE WHEN is_read=1 THEN 0 ELSE 1 END WHERE id=?').run(req.params.id);
+  res.redirect('/admin?tab=enquiries');
+});
+
+router.post('/enquiries/mark-all-read', requireAdmin, (req, res) => {
+  const db = getDB();
+  db.prepare('UPDATE enquiries SET is_read = 1').run();
+  res.redirect('/admin?tab=enquiries');
+});
+
+router.post('/enquiries/:id/delete', requireAdmin, (req, res) => {
+  const db = getDB();
+  db.prepare('DELETE FROM enquiries WHERE id=?').run(req.params.id);
+  req.session.flash = { type:'ok', msg: 'Enquiry deleted successfully.' };
+  res.redirect('/admin?tab=enquiries');
 });
 
 // ── helpers ───────────────────────────────────────────────────────

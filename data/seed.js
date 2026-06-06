@@ -364,7 +364,22 @@ const HOMES = [
     setting_body:'One of the premier coffee cultivation regions in Karnataka, offering fertile soil and a cool climate.',
     setting_pills:'Coffee plantation|High yield|Natural spring',
     emi_label:'85% loan · 20y · 8.5%', emi_val:'₹1,62,283',
-    next_id:'mermaid', sort_order:24, subtype:'Agriculture sites'
+    next_id:'garadi', sort_order:24, subtype:'Agriculture sites'
+  },
+  {
+    id: 'garadi', name: 'Garadi House', loc: 'Garadimajal, Santhekatte', area: 'Udupi',
+    type: 'House', listing: 'sale', price: '₹77 L', price_val: 7700000, price_note: 'negotiable',
+    beds: '3', baths: '3', sqft: '1,800', featured: 1, has_img: 1,
+    img_card: 'assets/img/c1eea95d-2381-496e-bfd1-94ee33dc5f55.jpg', img_hero: 'assets/img/c1eea95d-2381-496e-bfd1-94ee33dc5f55.jpg',
+    story_kicker: 'Under Construction',
+    story_heading: 'Modern 3 BHK house close to Santhekatte bus stand.',
+    story_body: 'This modern 3 BHK house is currently under construction on a 4.5 cents plot in Garadimajal, Santhekatte. Located exactly 200 meters from the Santhekatte bus stand, it offers excellent convenience and accessibility.\n\nThe property features a solid compound wall, interlocked paving around the premises, and a reliable private well as its main water source. Built with premium materials and a spacious 1,800 sqft floor plan, this house is perfect for families seeking a brand new independent home in a well-connected Udupi suburb.\n\nPrice is negotiable for serious buyers.',
+    amenities: 'Compound wall|Interlocked driveway|Private open well|Under construction|200m from bus stand|3 BHK spacious layout|Modern design|Prime Udupi suburb',
+    setting_heading: 'Garadimajal, Santhekatte',
+    setting_body: 'Santhekatte is one of Udupi\'s most rapidly growing and convenient suburbs, with immediate access to schools, hospitals, local markets, and public transport via the nearby bus stand.',
+    setting_pills: '200m from bus stand|Private well water|4.5 cents land',
+    emi_label: '85% loan · 20y · 8.5%', emi_val: '₹56,794',
+    next_id: 'mermaid', sort_order: 25, subtype: 'Independent house'
   }
 ];
 

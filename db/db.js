@@ -75,6 +75,9 @@ function initDB() {
   // migrate: add gallery column if not present (safe on existing DBs)
   try { db.exec(`ALTER TABLE properties ADD COLUMN gallery TEXT`); } catch (_) {}
 
+  // migrate: add is_read column to enquiries if not present
+  try { db.exec(`ALTER TABLE enquiries ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0`); } catch (_) {}
+
   // migrate: strip em/en dashes from prose copy on already-seeded rows (idempotent).
   // Leaves beds/baths/sqft '—' placeholder sentinels untouched (those have no surrounding spaces).
   try {
