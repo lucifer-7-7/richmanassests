@@ -7,8 +7,12 @@ const path     = require('path');
 const { getDB } = require('../db/db');
 
 // ── upload setup (disk buffer → optional cloudinary) ─────────────
+const uploadDir = process.env.VERCEL
+  ? '/tmp'
+  : path.join(__dirname, '../public/assets/img/uploads');
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../public/assets/img/uploads')),
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/[^a-z0-9.]/gi, '-').toLowerCase()),
 });
 const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });

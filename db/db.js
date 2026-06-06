@@ -1,12 +1,27 @@
 'use strict';
 const Database = require('better-sqlite3');
 const path     = require('path');
+const fs       = require('fs');
 
-const DB_PATH = path.join(__dirname, 'rma.db');
+const ORIGINAL_DB_PATH = path.join(__dirname, 'rma.db');
+const DB_PATH = process.env.VERCEL
+  ? path.join('/tmp', 'rma.db')
+  : ORIGINAL_DB_PATH;
 let db;
 
 function getDB() {
-  if (!db) db = new Database(DB_PATH);
+  if (!db) {
+    if (process.env.VERCEL && !fs.existsSync(DB_PATH)) {
+      try {
+        if (fs.existsSync(ORIGINAL_DB_PATH)) {
+          fs.copyFileSync(ORIGINAL_DB_PATH, DB_PATH);
+        }
+      } catch (err) {
+        console.error('Failed to copy database to /tmp:', err);
+      }
+    }
+    db = new Database(DB_PATH);
+  }
   return db;
 }
 

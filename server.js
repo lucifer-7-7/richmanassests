@@ -63,4 +63,9 @@ app.use((req, res) => res.status(404).render('404', { title: 'Page not found —
 
 // ── boot ─────────────────────────────────────────────────────────
 initDB();
-app.listen(PORT, () => console.log(`RichManAssets running → http://localhost:${PORT}`));
+
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`RichManAssets running → http://localhost:${PORT}`));
+}
+
+module.exports = app;
