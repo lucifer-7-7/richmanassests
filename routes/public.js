@@ -83,8 +83,10 @@ function withIcons(services) {
   return services.map(s => ({ ...s, icon_svg: ICON_SVGS[s.icon] || '' }));
 }
 
-function getAreas(db) {
-  return db.prepare("SELECT DISTINCT area FROM properties WHERE active=1 AND area != '' ORDER BY area").all().map(r => r.area);
+async function getAreas(db) {
+  const { data } = await db.from('properties').select('area').eq('active', true).neq('area', '');
+  if (!data) return [];
+  return [...new Set(data.map(r => r.area).filter(Boolean))].sort();
 }
 
 function applyBudgetFilter(q, budget) {
@@ -97,157 +99,167 @@ function applyBudgetFilter(q, budget) {
 }
 
 // ── HOME ─────────────────────────────────────────────────────────
-router.get('/', (req, res) => {
-  const db = getDB();
-  const heroIds = ['mermaid', 'kopparige', 'samudra', 'tara', 'honeyvale', 'ikigai'];
-  const heroSlides = heroIds.map(id => db.prepare('SELECT * FROM properties WHERE id=? AND active=1').get(id)).filter(Boolean);
-  const featured = db.prepare('SELECT * FROM properties WHERE active=1 AND has_img=1 ORDER BY featured DESC, sort_order ASC LIMIT 6').all();
-  const allListings = db.prepare('SELECT * FROM properties WHERE active=1 AND has_img=1 ORDER BY sort_order ASC').all();
-  const testimonials = db.prepare('SELECT * FROM testimonials WHERE active=1').all();
+router.get('/', async (req, res) => {
+  try {
+    const db = getDB();
+    const heroIds = ['mermaid', 'kopparige', 'samudra', 'tara', 'honeyvale', 'ikigai'];
 
-  res.render('index', {
-    title: 'Real Estate in Udupi & Mangaluru: Villas, Flats, Plots, Rentals | RichManAssets',
-    description: 'Buy, rent or lease property in Udupi, Mangaluru & coastal Karnataka. Verified villas, apartments, plots, commercial space & agricultural land, plus home loans, legal & interiors under one roof.',
-    canonical: canon('/'),
-    siteUrl: SITE,
-    heroSlides,
-    featured,
-    allListings,
-    categories: CATEGORIES,
-    services: withIcons(SERVICES),
-    testimonials,
-    areas: getAreas(db),
-  });
+    const [allRes, testimonialsRes, areasRes] = await Promise.all([
+      db.from('properties').select('*').eq('active', true).eq('has_img', true).order('sort_order', { ascending: true }),
+      db.from('testimonials').select('*').eq('active', true),
+      db.from('properties').select('area').eq('active', true).neq('area', ''),
+    ]);
+
+    const allProps    = allRes.data || [];
+    const testimonials = testimonialsRes.data || [];
+    const areas = [...new Set((areasRes.data || []).map(r => r.area).filter(Boolean))].sort();
+
+    // hero slides: prioritise named IDs, fall back to first 6 featured
+    const heroSlides = heroIds
+      .map(id => allProps.find(p => p.id === id))
+      .filter(Boolean)
+      .slice(0, 6);
+    const finalHero = heroSlides.length ? heroSlides : allProps.filter(p => p.featured).slice(0, 6);
+
+    const allListings = allProps;
+
+    res.render('index', {
+      title: 'Real Estate in Udupi & Mangaluru: Villas, Flats, Plots, Rentals | RichManAssets',
+      description: 'Buy, rent or lease property in Udupi, Mangaluru & coastal Karnataka. Verified villas, apartments, plots, commercial space & agricultural land, plus home loans, legal & interiors under one roof.',
+      canonical: canon('/'),
+      siteUrl: SITE,
+      heroSlides: finalHero,
+      featured: allProps.filter(p => p.featured).slice(0, 6),
+      allListings,
+      categories: CATEGORIES,
+      services: withIcons(SERVICES),
+      testimonials,
+      areas,
+    });
+  } catch (err) {
+    console.error('[/] error:', err.message);
+    res.status(500).render('404', { title: 'Error | RichManAssets' });
+  }
 });
 
 // ── PROPERTIES BROWSE ────────────────────────────────────────────
-router.get('/properties', (req, res) => {
-  const db = getDB();
-  const { listing, area, type, budget } = req.query;
+router.get('/properties', async (req, res) => {
+  try {
+    const db = getDB();
+    const { listing, area, type, budget } = req.query;
 
-  let sql = 'SELECT * FROM properties WHERE active=1';
-  const params = [];
+    let query = db.from('properties').select('*').eq('active', true);
+    if (listing) query = query.eq('listing', listing);
+    if (area)    query = query.eq('area', area);
+    if (type)    query = query.eq('type', type);
+    if (budget === 'u30')   query = query.lt('price_val', 3000000);
+    if (budget === '30-1c') query = query.gte('price_val', 3000000).lt('price_val', 10000000);
+    if (budget === '1-5c')  query = query.gte('price_val', 10000000).lt('price_val', 50000000);
+    if (budget === '5c')    query = query.gte('price_val', 50000000);
+    query = query.order('featured', { ascending: false }).order('sort_order', { ascending: true }).order('price_val', { ascending: false });
 
-  if (listing) { sql += ' AND listing=?'; params.push(listing); }
-  if (area) { sql += ' AND area=?'; params.push(area); }
-  if (type) { sql += ' AND type=?'; params.push(type); }
-  sql = applyBudgetFilter(sql, budget);
-  sql += ' ORDER BY featured DESC, sort_order ASC, price_val DESC';
+    const [propsRes, areasRes] = await Promise.all([
+      query,
+      db.from('properties').select('area').eq('active', true).neq('area', ''),
+    ]);
+    const properties = propsRes.data || [];
+    const areas = [...new Set((areasRes.data || []).map(r => r.area).filter(Boolean))].sort();
 
-  const properties = db.prepare(sql).all(...params);
+    const listLabel = listing === 'rent' ? 'for Rent' : listing === 'lease' ? 'for Lease' : listing === 'sale' ? 'for Sale' : 'for Sale, Rent & Lease';
+    const typeLabel = type ? (type === 'Plot' ? 'Plots' : type + 's') : 'Property';
+    const where = area ? ` in ${area}` : ' in Udupi & Mangaluru';
+    const pageTitle = `${typeLabel} ${listLabel}${where} | RichManAssets`;
+    const pageDesc = `Browse ${properties.length} verified ${typeLabel.toLowerCase()} ${listLabel.toLowerCase()}${where} and across coastal Karnataka. Title-checked listings with photos, price and direct enquiry.`;
+    const canonPath = '/properties' + (area ? '?area=' + encodeURIComponent(area) : '');
 
-  // localized, intent-matching title + description
-  const listLabel = listing === 'rent' ? 'for Rent' : listing === 'lease' ? 'for Lease' : listing === 'sale' ? 'for Sale' : 'for Sale, Rent & Lease';
-  const typeLabel = type ? (type === 'Plot' ? 'Plots' : type + 's') : 'Property';
-  const where = area ? ` in ${area}` : ' in Udupi & Mangaluru';
-  const pageTitle = `${typeLabel} ${listLabel}${where} | RichManAssets`;
-  const pageDesc = `Browse ${properties.length} verified ${typeLabel.toLowerCase()} ${listLabel.toLowerCase()}${where} and across coastal Karnataka. Title-checked listings with photos, price and direct enquiry.`;
+    const itemList = {
+      '@context': 'https://schema.org', '@type': 'ItemList',
+      'name': pageTitle, 'description': pageDesc,
+      'numberOfItems': properties.length,
+      'itemListElement': properties.slice(0, 20).map((p, i) => ({
+        '@type': 'ListItem', 'position': i + 1,
+        'url': `${SITE}/property/${p.id}`, 'name': `${p.name}, ${p.loc}`,
+      })),
+    };
+    const breadcrumbLdList = {
+      '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: canon('/') },
+        { '@type': 'ListItem', position: 2, name: 'Properties', item: canon('/properties') },
+        ...(area ? [{ '@type': 'ListItem', position: 3, name: `Property in ${area}`, item: canon(`/properties?area=${encodeURIComponent(area)}`) }] : []),
+      ],
+    };
 
-  // canonical: keep area as a local-landing dimension, drop volatile filters
-  const canonPath = '/properties' + (area ? '?area=' + encodeURIComponent(area) : '');
-
-  // ItemList structured data for the listing results
-  const itemList = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    'name': pageTitle,
-    'description': pageDesc,
-    'numberOfItems': properties.length,
-    'itemListElement': properties.slice(0, 20).map((p, i) => ({
-      '@type': 'ListItem',
-      'position': i + 1,
-      'url': `${SITE}/property/${p.id}`,
-      'name': `${p.name}, ${p.loc}`,
-    })),
-  };
-
-  const breadcrumbLdList = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    'itemListElement': [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: canon('/') },
-      { '@type': 'ListItem', position: 2, name: 'Properties', item: canon('/properties') },
-      ...(area ? [{ '@type': 'ListItem', position: 3, name: `Property in ${area}`, item: canon(`/properties?area=${encodeURIComponent(area)}`) }] : []),
-    ],
-  };
-
-  res.render('properties', {
-    title: pageTitle,
-    description: pageDesc,
-    canonical: canon(canonPath),
-    siteUrl: SITE,
-    jsonld: JSON.stringify([itemList, breadcrumbLdList]),
-    properties,
-    areas: getAreas(db),
-    q: { listing, area, type, budget },
-  });
+    res.render('properties', {
+      title: pageTitle, description: pageDesc,
+      canonical: canon(canonPath), siteUrl: SITE,
+      jsonld: JSON.stringify([itemList, breadcrumbLdList]),
+      properties, areas, q: { listing, area, type, budget },
+    });
+  } catch (err) {
+    console.error('[/properties] error:', err.message);
+    res.status(500).render('404', { title: 'Error | RichManAssets' });
+  }
 });
 
 // ── PROPERTY DETAIL ──────────────────────────────────────────────
-router.get('/property/:id', (req, res) => {
-  const db = getDB();
-  const p = db.prepare('SELECT * FROM properties WHERE id=? AND active=1').get(req.params.id);
-  if (!p) return res.status(404).render('404', { title: 'Property not found | RichManAssets' });
+router.get('/property/:id', async (req, res) => {
+  try {
+    const db = getDB();
+    const { data: p } = await db.from('properties').select('*').eq('id', req.params.id).eq('active', true).maybeSingle();
+    if (!p) return res.status(404).render('404', { title: 'Property not found | RichManAssets' });
 
-  const similar = db.prepare('SELECT * FROM properties WHERE id != ? AND active=1 AND type=? AND has_img=1 LIMIT 3').all(p.id, p.type);
-  const next = p.next_id ? db.prepare('SELECT * FROM properties WHERE id=? AND active=1').get(p.next_id) : null;
+    const [similarRes, nextRes] = await Promise.all([
+      db.from('properties').select('*').neq('id', p.id).eq('active', true).eq('type', p.type).eq('has_img', true).limit(3),
+      p.next_id ? db.from('properties').select('*').eq('id', p.next_id).eq('active', true).maybeSingle() : Promise.resolve({ data: null }),
+    ]);
+    const similar = similarRes.data || [];
+    const next = nextRes.data || null;
 
-  // collect absolute image urls (hero + gallery)
-  const absImg = (u) => !u ? null : (u.indexOf('http') === 0 ? u : SITE + '/' + u.replace(/^\//, ''));
-  let gallery = [];
-  try { gallery = JSON.parse(p.gallery || '[]'); } catch (_) { }
-  const images = [p.img_hero, p.img_card, ...gallery].map(absImg).filter(Boolean);
+    const absImg = (u) => !u ? null : (u.indexOf('http') === 0 ? u : SITE + '/' + u.replace(/^\//, ''));
+    let gallery = [];
+    try { gallery = JSON.parse(p.gallery || '[]'); } catch (_) { }
+    const images = [p.img_hero, p.img_card, ...gallery].map(absImg).filter(Boolean);
 
-  const listLabel = p.listing === 'rent' ? 'for Rent' : p.listing === 'lease' ? 'for Lease' : 'for Sale';
-  const pageTitle = `${p.name} in ${p.loc}, ${p.type} ${listLabel} at ${p.price} | RichManAssets`;
-  const pageDesc = (p.story_body ? String(p.story_body).replace(/\s+/g, ' ').slice(0, 150)
-    : `${p.type} ${listLabel.toLowerCase()} in ${p.loc}, coastal Karnataka. ${p.beds && p.beds !== '—' ? p.beds + ' beds · ' : ''}${p.sqft || ''}. Price ${p.price}.`).trim() + '…';
+    const listLabel = p.listing === 'rent' ? 'for Rent' : p.listing === 'lease' ? 'for Lease' : 'for Sale';
+    const pageTitle = `${p.name} in ${p.loc}, ${p.type} ${listLabel} at ${p.price} | RichManAssets`;
+    const pageDesc = (p.story_body ? String(p.story_body).replace(/\s+/g, ' ').slice(0, 150)
+      : `${p.type} ${listLabel.toLowerCase()} in ${p.loc}, coastal Karnataka. ${p.beds && p.beds !== '—' ? p.beds + ' beds · ' : ''}${p.sqft || ''}. Price ${p.price}.`).trim() + '…';
 
-  const productLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    'name': `${p.name}, ${p.loc}`,
-    'description': pageDesc,
-    'image': images.length ? images : undefined,
-    'category': `${p.type} for ${p.listing === 'rent' ? 'Rent' : p.listing === 'lease' ? 'Lease' : 'Sale'} in ${p.loc}`,
-    'brand': { '@type': 'Brand', 'name': 'RichManAssets' },
-    'seller': {
-      '@type': 'RealEstateAgent',
-      '@id': `${SITE}/#organization`,
-      'name': 'RichManAssets',
-      'telephone': '+919036001234',
-      'url': SITE,
-    },
-    'offers': {
-      '@type': 'Offer',
-      'price': p.price_val || undefined,
-      'priceCurrency': 'INR',
-      'availability': 'https://schema.org/InStock',
-      'url': canon('/property/' + p.id),
-      'areaServed': p.area || p.loc,
-      'validFrom': p.created_at ? p.created_at.split('T')[0] : undefined,
-    },
-  };
-  const breadcrumbLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    'itemListElement': [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: canon('/') },
-      { '@type': 'ListItem', position: 2, name: 'Properties', item: canon('/properties') },
-      { '@type': 'ListItem', position: 3, name: p.name, item: canon('/property/' + p.id) },
-    ],
-  };
+    const productLd = {
+      '@context': 'https://schema.org', '@type': 'Product',
+      'name': `${p.name}, ${p.loc}`, 'description': pageDesc,
+      'image': images.length ? images : undefined,
+      'category': `${p.type} for ${p.listing === 'rent' ? 'Rent' : p.listing === 'lease' ? 'Lease' : 'Sale'} in ${p.loc}`,
+      'brand': { '@type': 'Brand', 'name': 'RichManAssets' },
+      'seller': { '@type': 'RealEstateAgent', '@id': `${SITE}/#organization`, 'name': 'RichManAssets', 'telephone': '+919036001234', 'url': SITE },
+      'offers': {
+        '@type': 'Offer', 'price': p.price_val || undefined, 'priceCurrency': 'INR',
+        'availability': 'https://schema.org/InStock', 'url': canon('/property/' + p.id),
+        'areaServed': p.area || p.loc,
+        'validFrom': p.created_at ? p.created_at.split('T')[0] : undefined,
+      },
+    };
+    const breadcrumbLd = {
+      '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: canon('/') },
+        { '@type': 'ListItem', position: 2, name: 'Properties', item: canon('/properties') },
+        { '@type': 'ListItem', position: 3, name: p.name, item: canon('/property/' + p.id) },
+      ],
+    };
 
-  res.render('property', {
-    title: pageTitle,
-    description: pageDesc,
-    canonical: canon('/property/' + p.id),
-    siteUrl: SITE,
-    ogType: 'product',
-    ogImage: images[0] || undefined,
-    jsonld: JSON.stringify([productLd, breadcrumbLd]),
-    p, similar, next,
-  });
+    res.render('property', {
+      title: pageTitle, description: pageDesc,
+      canonical: canon('/property/' + p.id), siteUrl: SITE,
+      ogType: 'product', ogImage: images[0] || undefined,
+      jsonld: JSON.stringify([productLd, breadcrumbLd]),
+      p, similar, next,
+    });
+  } catch (err) {
+    console.error('[/property/:id] error:', err.message);
+    res.status(500).render('404', { title: 'Error | RichManAssets' });
+  }
 });
 
 // ── CONTACT ──────────────────────────────────────────────────────
@@ -274,39 +286,34 @@ router.get('/services', (req, res) => {
 });
 
 // ── ABOUT ─────────────────────────────────────────────────────────
-router.get('/about', (req, res) => {
-  const db = getDB();
-  const testimonials = db.prepare('SELECT * FROM testimonials WHERE active=1').all();
-  const faqLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    'mainEntity': [
-      {
-        '@type': 'Question', name: 'Which areas do you cover for property in coastal Karnataka?',
-        acceptedAnswer: { '@type': 'Answer', text: 'We cover Udupi, Mangaluru, Manipal, Surathkal, Mulki, Kapu, Padubidri, Maravanthe and the wider Dakshina Kannada and Udupi districts, plus hill stations like Sakleshpur and Chikmagalur.' }
-      },
-      {
-        '@type': 'Question', name: 'Do you help with home loans and legal paperwork?',
-        acceptedAnswer: { '@type': 'Answer', text: 'Yes. We have direct tie-ups with SBI, Bank of Baroda, HDFC, Karnataka Bank and others for fast, pre-approved home and project loans, and an in-house advocate for title checks, due diligence and registration.' }
-      },
-      {
-        '@type': 'Question', name: 'Are your property listings title-verified?',
-        acceptedAnswer: { '@type': 'Answer', text: 'Every listing is title-checked and verified before we publish it. We only market title-clear property across Udupi and Mangaluru.' }
-      },
-      {
-        '@type': 'Question', name: 'Do you work with NRI buyers and investors?',
-        acceptedAnswer: { '@type': 'Answer', text: 'Yes. We offer end-to-end NRI services including remote site visits, documentation, loans, registration and full property management after purchase.' }
-      },
-    ],
-  };
-  res.render('about', {
-    title: 'About RichManAssets: Property Consultants in Udupi & Mangaluru, Coastal Karnataka',
-    description: 'RichManAssets (Vittu Bharat Associates LLP) is a coastal-Karnataka real-estate firm in Udupi & Mangaluru. 15+ years, 1,200+ families, ₹500 Cr+ transacted across sales, loans, legal, construction and interiors under one roof.',
-    canonical: canon('/about'),
-    siteUrl: SITE,
-    jsonld: JSON.stringify(faqLd),
-    testimonials,
-  });
+router.get('/about', async (req, res) => {
+  try {
+    const db = getDB();
+    const { data: testimonials } = await db.from('testimonials').select('*').eq('active', true);
+    const faqLd = {
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      'mainEntity': [
+        { '@type': 'Question', name: 'Which areas do you cover for property in coastal Karnataka?',
+          acceptedAnswer: { '@type': 'Answer', text: 'We cover Udupi, Mangaluru, Manipal, Surathkal, Mulki, Kapu, Padubidri, Maravanthe and the wider Dakshina Kannada and Udupi districts, plus hill stations like Sakleshpur and Chikmagalur.' } },
+        { '@type': 'Question', name: 'Do you help with home loans and legal paperwork?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Yes. We have direct tie-ups with SBI, Bank of Baroda, HDFC, Karnataka Bank and others for fast, pre-approved home and project loans, and an in-house advocate for title checks, due diligence and registration.' } },
+        { '@type': 'Question', name: 'Are your property listings title-verified?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Every listing is title-checked and verified before we publish it. We only market title-clear property across Udupi and Mangaluru.' } },
+        { '@type': 'Question', name: 'Do you work with NRI buyers and investors?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Yes. We offer end-to-end NRI services including remote site visits, documentation, loans, registration and full property management after purchase.' } },
+      ],
+    };
+    res.render('about', {
+      title: 'About RichManAssets: Property Consultants in Udupi & Mangaluru, Coastal Karnataka',
+      description: 'RichManAssets (Vittu Bharat Associates LLP) is a coastal-Karnataka real-estate firm in Udupi & Mangaluru. 15+ years, 1,200+ families, ₹500 Cr+ transacted across sales, loans, legal, construction and interiors under one roof.',
+      canonical: canon('/about'), siteUrl: SITE,
+      jsonld: JSON.stringify(faqLd),
+      testimonials: testimonials || [],
+    });
+  } catch (err) {
+    console.error('[/about] error:', err.message);
+    res.status(500).render('404', { title: 'Error | RichManAssets' });
+  }
 });
 
 // ── LOANS ─────────────────────────────────────────────────────────
@@ -320,16 +327,17 @@ router.get('/loans', (req, res) => {
 });
 
 // ── ENQUIRY POST ─────────────────────────────────────────────────
-router.post('/enquiry', (req, res) => {
+router.post('/enquiry', async (req, res) => {
   const db = getDB();
   const { name, phone, email, service, budget, time_pref, message, property_ref, page } = req.body;
 
   if (!phone && !email) return res.status(400).json({ ok: false });
 
-  db.prepare(`
-    INSERT INTO enquiries (name, phone, email, service, budget, time_pref, message, property_ref, page)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(name || '', phone || '', email || '', service || '', budget || '', time_pref || '', message || '', property_ref || '', page || '');
+  await db.from('enquiries').insert({
+    name: name || '', phone: phone || '', email: email || '',
+    service: service || '', budget: budget || '', time_pref: time_pref || '',
+    message: message || '', property_ref: property_ref || '', page: page || '',
+  });
 
   // try to send email notification (non-blocking)
   if (process.env.SMTP_USER && process.env.NOTIFY_EMAIL) {
