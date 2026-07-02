@@ -1,0 +1,79 @@
+<%- include('../partials/agent-layout-start', { activeNav: 'profile', pageTitle: 'My Profile' }) %>
+
+<% if (flash) { %><div class="flash <%= flash.type %>"><%- flash.msg %></div><% } %>
+
+<div style="max-width:600px">
+  <div class="ap-card" style="margin-bottom:24px">
+    <div class="ap-card-header"><h2>Account Information</h2></div>
+    <div class="ap-card-body">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--gold-glow);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;color:var(--gold);flex-shrink:0">
+          <%= agent.name ? agent.name.charAt(0).toUpperCase() : 'A' %>
+        </div>
+        <div>
+          <div style="font-size:18px;font-weight:600;color:var(--cream)"><%= agent.name %></div>
+          <div style="font-size:13px;color:var(--muted)"><%= agent.email %></div>
+          <div style="font-size:11px;color:var(--gold);margin-top:4px;letter-spacing:.1em;text-transform:uppercase">Agent</div>
+        </div>
+      </div>
+
+      <form method="post" action="/agent/profile">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prof-name">Full Name</label>
+            <input type="text" id="prof-name" name="name" value="<%= agent.name || '' %>" required>
+          </div>
+          <div class="form-group">
+            <label for="prof-phone">Phone</label>
+            <input type="tel" id="prof-phone" name="phone" value="<%= agent.phone || '' %>">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prof-company">Company / Agency</label>
+            <input type="text" id="prof-company" name="company_name" value="<%= agent.company_name || '' %>" placeholder="Your agency name">
+          </div>
+          <div class="form-group">
+            <label for="prof-city">City</label>
+            <input type="text" id="prof-city" name="city" value="<%= agent.city || '' %>" placeholder="e.g. Udupi">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prof-rera">RERA Number</label>
+            <input type="text" id="prof-rera" name="rera_number" value="<%= agent.rera_number || '' %>" placeholder="Optional">
+          </div>
+          <div class="form-group">
+            <label for="prof-gst">GST Number</label>
+            <input type="text" id="prof-gst" name="gst_number" value="<%= agent.gst_number || '' %>" placeholder="For GST invoices">
+            <div class="form-hint">Added to your invoices.</div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Profile</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-card-header"><h2>Account Details</h2></div>
+    <div class="ap-card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:14px">
+        <div>
+          <div style="color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Email</div>
+          <div style="color:var(--cream)"><%= agent.email %></div>
+        </div>
+        <div>
+          <div style="color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Member Since</div>
+          <div style="color:var(--cream)"><%= new Date(agent.created_at).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) %></div>
+        </div>
+        <div>
+          <div style="color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Status</div>
+          <div><span class="status-badge <%= agent.is_active ? 'status-published' : 'status-payment_failed' %>"><%= agent.is_active ? 'Active' : 'Suspended' %></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/agent-layout-end') %>

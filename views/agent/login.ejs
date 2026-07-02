@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/agent.css">
+</head>
+<body class="agent-portal">
+<div class="ap-auth-page">
+  <div class="ap-auth-box">
+    <div class="ap-auth-logo">
+      <div class="brand">Rich<em>Man</em>Assets</div>
+      <div class="sub">Agent Portal</div>
+    </div>
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to manage your property listings.</p>
+
+    <% if (flash) { %>
+    <div class="flash <%= flash.type %>">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <%- flash.msg %>
+    </div>
+    <% } %>
+
+    <form method="post" action="/agent/login" id="loginForm">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="next" value="<%= next || '/agent/dashboard' %>">
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <input type="email" id="login-email" name="email" required autofocus placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="login-pass">Password</label>
+        <input type="password" id="login-pass" name="password" required placeholder="Your password" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg" id="login-submit">
+        Sign In →
+      </button>
+    </form>
+    <p class="ap-auth-link">New agent? <a href="/agent/register">Create account</a></p>
+    <p class="ap-auth-link" style="margin-top:8px"><a href="/">← Back to site</a></p>
+  </div>
+</div>
+<script>
+document.getElementById('loginForm').addEventListener('submit', function() {
+  var btn = document.getElementById('login-submit');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+});
+</script>
+</body>
+</html>

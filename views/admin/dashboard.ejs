@@ -46,25 +46,38 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .sidebar .count-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:100px}
 .content{flex:1;padding:24px 20px;max-width:1100px;overflow:hidden}
 
-/* mobile: no sidebar, bottom nav */
+/* mobile: sidebar becomes drawer */
 @media(max-width:720px){
-  .sidebar{display:none}
-  .mob-nav{
-    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:48;
-    background:var(--white);border-top:1px solid var(--line);
-    height:60px;align-items:stretch;
+  .sidebar{
+    display: flex;
+    position: fixed;
+    top: 56px;
+    left: -240px;
+    width: 220px;
+    height: calc(100svh - 56px);
+    z-index: 99;
+    box-shadow: 4px 0 12px rgba(0,0,0,.15);
+    transition: left .25s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .mob-nav button{
-    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:3px;font-size:10px;letter-spacing:.04em;color:var(--muted);
-    background:none;border:0;cursor:pointer;transition:.2s;padding:0;
+  .sidebar.open {
+    left: 0;
   }
-  .mob-nav button.active{color:var(--ink)}
-  .mob-nav button svg{width:20px;height:20px}
-  body{padding-bottom:60px}
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 56px 0 0 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 98;
+    backdrop-filter: blur(2px);
+  }
+  .sidebar-overlay.open {
+    display: block;
+  }
+  .top .menu-toggle {
+    display: flex !important;
+  }
   .content{padding:16px}
 }
-@media(min-width:721px){.mob-nav{display:none}}
 
 /* ── FLASH ── */
 .flash{padding:12px 16px;border-radius:var(--r-sm);margin-bottom:18px;font-size:13px;display:flex;align-items:center;gap:10px}
@@ -187,7 +200,10 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 <body>
 
 <div class="top">
-  <div class="brand">
+  <div class="brand" style="gap:12px">
+    <button class="menu-toggle" onclick="toggleSidebar()" style="display:none;background:none;border:0;color:#F7F4ED;cursor:pointer;padding:4px;align-items:center;justify-content:center">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     RichManAssets
     <span class="badge">Admin</span>
   </div>
@@ -198,8 +214,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 </div>
 
 <div class="layout">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
   <!-- Desktop sidebar -->
-  <nav class="sidebar">
+  <nav class="sidebar" id="adminSidebar">
     <span class="sec-label">Manage</span>
     <button class="active" onclick="showPanel('properties')" id="sb-properties">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h3a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
@@ -214,11 +231,30 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
       Enquiries
       <% if (stats.unreadEnquiries > 0) { %><span class="count-badge"><%= stats.unreadEnquiries %></span><% } %>
     </button>
+    <button onclick="showPanel('agent-listings')" id="sb-agent-listings">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+      Agent Listings
+      <% if (stats.agentPublished > 0) { %><span class="count-badge" style="background:#2e7d52"><%= stats.agentPublished %></span><% } %>
+    </button>
+    <button onclick="showPanel('agents')" id="sb-agents">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+      Agents
+      <% if ((stats.totalAgents||0) > 0) { %><span class="count-badge" style="background:var(--muted)"><%= stats.totalAgents %></span><% } %>
+    </button>
+    <button onclick="showPanel('payments')" id="sb-payments">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/></svg>
+      Payments
+    </button>
+    <button onclick="showPanel('webhooks')" id="sb-webhooks">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 3a1 1 0 00-1.414-1.414l-3 3A1 1 0 0013 5.293V6H5a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-5a1 1 0 10-2 0v5H5V8h8v.707a1 1 0 001.707.707l3-3z" clip-rule="evenodd"/></svg>
+      Webhook Logs
+    </button>
 
     <span class="sec-label" style="margin-top:8px">Overview</span>
     <div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Active</span><b><%= stats.active %></b></div>
-      <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Total</span><b><%= stats.total %></b></div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Admin Props</span><b><%= stats.active %>/<%= stats.total %></b></div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Agent Published</span><b><%= stats.agentPublished||0 %></b></div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Agents</span><b><%= stats.totalAgents||0 %></b></div>
       <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--muted)">Enquiries</span><b><%= stats.enquiries %></b></div>
     </div>
   </nav>
@@ -466,35 +502,192 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
       </div>
       <% } %>
     </div>
+
+    <!-- AGENT LISTINGS PANEL -->
+    <div class="panel" id="panel-agent-listings">
+      <div class="page-head"><h1>Agent Listings</h1></div>
+      <% if (!agentProps || agentProps.length === 0) { %>
+      <div class="empty"><h3>No agent listings yet</h3><p>Listings appear here after agents submit and pay.</p></div>
+      <% } else { %>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+          <thead><tr style="background:var(--bg)">
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Property</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Agent</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Type/For</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Status</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Expires</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Actions</th>
+          </tr></thead>
+          <tbody>
+          <% agentProps.forEach(function(p) { %>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:12px 14px">
+              <div style="font-weight:600"><%= p.name %></div>
+              <div style="font-size:11px;color:var(--muted)"><%= p.loc %></div>
+            </td>
+            <td style="padding:12px 14px;font-size:13px">
+              <%= p.agents ? p.agents.name : '—' %>
+              <div style="font-size:11px;color:var(--muted)"><%= p.agents ? p.agents.email : '' %></div>
+            </td>
+            <td style="padding:12px 14px;font-size:13px"><%= p.type %> · <%= p.listing %></td>
+            <td style="padding:12px 14px">
+              <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;background:<%= p.status==='published'?'#e6f9f0':p.status==='payment_failed'?'#fdf0ee':'#f0ede5' %>;color:<%= p.status==='published'?'#2e7d52':p.status==='payment_failed'?'#c0392b':'#928A79' %>">
+                <%= p.status.replace(/_/g,' ') %>
+              </span>
+            </td>
+            <td style="padding:12px 14px;font-size:11px;color:var(--muted)">
+              <%= p.expires_at ? new Date(p.expires_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—' %>
+            </td>
+            <td style="padding:12px 14px">
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <% if (p.status === 'published') { %>
+                <a href="/property/<%= p.id %>" target="_blank" style="padding:5px 10px;background:var(--bg);border:1px solid var(--line);border-radius:6px;font-size:12px;text-decoration:none;color:var(--ink)">View ↗</a>
+                <form method="post" action="/admin/agent-listings/<%= p.id %>/archive" style="display:inline">
+                  <button type="submit" style="padding:5px 10px;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;font-size:12px;cursor:pointer">Archive</button>
+                </form>
+                <% if (p.paid_order_id) { %>
+                <form method="post" action="/admin/agent-listings/<%= p.id %>/refund" style="display:inline" onsubmit="return confirm('Refund ₹999 to agent?')">
+                  <input type="hidden" name="reason" value="Admin initiated refund">
+                  <button type="submit" style="padding:5px 10px;background:#fdf0ee;border:1px solid #e74c3c;border-radius:6px;font-size:12px;cursor:pointer;color:#c0392b">Refund</button>
+                </form>
+                <% } %>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+    </div>
+
+          <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- PAYMENTS PANEL -->
+    <div class="panel" id="panel-payments">
+      <div class="page-head"><h1>Payment Orders</h1></div>
+      <% if (!orders || orders.length === 0) { %>
+      <div class="empty"><h3>No payments yet</h3><p>Payments will appear here once agents make transactions.</p></div>
+      <% } else { %>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+          <thead><tr style="background:var(--bg)">
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Order ID</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Agent</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Property</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Amount</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Method</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Status</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Date</th>
+          </tr></thead>
+          <tbody>
+          <% orders.forEach(function(o) { %>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:12px 14px;font-family:monospace;font-size:11px"><%= o.internal_order_id %></td>
+            <td style="padding:12px 14px">
+              <%= o.agents ? o.agents.name : '—' %>
+              <div style="font-size:11px;color:var(--muted)"><%= o.agents ? o.agents.email : '' %></div>
+            </td>
+            <td style="padding:12px 14px"><%= o.agent_properties ? o.agent_properties.name : '—' %></td>
+            <td style="padding:12px 14px;font-weight:600">₹<%= ((o.amount_paise||0)/100).toLocaleString('en-IN') %></td>
+            <td style="padding:12px 14px"><%= o.payment_method || '—' %></td>
+            <td style="padding:12px 14px">
+              <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;background:<%= o.status==='paid'?'#e6f9f0':o.status==='failed'?'#fdf0ee':'#fff8e6' %>;color:<%= o.status==='paid'?'#2e7d52':o.status==='failed'?'#c0392b':'#c07a00' %>">
+                <%= o.status %>
+              </span>
+            </td>
+            <td style="padding:12px 14px;font-size:11px;color:var(--muted)">
+              <%= new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+            </td>
+          </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- WEBHOOKS PANEL -->
+    <div class="panel" id="panel-webhooks">
+      <div class="page-head"><h1>Webhook Logs</h1></div>
+      <% if (!logs || logs.length === 0) { %>
+      <div class="empty"><h3>No webhook logs yet</h3><p>Incoming logs appear here.</p></div>
+      <% } else { %>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+          <thead><tr style="background:var(--bg)">
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Time</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Event</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">CF Order</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Sig Valid</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Processed</th>
+            <th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Payload</th>
+          </tr></thead>
+          <tbody>
+          <% logs.forEach(function(l) { %>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:12px 14px;white-space:nowrap;color:var(--muted)"><%= new Date(l.received_at).toLocaleString('en-IN',{hour12:false}) %></td>
+            <td style="padding:12px 14px;font-weight:600"><%= l.event_type || '—' %></td>
+            <td style="padding:12px 14px;font-family:monospace"><%= l.cashfree_order_id || '—' %></td>
+            <td style="padding:12px 14px">
+              <span style="display:inline-flex;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;background:<%= l.sig_valid?'#e6f9f0':'#fdf0ee' %>;color:<%= l.sig_valid?'#2e7d52':'#c0392b' %>">
+                <%= l.sig_valid ? '✓' : '✗' %>
+              </span>
+            </td>
+            <td style="padding:12px 14px">
+              <span style="display:inline-flex;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;background:<%= l.processed?'#e6f9f0':'#fdf0ee' %>;color:<%= l.processed?'#2e7d52':'#c0392b' %>">
+                <%= l.processed ? 'Yes' : 'No' %>
+              </span>
+              <% if (l.processing_error) { %>
+              <div style="font-size:10px;color:#c0392b;margin-top:2px"><%= l.processing_error %></div>
+              <% } %>
+            </td>
+            <td style="padding:12px 14px;font-family:monospace;font-size:11px;color:#555;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= l.payload %>">
+              <%= l.payload.slice(0, 80) %>…
+            </td>
+          </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+    </div>
+
   </main>
 </div>
 
-<!-- Mobile bottom nav -->
-<div class="mob-nav">
-  <button class="active" id="mob-properties" onclick="showPanel('properties')">
-    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h3a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
-    Properties
-  </button>
-  <button id="mob-add" onclick="showPanel('add')">
-    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
-    Add
-  </button>
-  <button id="mob-enquiries" onclick="showPanel('enquiries')">
-    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
-    Enquiries
-  </button>
-</div>
+<!-- Mobile bottom nav removed, sidebar drawer contains all controls -->
 
 <script>
+function toggleSidebar() {
+  const sidebar = document.getElementById('adminSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
 function showPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.mob-nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
   const sb = document.getElementById('sb-' + id);
   if (sb) sb.classList.add('active');
-  const mb = document.getElementById('mob-' + id);
-  if (mb) mb.classList.add('active');
+  
+  // Close drawer on mobile
+  const sidebar = document.getElementById('adminSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar && sidebar.classList.contains('open')) {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+  
   window.scrollTo(0,0);
 }
 
@@ -532,6 +725,10 @@ function filterProps() {
 // open add panel if URL hash says so
 if (location.hash === '#add') showPanel('add');
 if (location.search.includes('tab=enquiries')) showPanel('enquiries');
+if (location.search.includes('tab=agent-listings')) showPanel('agent-listings');
+if (location.search.includes('tab=agents')) showPanel('agents');
+if (location.search.includes('tab=payments')) showPanel('payments');
+if (location.search.includes('tab=webhooks')) showPanel('webhooks');
 
 // filter enquiries
 function filterEnquiries() {

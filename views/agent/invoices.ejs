@@ -1,0 +1,37 @@
+<%- include('../partials/agent-layout-start', { activeNav: 'invoices', pageTitle: 'My Invoices' }) %>
+
+<div class="ap-card">
+  <div class="ap-card-header">
+    <h2>Transaction History</h2>
+    <span style="font-size:13px;color:var(--muted)">Paid listings only</span>
+  </div>
+  <% if (orders.length === 0) { %>
+  <div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <h3>No invoices yet</h3>
+    <p>Invoices appear here after successful payments.</p>
+    <a href="/agent/listings/new" class="btn btn-primary">Add a Listing</a>
+  </div>
+  <% } else { %>
+  <div style="padding:16px">
+    <% orders.forEach(function(o) { %>
+    <div class="invoice-card">
+      <div>
+        <div class="invoice-id">#<%= o.internal_order_id %></div>
+        <div class="invoice-prop"><%= o.agent_properties && o.agent_properties.name ? o.agent_properties.name : 'Property' %></div>
+        <div style="font-size:12px;color:var(--muted)">
+          <%= new Date(o.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }) %>
+          · <span class="status-badge status-<%= o.status %>" style="font-size:11px"><%= o.status %></span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <div class="invoice-amt">₹<%= (o.amount_paise / 100).toLocaleString('en-IN') %></div>
+        <a href="/agent/invoices/<%= o.internal_order_id %>" class="btn btn-ghost btn-sm" target="_blank">View Invoice</a>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+
+<%- include('../partials/agent-layout-end') %>

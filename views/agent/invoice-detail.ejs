@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title><meta name="robots" content="noindex,nofollow"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/agent.css">
+</head>
+<body class="agent-portal">
+<div class="ap-content" style="max-width:800px;margin:40px auto">
+  <div class="no-print" style="margin-bottom:20px;display:flex;gap:10px">
+    <button onclick="window.print()" class="btn btn-primary">🖨 Print / Save PDF</button>
+    <a href="/agent/invoices" class="btn btn-outline">← Back</a>
+  </div>
+
+  <div class="invoice-print">
+    <div class="inv-header">
+      <div>
+        <div class="inv-brand">RichManAssets</div>
+        <div class="inv-tag" style="margin-top:4px">Vittu Bharat Associates LLP</div>
+        <div style="font-size:12px;color:#666;margin-top:8px;line-height:1.6">
+          2nd Floor, Sri Ram Building<br>
+          Bannanje Road, Udupi — 576101<br>
+          Karnataka, India<br>
+          GSTIN: (Fill your GST number)
+        </div>
+      </div>
+      <div style="text-align:right">
+        <h2>INVOICE</h2>
+        <div class="inv-tag" style="margin-top:6px;margin-bottom:4px">Invoice No</div>
+        <div style="font-size:14px;font-family:monospace;color:#555">#<%= order.internal_order_id %></div>
+        <div class="inv-tag" style="margin-top:10px;margin-bottom:4px">Date</div>
+        <div style="font-size:13px;color:#555"><%= new Date(order.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }) %></div>
+      </div>
+    </div>
+
+    <div style="border-top:2px solid #17150F;padding-top:20px;margin-bottom:24px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:#888;margin-bottom:8px">Billed To</div>
+      <div style="font-size:15px;font-weight:700;color:#17150F"><%= agent.name %></div>
+      <div style="font-size:13px;color:#555;margin-top:2px"><%= agent.email %></div>
+      <% if (agent.phone) { %><div style="font-size:13px;color:#555">+91 <%= agent.phone %></div><% } %>
+      <% if (agent.company_name) { %><div style="font-size:13px;color:#555"><%= agent.company_name %></div><% } %>
+      <% if (agent.gst_number) { %><div style="font-size:12px;color:#888;margin-top:4px">GSTIN: <%= agent.gst_number %></div><% } %>
+    </div>
+
+    <table>
+      <thead>
+        <tr style="background:#f9f7f2">
+          <th style="text-align:left;padding:10px 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#888;border-bottom:2px solid #eee">Description</th>
+          <th style="text-align:right;padding:10px 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#888;border-bottom:2px solid #eee">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div style="font-weight:600;color:#17150F">Property Listing Fee — 1 Year</div>
+            <div style="font-size:12px;color:#888;margin-top:2px">
+              <%= order.agent_properties && order.agent_properties.name ? order.agent_properties.name : 'Property' %>
+              <% if (order.agent_properties && order.agent_properties.loc) { %> · <%= order.agent_properties.loc %><% } %>
+            </div>
+            <div style="font-size:11px;color:#aaa;margin-top:2px">Order: <%= order.internal_order_id %> · <%= order.payment_method || 'Online' %></div>
+          </td>
+          <td style="text-align:right;vertical-align:top;padding-top:12px">
+            ₹<%= (order.amount_paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td style="border-top:2px solid #17150F;padding-top:12px;font-weight:600;color:#17150F">Total</td>
+          <td style="border-top:2px solid #17150F;padding-top:12px;text-align:right" class="inv-total">
+            ₹<%= (order.amount_paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="font-size:12px;color:#888;padding-top:8px">Payment Status: <strong style="color:<%= order.status === 'paid' ? '#2e7d52' : '#c0392b' %>"><%= order.status.toUpperCase() %></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #eee;font-size:12px;color:#999;line-height:1.7">
+      <p><strong style="color:#555">Terms:</strong> This invoice is for the RichManAssets property listing service. The listing fee is non-refundable once the listing is published. Listing is valid for 1 year from the date of payment.</p>
+      <p style="margin-top:8px">Thank you for listing with RichManAssets. For support: hello@richmanassets.com</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

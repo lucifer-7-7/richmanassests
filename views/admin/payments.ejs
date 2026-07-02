@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title><meta name="robots" content="noindex,nofollow"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#F7F4ED;padding:24px;color:#17150F}
+  h1{font-size:22px;font-weight:500;margin-bottom:20px}
+  .flash{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px}
+  .ok{background:#e6f9f0;color:#2e7d52}.err{background:#fdf0ee;color:#c0392b}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);font-size:13px}
+  th{text-align:left;padding:12px 14px;background:#f9f7f2;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#928A79;border-bottom:1px solid #eee}
+  td{padding:12px 14px;border-bottom:1px solid #f0ede5;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  .badge{display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600}
+  .b-paid{background:#e6f9f0;color:#2e7d52}.b-failed{background:#fdf0ee;color:#c0392b}
+  .b-created,.b-processing{background:#fff8e6;color:#c07a00}
+  .b-refunded{background:#eef2ff;color:#4a5dc2}
+  .back{display:inline-block;margin-bottom:16px;font-size:13px;color:#9A7B3F;text-decoration:none}
+  .back:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<a href="/admin" class="back">← Admin Dashboard</a>
+<h1>Payment Orders</h1>
+<% if (flash) { %><div class="flash <%=flash.type%>"><%=flash.msg%></div><% } %>
+<table>
+  <thead><tr><th>Order ID</th><th>Agent</th><th>Property</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
+  <tbody>
+  <% (orders||[]).forEach(function(o) { %>
+  <tr>
+    <td style="font-family:monospace;font-size:11px"><%=o.internal_order_id%></td>
+    <td><%=o.agents&&o.agents.name?o.agents.name:'—'%><br><span style="font-size:11px;color:#888"><%=o.agents&&o.agents.email?o.agents.email:''%></span></td>
+    <td><%=o.agent_properties&&o.agent_properties.name?o.agent_properties.name:'—'%></td>
+    <td style="font-weight:600">₹<%=((o.amount_paise||0)/100).toLocaleString('en-IN')%></td>
+    <td><%=o.payment_method||'—'%></td>
+    <td><span class="badge b-<%=o.status%>"><%=o.status%></span></td>
+    <td style="font-size:12px;color:#888"><%=new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})%></td>
+  </tr>
+  <% }) %>
+  <% if (!orders||!orders.length) { %><tr><td colspan="7" style="text-align:center;color:#888;padding:24px">No payments yet.</td></tr><% } %>
+  </tbody>
+</table>
+</body>
+</html>

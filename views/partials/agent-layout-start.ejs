@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title>
+<% if (typeof robots !== 'undefined') { %><meta name="robots" content="<%= robots %>"/><% } %>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/agent.css">
+</head>
+<body class="agent-portal">
+<div class="ap-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="ap-sidebar" id="agentSidebar">
+    <div class="ap-sidebar-logo">
+      <a href="/agent/dashboard">
+        <div class="brand">RichManAssets</div>
+        <div class="sub">Agent Portal</div>
+      </a>
+    </div>
+
+    <nav class="ap-nav">
+      <div class="ap-nav-label">Menu</div>
+      <a href="/agent/dashboard" class="<%= activeNav === 'dashboard' ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="/agent/listings" class="<%= activeNav === 'listings' ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        My Listings
+      </a>
+      <a href="/agent/listings/new" class="<%= activeNav === 'new' ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+        Add Listing
+      </a>
+
+      <div class="ap-nav-label">Billing</div>
+      <a href="/agent/invoices" class="<%= activeNav === 'invoices' ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Invoices
+      </a>
+
+      <div class="ap-nav-label">Account</div>
+      <a href="/agent/profile" class="<%= activeNav === 'profile' ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+      <a href="/" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Visit Site
+      </a>
+    </nav>
+
+    <div class="ap-sidebar-footer">
+      <div class="ap-agent-info">
+        <div class="ap-avatar"><%= typeof agent !== 'undefined' && agent ? agent.name.charAt(0).toUpperCase() : 'A' %></div>
+        <div>
+          <div class="name"><%= typeof agent !== 'undefined' && agent ? agent.name : '' %></div>
+          <div class="email"><%= typeof agent !== 'undefined' && agent ? agent.email : '' %></div>
+        </div>
+      </div>
+      <form method="post" action="/agent/logout" style="display:inline">
+        <button type="submit" class="ap-logout">Sign Out</button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ap-main">
+    <div class="ap-topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="menu-toggle" onclick="toggleAgentSidebar()" style="display:none;background:none;border:0;color:var(--cream);cursor:pointer;padding:4px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="ap-topbar-title"><%= pageTitle %></div>
+      </div>
+      <div class="ap-topbar-actions">
+        <a href="/agent/listings/new" class="btn btn-primary btn-sm">+ Add Listing</a>
+      </div>
+    </div>
+    <div class="ap-sidebar-overlay" id="agentSidebarOverlay" onclick="toggleAgentSidebar()"></div>
+    <script>
+      function toggleAgentSidebar() {
+        const sidebar = document.getElementById('agentSidebar');
+        const overlay = document.getElementById('agentSidebarOverlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('open');
+      }
+    </script>
+    <div class="ap-content">

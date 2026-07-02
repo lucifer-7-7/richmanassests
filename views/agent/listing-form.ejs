@@ -1,0 +1,175 @@
+<%
+  var navLabel = isEdit ? 'listings' : 'new';
+  var pageLabel = isEdit ? ('Edit: ' + (prop && prop.name ? prop.name : 'Listing')) : 'Add New Listing';
+%>
+<%- include('../partials/agent-layout-start', { activeNav: navLabel, pageTitle: pageLabel }) %>
+
+<% if (flash) { %><div class="flash <%= flash.type %>"><%- flash.msg %></div><% } %>
+
+<form method="post" action="<%= isEdit ? '/agent/listings/' + prop.id + '/edit' : '/agent/listings' %>" enctype="multipart/form-data" id="listingForm">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+  <!-- BASIC INFO -->
+  <div class="form-section">
+    <div class="form-section-title">Property Details</div>
+    <div class="form-group">
+      <label for="pname">Property Name *</label>
+      <input type="text" id="pname" name="name" required placeholder="e.g. Sea-View Villa, Kapu" value="<%= prop && prop.name ? prop.name : '' %>">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ploc">Location / Address *</label>
+        <input type="text" id="ploc" name="loc" required placeholder="e.g. Kapu, Udupi District" value="<%= prop && prop.loc ? prop.loc : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="parea">Area / Locality</label>
+        <input type="text" id="parea" name="area" placeholder="e.g. Udupi" value="<%= prop && prop.area ? prop.area : '' %>">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ptype">Property Type *</label>
+        <select id="ptype" name="type" required>
+          <option value="">Select type…</option>
+          <% ['Apartment','Villa','House','Plot','Land','Commercial','Office','Shop','Agricultural','Penthouse','Bungalow','Row House','Other'].forEach(function(t) { %>
+          <option value="<%=t%>" <%= prop && prop.type === t ? 'selected' : '' %>><%=t%></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="plisting">Listed For *</label>
+        <select id="plisting" name="listing" required>
+          <option value="">Select…</option>
+          <option value="sale"  <%= prop && prop.listing === 'sale'  ? 'selected' : '' %>>Sale</option>
+          <option value="rent"  <%= prop && prop.listing === 'rent'  ? 'selected' : '' %>>Rent</option>
+          <option value="lease" <%= prop && prop.listing === 'lease' ? 'selected' : '' %>>Lease</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="pprice">Price Display *</label>
+        <input type="text" id="pprice" name="price" required placeholder="e.g. ₹85 Lakhs or ₹25,000/mo" value="<%= prop && prop.price ? prop.price : '' %>">
+        <div class="form-hint">Text shown on the listing card.</div>
+      </div>
+      <div class="form-group">
+        <label for="pprice_val">Price Value (₹ numeric) *</label>
+        <input type="number" id="pprice_val" name="price_val" required min="0" step="1" placeholder="8500000" value="<%= prop && prop.price_val ? prop.price_val : '' %>">
+        <div class="form-hint">Used for budget filtering. No commas.</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="pprice_note">Price Note</label>
+      <input type="text" id="pprice_note" name="price_note" placeholder="e.g. Negotiable · Bank loan available" value="<%= prop && prop.price_note ? prop.price_note : '' %>">
+    </div>
+  </div>
+
+  <!-- SPECS -->
+  <div class="form-section">
+    <div class="form-section-title">Specifications</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="pbeds">Bedrooms</label>
+        <input type="text" id="pbeds" name="beds" placeholder="e.g. 3 BHK or —" value="<%= prop && prop.beds ? prop.beds : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="pbaths">Bathrooms</label>
+        <input type="text" id="pbaths" name="baths" placeholder="e.g. 2 or —" value="<%= prop && prop.baths ? prop.baths : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="psqft">Area (sqft / Acres)</label>
+        <input type="text" id="psqft" name="sqft" placeholder="e.g. 1,800 sqft" value="<%= prop && prop.sqft ? prop.sqft : '' %>">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="psubtype">Sub-type</label>
+      <input type="text" id="psubtype" name="subtype" placeholder="e.g. Beachfront, Gated community" value="<%= prop && prop.subtype ? prop.subtype : '' %>">
+    </div>
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div class="form-section">
+    <div class="form-section-title">Description & Amenities</div>
+    <div class="form-group">
+      <label for="pdesc">Property Description</label>
+      <textarea id="pdesc" name="description" rows="5" placeholder="Describe the property in detail — location highlights, views, condition, neighbourhood…"><%= prop && prop.description ? prop.description : '' %></textarea>
+    </div>
+    <div class="form-group">
+      <label for="pamen">Amenities</label>
+      <textarea id="pamen" name="amenities" rows="3" placeholder="e.g. Swimming Pool · Gym · 24/7 Security · Parking · Backup Power"><%= prop && prop.amenities ? prop.amenities : '' %></textarea>
+      <div class="form-hint">Separate with · (bullet) or new lines.</div>
+    </div>
+  </div>
+
+  <!-- IMAGES -->
+  <div class="form-section">
+    <div class="form-section-title">Property Images</div>
+    <% if (isEdit && prop) { %>
+    <% if (prop.img_card) { %>
+    <div class="form-group">
+      <label>Current Card Image</label>
+      <div class="img-preview-wrap"><img src="<%- prop.img_card %>" class="img-preview" alt="Card"></div>
+    </div>
+    <% } %>
+    <% if (prop.img_hero) { %>
+    <div class="form-group">
+      <label>Current Hero Image</label>
+      <div class="img-preview-wrap"><img src="<%- prop.img_hero %>" class="img-preview" alt="Hero"></div>
+    </div>
+    <% } %>
+    <% if (prop.gallery) {
+      var gallery = [];
+      try { gallery = JSON.parse(prop.gallery); } catch(_) {}
+      if (gallery.length) { %>
+    <div class="form-group">
+      <label>Gallery (<%= gallery.length %> images)</label>
+      <div class="img-preview-wrap">
+        <% gallery.forEach(function(g,i) { %>
+        <div>
+          <img src="<%- g %>" class="img-preview" alt="Gallery <%=i+1%>">
+          <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:2px">
+            <label style="cursor:pointer;text-transform:none;letter-spacing:0;font-size:11px;color:var(--danger)">
+              <input type="checkbox" name="gallery_remove[]" value="<%=i%>" style="margin-right:2px">Remove
+            </label>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } } %>
+    <% } %>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="img_card">Card / Thumbnail Image</label>
+        <input type="file" id="img_card" name="img_card" accept="image/jpeg,image/png,image/webp">
+        <div class="form-hint">JPEG/PNG/WebP, max 15 MB. Shown in listings grid.</div>
+      </div>
+      <div class="form-group">
+        <label for="img_hero">Hero / Full-size Image</label>
+        <input type="file" id="img_hero" name="img_hero" accept="image/jpeg,image/png,image/webp">
+        <div class="form-hint">Shown on property detail page.</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="gallery">Gallery Images (up to 10)</label>
+      <input type="file" id="gallery" name="gallery" multiple accept="image/jpeg,image/png,image/webp">
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+      <%= isEdit ? 'Save Changes → Proceed to Payment' : 'Save Draft → Proceed to Payment' %>
+    </button>
+    <a href="/agent/listings" class="btn btn-outline">Cancel</a>
+  </div>
+</form>
+
+<script>
+document.getElementById('listingForm').addEventListener('submit', function() {
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+});
+</script>
+
+<%- include('../partials/agent-layout-end') %>

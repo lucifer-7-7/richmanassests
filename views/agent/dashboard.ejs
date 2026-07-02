@@ -1,0 +1,89 @@
+<%- include('../partials/agent-layout-start', { activeNav: 'dashboard', pageTitle: 'Dashboard' }) %>
+
+<% if (welcome) { %>
+<div class="welcome-banner">
+  <div class="wb-icon">🎉</div>
+  <div>
+    <h2>Welcome to RichManAssets Agent Portal!</h2>
+    <p>You're all set. Add your first property listing and pay ₹<%= feeRs %> to publish it.</p>
+  </div>
+</div>
+<% } %>
+
+<% if (flash) { %><div class="flash <%= flash.type %>"><%- flash.msg %></div><% } %>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="label">Total Listings</div>
+    <div class="value"><%= stats.total || 0 %></div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Published</div>
+    <div class="value gold"><%= stats.published || 0 %></div>
+    <div class="sub">Live on site</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Drafts / Pending</div>
+    <div class="value"><%= stats.draft || 0 %></div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Expired</div>
+    <div class="value"><%= stats.expired || 0 %></div>
+    <div class="sub">Need renewal</div>
+  </div>
+</div>
+
+<!-- Quick action -->
+<div style="margin-bottom:32px">
+  <a href="/agent/listings/new" class="btn btn-primary btn-lg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Add New Listing — ₹<%= feeRs %>
+  </a>
+</div>
+
+<!-- Recent listings -->
+<div class="ap-card">
+  <div class="ap-card-header">
+    <h2>Recent Listings</h2>
+    <a href="/agent/listings" class="btn btn-ghost btn-sm">View all →</a>
+  </div>
+  <% if (listings.length === 0) { %>
+  <div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <h3>No listings yet</h3>
+    <p>Create your first property listing and pay to publish it on RichManAssets.</p>
+    <a href="/agent/listings/new" class="btn btn-primary">Add First Listing</a>
+  </div>
+  <% } else { %>
+  <div class="ap-table-wrap">
+    <table class="ap-table">
+      <thead><tr><th>Property</th><th>Type</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+      <% listings.forEach(function(l) { %>
+      <tr>
+        <td>
+          <div class="prop-name"><%= l.name.length > 35 ? l.name.slice(0,35)+'…' : l.name %></div>
+          <div class="prop-loc"><%= l.loc %></div>
+        </td>
+        <td><%= l.type %></td>
+        <td><%= l.price %></td>
+        <td><span class="status-badge status-<%= l.status %>"><%= l.status.replace(/_/g,' ') %></span></td>
+        <td>
+          <% if (['draft','payment_failed'].includes(l.status)) { %>
+          <a href="/agent/listings/<%= l.id %>/pay" class="btn btn-primary btn-sm">Pay to Publish</a>
+          <% } else if (l.status === 'published') { %>
+          <a href="/property/<%= l.id %>" class="btn btn-outline btn-sm" target="_blank">View Live</a>
+          <% } else { %>
+          <span style="color:var(--muted);font-size:13px">—</span>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<%- include('../partials/agent-layout-end') %>

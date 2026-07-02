@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/agent.css">
+</head>
+<body class="agent-portal">
+<div class="status-page">
+  <div class="status-box">
+    <div id="spinnerWrap">
+      <div class="spinner"></div>
+      <h2 style="color:var(--cream);margin-bottom:8px">Verifying Payment</h2>
+      <p style="color:var(--muted);font-size:14px">Please wait while we confirm your payment…</p>
+    </div>
+    <div id="statusDone" style="display:none">
+      <div id="resultIcon" class="result-icon" style="margin:0 auto 16px"></div>
+      <h2 id="resultTitle" style="color:var(--cream);margin-bottom:8px"></h2>
+      <p id="resultMsg" style="color:var(--muted);font-size:14px;margin-bottom:20px"></p>
+      <a id="resultBtn" href="/agent/dashboard" class="btn btn-primary btn-full">Continue</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var ORDER_ID  = '<%- order && order.internal_order_id ? order.internal_order_id : "" %>';
+var MAX_POLLS = 20;   // 20 × 3s = 60 seconds
+var polls     = 0;
+
+function showResult(status, propId) {
+  document.getElementById('spinnerWrap').style.display = 'none';
+  document.getElementById('statusDone').style.display = 'block';
+  var icon  = document.getElementById('resultIcon');
+  var title = document.getElementById('resultTitle');
+  var msg   = document.getElementById('resultMsg');
+  var btn   = document.getElementById('resultBtn');
+
+  if (status === 'paid') {
+    icon.className  = 'result-icon success';
+    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="#4CAF82" stroke-width="2.5" width="36" height="36"><polyline points="20 6 9 17 4 12"/></svg>';
+    title.textContent = '🎉 Payment Successful!';
+    msg.textContent   = 'Your listing is now live on RichManAssets.';
+    btn.href = propId ? '/property/' + propId : '/agent/listings';
+    btn.textContent = 'View Live Listing →';
+  } else if (['failed','cancelled'].includes(status)) {
+    icon.className  = 'result-icon fail';
+    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="#E05353" stroke-width="2.5" width="36" height="36"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    title.textContent = 'Payment Failed';
+    msg.textContent   = 'Your payment could not be completed. No charge has been made. You can retry.';
+    btn.href = '/agent/listings';
+    btn.textContent = 'Back to Listings';
+  } else {
+    // still processing
+    icon.className  = 'result-icon';
+    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2" width="36" height="36"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>';
+    title.textContent = 'Payment Pending';
+    msg.textContent   = 'Your payment is being processed. Check My Listings in a minute.';
+    btn.href = '/agent/listings';
+    btn.textContent = 'View My Listings';
+  }
+}
+
+async function poll() {
+  if (!ORDER_ID) { showResult('unknown'); return; }
+  polls++;
+  try {
+    var r = await fetch('/agent/payment/api-status/' + ORDER_ID);
+    var d = await r.json();
+    if (d.ok && ['paid','failed','cancelled','refunded'].includes(d.status)) {
+      showResult(d.status, d.property_id);
+    } else if (polls >= MAX_POLLS) {
+      showResult('pending');
+    } else {
+      setTimeout(poll, 3000);
+    }
+  } catch(_) {
+    if (polls >= MAX_POLLS) showResult('pending');
+    else setTimeout(poll, 3000);
+  }
+}
+
+// Start polling immediately
+poll();
+</script>
+</body>
+</html>

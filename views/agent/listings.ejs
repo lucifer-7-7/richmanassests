@@ -1,0 +1,83 @@
+<%- include('../partials/agent-layout-start', { activeNav: 'listings', pageTitle: 'My Listings' }) %>
+
+<% if (flash) { %><div class="flash <%= flash.type %>"><%- flash.msg %></div><% } %>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <div class="filter-tabs">
+    <a href="/agent/listings" class="filter-tab <%= filterStatus === 'all' ? 'active' : '' %>">All (<%= listings.length %>)</a>
+    <a href="/agent/listings?status=published"       class="filter-tab <%= filterStatus === 'published'       ? 'active' : '' %>">Published</a>
+    <a href="/agent/listings?status=draft"           class="filter-tab <%= filterStatus === 'draft'           ? 'active' : '' %>">Draft</a>
+    <a href="/agent/listings?status=payment_failed"  class="filter-tab <%= filterStatus === 'payment_failed'  ? 'active' : '' %>">Failed</a>
+    <a href="/agent/listings?status=expired"         class="filter-tab <%= filterStatus === 'expired'         ? 'active' : '' %>">Expired</a>
+  </div>
+  <a href="/agent/listings/new" class="btn btn-primary btn-sm">+ Add Listing — ₹<%= feeRs %></a>
+</div>
+
+<div class="ap-card">
+  <% if (listings.length === 0) { %>
+  <div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <h3>No listings found</h3>
+    <p><% if (filterStatus !== 'all') { %>No listings in this status.<% } else { %>You haven't added any listings yet.<% } %></p>
+    <a href="/agent/listings/new" class="btn btn-primary">Add First Listing</a>
+  </div>
+  <% } else { %>
+  <div class="ap-table-wrap">
+    <table class="ap-table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Type / For</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Expires</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% listings.forEach(function(l) { %>
+      <tr>
+        <td>
+          <div class="prop-name"><%= l.name %></div>
+          <div class="prop-loc">📍 <%= l.loc %></div>
+        </td>
+        <td><%= l.type %> · <%= l.listing %></td>
+        <td><%= l.price %></td>
+        <td><span class="status-badge status-<%= l.status %>"><%= l.status.replace(/_/g,' ') %></span></td>
+        <td style="font-size:12px;color:var(--muted)">
+          <% if (l.expires_at) { %>
+            <%= new Date(l.expires_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) %>
+          <% } else { %>—<% } %>
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <% if (l.status === 'published') { %>
+              <a href="/property/<%= l.id %>" class="btn btn-outline btn-sm" target="_blank">View Live</a>
+            <% } %>
+            <% if (['draft','payment_failed'].includes(l.status)) { %>
+              <a href="/agent/listings/<%= l.id %>/edit" class="btn btn-ghost btn-sm">Edit</a>
+              <a href="/agent/listings/<%= l.id %>/pay" class="btn btn-primary btn-sm">Pay to Publish</a>
+            <% } %>
+            <% if (l.status === 'payment_pending') { %>
+              <a href="/agent/listings/<%= l.id %>/pay" class="btn btn-outline btn-sm">Resume Payment</a>
+            <% } %>
+            <% if (l.status === 'expired') { %>
+              <a href="/agent/listings/<%= l.id %>/pay" class="btn btn-primary btn-sm">Renew Listing</a>
+            <% } %>
+            <% if (['draft','payment_failed'].includes(l.status)) { %>
+            <form method="post" action="/agent/listings/<%= l.id %>/delete" onsubmit="return confirm('Delete this draft listing?')" style="display:inline">
+              <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+            <% } %>
+          </div>
+        </td>
+      </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<%- include('../partials/agent-layout-end') %>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/agent.css">
+</head>
+<body class="agent-portal">
+<div class="ap-auth-page">
+  <div class="ap-auth-box">
+    <div class="ap-auth-logo">
+      <div class="brand">Rich<em>Man</em>Assets</div>
+      <div class="sub">Agent Portal</div>
+    </div>
+    <h1>Create Account</h1>
+    <p class="sub">List your properties on RichManAssets and reach thousands of buyers.</p>
+
+    <% if (flash) { %>
+    <div class="flash <%= flash.type %>">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <%- flash.msg %>
+    </div>
+    <% } %>
+
+    <form method="post" action="/agent/register">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-name">Full Name *</label>
+          <input type="text" id="reg-name" name="name" required placeholder="Rajesh Kumar" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="reg-phone">Phone *</label>
+          <input type="tel" id="reg-phone" name="phone" required placeholder="9876543210" maxlength="10">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email Address *</label>
+        <input type="email" id="reg-email" name="email" required placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Password *</label>
+        <input type="password" id="reg-password" name="password" required placeholder="Min 8 characters" minlength="8" autocomplete="new-password">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-company">Company / Agency</label>
+          <input type="text" id="reg-company" name="company_name" placeholder="Acme Realty">
+        </div>
+        <div class="form-group">
+          <label for="reg-city">City</label>
+          <input type="text" id="reg-city" name="city" placeholder="Udupi">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-rera">RERA Number</label>
+          <input type="text" id="reg-rera" name="rera_number" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label for="reg-gst">GST Number</label>
+          <input type="text" id="reg-gst" name="gst_number" placeholder="For invoices">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg" id="reg-submit">
+        Create Account →
+      </button>
+    </form>
+    <p class="ap-auth-link">Already have an account? <a href="/agent/login">Sign in</a></p>
+    <p class="ap-auth-link" style="margin-top:8px"><a href="/">← Back to site</a></p>
+  </div>
+</div>
+<script>
+document.getElementById('reg-submit').addEventListener('click', function() {
+  this.disabled = true; this.textContent = 'Creating account…';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title><meta name="robots" content="noindex,nofollow"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#F7F4ED;padding:24px;color:#17150F}
+  h1{font-size:22px;font-weight:500;margin-bottom:20px}
+  .flash{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px}
+  .ok{background:#e6f9f0;color:#2e7d52}.err{background:#fdf0ee;color:#c0392b}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);font-size:12px}
+  th{text-align:left;padding:10px 12px;background:#f9f7f2;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#928A79;border-bottom:1px solid #eee}
+  td{padding:10px 12px;border-bottom:1px solid #f0ede5;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .badge{display:inline-flex;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600}
+  .b-true{background:#e6f9f0;color:#2e7d52}.b-false{background:#fdf0ee;color:#c0392b}
+  .payload{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:11px;color:#555}
+  .back{display:inline-block;margin-bottom:16px;font-size:13px;color:#9A7B3F;text-decoration:none}
+</style>
+</head>
+<body>
+<a href="/admin" class="back">← Admin Dashboard</a>
+<h1>Webhook Logs</h1>
+<% if (flash) { %><div class="flash <%=flash.type%>"><%=flash.msg%></div><% } %>
+<table>
+  <thead><tr><th>Time</th><th>Event</th><th>CF Order</th><th>Sig Valid</th><th>Processed</th><th>Payload</th></tr></thead>
+  <tbody>
+  <% (logs||[]).forEach(function(l) { %>
+  <tr>
+    <td style="white-space:nowrap;color:#888"><%=new Date(l.received_at).toLocaleString('en-IN',{hour12:false})%></td>
+    <td style="font-weight:600"><%=l.event_type||'—'%></td>
+    <td style="font-family:monospace"><%=l.cashfree_order_id||'—'%></td>
+    <td><span class="badge b-<%=l.sig_valid%>"><%=l.sig_valid?'✓':'✗'%></span></td>
+    <td><span class="badge b-<%=l.processed%>"><%=l.processed?'Yes':'No'%></span>
+      <% if(l.processing_error){%><div style="font-size:10px;color:#c0392b;margin-top:2px"><%=l.processing_error%></div><%}%>
+    </td>
+    <td class="payload" title="<%=l.payload%>"><%=l.payload.slice(0,100)%>…</td>
+  </tr>
+  <% }) %>
+  <% if (!logs||!logs.length) { %><tr><td colspan="6" style="text-align:center;color:#888;padding:24px">No webhook logs yet.</td></tr><% } %>
+  </tbody>
+</table>
+</body>
+</html>

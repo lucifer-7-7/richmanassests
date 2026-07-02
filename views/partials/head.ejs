@@ -3,11 +3,12 @@
   var _canonical = (typeof locals.canonical !== 'undefined' && locals.canonical) ? locals.canonical : _site;
   var _desc = (typeof locals.description !== 'undefined' && locals.description)
     ? locals.description
-    : 'Buy, rent or lease premium property across Udupi, Mangaluru and coastal Karnataka. Villas, flats, plots, commercial and agricultural land, plus home loans, legal and interiors.';
+    : 'Buy, rent or lease property in Udupi, Mangaluru & coastal Karnataka. Verified villas, 2BHK & 3BHK apartments, residential plots, commercial space, beach-facing land & agricultural sites. Home loans, legal services & interiors under one roof. 15+ years · 1,200+ families · ₹500 Cr+ transacted.';
   var _ogImg = (typeof locals.ogImage !== 'undefined' && locals.ogImage) ? locals.ogImage : (_site + '/assets/img/site-hero.jpg');
   if (_ogImg.indexOf('http') !== 0) _ogImg = _site + (_ogImg.charAt(0) === '/' ? '' : '/') + _ogImg;
   var _ogType = (typeof locals.ogType !== 'undefined' && locals.ogType) ? locals.ogType : 'website';
-  var _robots = (typeof locals.robots !== 'undefined' && locals.robots) ? locals.robots : 'index,follow,max-image-preview:large';
+  var _robots = (typeof locals.robots !== 'undefined' && locals.robots) ? locals.robots : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
+  var _pageTitle = (typeof locals.title !== 'undefined') ? locals.title : 'RichManAssets';
 %>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
@@ -16,23 +17,35 @@
 <meta name="robots" content="<%= _robots %>"/>
 <link rel="canonical" href="<%= _canonical %>"/>
 <meta name="theme-color" content="#17150F"/>
+
+<!-- Geo targeting (Google & Bing local signals) -->
 <meta name="geo.region" content="IN-KA"/>
-<meta name="geo.placename" content="Udupi, Mangaluru"/>
+<meta name="geo.placename" content="Udupi, Karnataka, India"/>
+<meta name="geo.position" content="13.343869;74.7435883"/>
+<meta name="ICBM" content="13.343869, 74.7435883"/>
+
+<!-- Language & region targeting -->
+<link rel="alternate" hreflang="en-IN" href="<%= _canonical %>"/>
+<link rel="alternate" hreflang="en" href="<%= _canonical %>"/>
 
 <!-- Open Graph -->
 <meta property="og:type" content="<%= _ogType %>"/>
 <meta property="og:title" content="<%= title %>"/>
 <meta property="og:description" content="<%= _desc %>"/>
 <meta property="og:image" content="<%= _ogImg %>"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="<%= _pageTitle %> — Real Estate in Udupi & Mangaluru"/>
 <meta property="og:url" content="<%= _canonical %>"/>
 <meta property="og:site_name" content="RichManAssets"/>
 <meta property="og:locale" content="en_IN"/>
 
-<!-- Twitter -->
+<!-- Twitter / X Card -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="<%= title %>"/>
 <meta name="twitter:description" content="<%= _desc %>"/>
 <meta name="twitter:image" content="<%= _ogImg %>"/>
+<meta name="twitter:image:alt" content="<%= _pageTitle %> — Udupi Real Estate"/>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,21 +58,33 @@
 <link rel="stylesheet" href="/assets/site.css?v=3">
 <link rel="stylesheet" href="/assets/market.css?v=3">
 
-<!-- Sitewide structured data: local real-estate agent + site search -->
+<!-- ══════════════════════════════════════════════════════════════
+     STRUCTURED DATA — Schema.org
+     ══════════════════════════════════════════════════════════════ -->
+
+<!-- RealEstateAgent (LocalBusiness) — sitewide -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "RealEstateAgent",
+  "@type": ["RealEstateAgent", "LocalBusiness"],
   "@id": "<%= _site %>/#organization",
   "name": "RichManAssets",
-  "alternateName": "RichManAssets, Vittu Bharat Associates LLP",
-  "description": "Premium property marketplace and real-estate consultants for Udupi, Mangaluru and coastal Karnataka. Villas, flats, plots, commercial space, rentals, home loans, legal and interiors.",
+  "alternateName": ["RichMan Assets", "Vittu Bharat Associates LLP", "Rich Man Assets Udupi"],
+  "description": "Premium property marketplace and real-estate consultants in Udupi, Karnataka. Specialists in villas, apartments, plots, commercial space, agricultural land, rentals, home loans, legal services and interior design across Udupi, Manipal, Mangaluru and coastal Karnataka.",
   "url": "<%= _site %>",
-  "logo": "<%= _site %>/assets/img/site-hero.jpg",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "<%= _site %>/assets/img/site-hero.jpg",
+    "width": 1200,
+    "height": 630
+  },
   "image": "<%= _site %>/assets/img/site-hero.jpg",
   "telephone": "+919036001234",
   "email": "hello@richmanassets.com",
   "priceRange": "₹₹₹",
+  "hasMap": "https://maps.google.com/?q=13.343869,74.7435883",
+  "paymentAccepted": "Cash, Bank Transfer, Home Loan",
+  "currenciesAccepted": "INR",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "2nd Floor, Sri Ram Building, Opp. Manjunath Eye Hospital, Bannanje Road",
@@ -74,34 +99,71 @@
     { "@type": "City", "name": "Mangaluru" },
     { "@type": "City", "name": "Manipal" },
     { "@type": "City", "name": "Surathkal" },
-    { "@type": "City", "name": "Kapu" },
+    { "@type": "City", "name": "Kaup" },
     { "@type": "City", "name": "Mulki" },
+    { "@type": "City", "name": "Padubidri" },
+    { "@type": "City", "name": "Udyavara" },
+    { "@type": "City", "name": "Malpe" },
+    { "@type": "City", "name": "Kundapura" },
     { "@type": "AdministrativeArea", "name": "Dakshina Kannada" },
-    { "@type": "AdministrativeArea", "name": "Udupi District" }
+    { "@type": "AdministrativeArea", "name": "Udupi District" },
+    { "@type": "AdministrativeArea", "name": "Coastal Karnataka" }
   ],
   "openingHoursSpecification": [{
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-    "opens": "09:30", "closes": "19:00"
+    "opens": "09:30",
+    "closes": "19:00"
   }],
-  "sameAs": []
+  "knowsAbout": [
+    "Real estate in Udupi",
+    "Property for sale in Udupi",
+    "Plots for sale in Udupi",
+    "Flats for sale in Udupi",
+    "Villas in Udupi",
+    "House for sale in Udupi",
+    "Home loans Udupi",
+    "Commercial property Mangaluru",
+    "Agricultural land Karnataka",
+    "Interior design Udupi",
+    "Real estate agent Udupi"
+  ],
+  "sameAs": [
+    "https://www.facebook.com/richmanassets",
+    "https://www.instagram.com/richmanassets"
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "1200",
+    "bestRating": "5",
+    "worstRating": "1"
+  }
 }
 </script>
+
+<!-- WebSite + Sitelinks SearchBox -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "@id": "<%= _site %>/#website",
   "url": "<%= _site %>",
-  "name": "RichManAssets",
+  "name": "RichManAssets — Real Estate in Udupi & Mangaluru",
+  "description": "Buy, sell, rent or lease property in Udupi, Manipal, Mangaluru and coastal Karnataka.",
   "publisher": { "@id": "<%= _site %>/#organization" },
+  "inLanguage": "en-IN",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": { "@type": "EntryPoint", "urlTemplate": "<%= _site %>/properties?area={search_term_string}" },
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "<%= _site %>/properties?area={search_term_string}"
+    },
     "query-input": "required name=search_term_string"
   }
 }
 </script>
+
 <% if (typeof jsonld !== 'undefined' && jsonld) { %>
 <script type="application/ld+json"><%- jsonld %></script>
 <% } %>

@@ -3,6 +3,76 @@
 <head>
 <%- include('partials/head') %>
 <link rel="stylesheet" href="/assets/home.css?v=4">
+
+<!-- FAQPage structured data — boosts Featured Snippets, PAA, voice search, AI citations -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq-answer"]
+  },
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the property price in Udupi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Property prices in Udupi range from ₹20–30 lakh for a residential plot in upcoming localities to ₹1–5 crore for villas and independent houses in premium areas like Manipal, Kunjibettu and Ambalpady. Apartment prices typically range from ₹40 lakh to ₹1.5 crore for a 2BHK or 3BHK flat. Land prices per cent range from ₹1–3 lakh in suburban areas to ₹5–15 lakh for beach-facing or town-centre plots. Contact RichManAssets for current market rates and title-verified listings."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Udupi a good place to invest in real estate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Udupi is one of Karnataka's fastest-growing real-estate markets. Key growth drivers include the Manipal educational corridor (steady rental demand), coastal tourism (beach property appreciation), the Udupi–Mangaluru highway upgrade, and NRI investment from the Gulf diaspora. Residential plots and villas in Udupi have consistently appreciated 8–12% annually over the past decade. RichManAssets has tracked this market for 15+ years and can guide you to the right investment."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which areas in Udupi are best for buying a house?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The most sought-after areas for buying a house in Udupi are: Manipal (ideal for investment and rental income near the university), Kunjibettu and Udyavara (premium residential localities close to the city centre), Ambalpady and Doddanagudde (growing apartment and villa hubs), Kaup and Padubidri (beach-proximity lifestyle properties), and Malpe (coastal investments). RichManAssets lists verified properties across all these locations."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I buy a house in Udupi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To buy a house in Udupi: (1) Set your budget and preferred area; (2) Browse verified listings on RichManAssets or visit our office; (3) Shortlist properties and schedule site visits; (4) Our legal team conducts title verification and due diligence; (5) We help you arrange a home loan through our 11 authorised banking partners; (6) We handle the sale deed drafting and registration. End-to-end support from search to keys — contact us at +91 90360 01234."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What types of property are available in Udupi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Udupi offers a wide range of property types: independent houses and villas, 2BHK and 3BHK apartments and flats, residential plots and layouts, beach-facing and river-facing sites, commercial offices and retail showrooms, agricultural land and coffee plantations, and gated community projects. RichManAssets lists all these categories with 100% title-clear properties across Udupi, Manipal and coastal Karnataka."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does RichManAssets help with home loans in Udupi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. RichManAssets is an authorised channel partner for 11 banks including SBI, HDFC, Bank of Baroda, Karnataka Bank, IDBI, SVC Bank, Piramal Finance and Cholamandalam Finance. We offer pre-approved loan offers, doorstep documentation, eligibility checks and the best negotiated interest rates in Udupi and Mangaluru. Our home loan assistance is free for property buyers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can NRIs buy property in Udupi through RichManAssets?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. NRIs (Non-Resident Indians) can purchase residential and commercial property in Udupi through RichManAssets. We handle the full process remotely: property shortlisting, virtual site tours, title verification, power of attorney arrangements, home loan processing and registration. Udupi is particularly popular with NRIs from the Gulf countries, the UK and the US. Contact us at hello@richmanassets.com for NRI property services."
+      }
+    }
+  ]
+}
+</script>
 <style>
   .loans-cta{background:var(--paper-2)}
   .loans-in{display:grid;gap:30px;align-items:center;padding:clamp(48px,7vw,96px) 0}
@@ -39,6 +109,30 @@
   .bank-logo-wrap{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;width:100%}
   .bank-logo-wrap img{max-height:40px;max-width:110px;width:auto;object-fit:contain;display:block}
   .bank-name{font-size:10.5px;color:var(--ink-3);line-height:1.3;letter-spacing:.01em;text-align:center}
+
+  /* FAQ section */
+  .faq-item{
+    border-bottom:1px solid var(--line);
+    padding:24px 0;
+  }
+  .faq-item:last-child{border-bottom:0}
+  .faq-q{
+    font-family:var(--f-display);
+    font-size:clamp(17px,2vw,21px);
+    font-weight:400;
+    line-height:1.25;
+    color:var(--ink);
+    margin-bottom:10px;
+    cursor:default;
+  }
+  .faq-answer{
+    color:var(--ink-3);
+    font-size:15px;
+    line-height:1.72;
+    max-width:72ch;
+  }
+  .faq-answer a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+  .faq-answer strong{color:var(--ink-2)}
 </style>
 
 <link rel="preload" as="image" href="<%= heroSlides[0] && heroSlides[0].img_hero ? (heroSlides[0].img_hero.indexOf('http')===0 ? heroSlides[0].img_hero : '/' + heroSlides[0].img_hero) : '/assets/img/site-hero.jpg' %>" fetchpriority="high">
@@ -604,6 +698,64 @@
     </div>
     <%- include('partials/enquiry-form', { propertyRef: '' }) %>
   </div></div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- FAQ SECTION — Featured Snippets, PAA, GEO, Voice Search    -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="sec intro" id="faq" data-screen-label="FAQ">
+  <div class="intro-head">
+    <h2 class="fx">Frequently asked <span class="it">questions.</span></h2>
+    <p class="sub fx">Everything you need to know about buying, renting or investing in property in Udupi, Manipal and coastal Karnataka.</p>
+  </div>
+  <div class="wrap" style="max-width:860px;margin:0 auto">
+
+    <div class="faq-item fx">
+      <h3 class="faq-q">What is the property price in Udupi?</h3>
+      <p class="faq-answer">Property prices in Udupi range from <strong>₹20–30 lakh</strong> for a residential plot in upcoming localities to <strong>₹1–5 crore</strong> for villas and independent houses in premium areas like Manipal, Kunjibettu and Ambalpady. 2BHK and 3BHK apartment prices typically range from <strong>₹40 lakh to ₹1.5 crore</strong>. Land prices per cent range from ₹1–3 lakh in suburban areas to ₹5–15 lakh for beach-facing or town-centre plots. <a href="/contact">Contact us</a> for current verified market rates.</p>
+    </div>
+
+    <div class="faq-item fx">
+      <h3 class="faq-q">Is Udupi a good place to invest in real estate?</h3>
+      <p class="faq-answer">Yes — Udupi is one of Karnataka's fastest-growing real-estate markets. Growth drivers include the <strong>Manipal educational corridor</strong> (steady rental demand), coastal tourism, the Udupi–Mangaluru highway, and strong NRI investment from the Gulf diaspora. Residential plots and villas have appreciated <strong>8–12% annually</strong> over the past decade. We have tracked this market for 15+ years and can guide you to the right investment.</p>
+    </div>
+
+    <div class="faq-item fx">
+      <h3 class="faq-q">Which areas in Udupi are best for buying a house?</h3>
+      <p class="faq-answer">The most sought-after localities for buying a house in Udupi are: <strong>Manipal</strong> (university rental income), <strong>Kunjibettu &amp; Udyavara</strong> (upmarket residential), <strong>Ambalpady &amp; Doddanagudde</strong> (new apartment hubs), <strong>Kaup &amp; Padubidri</strong> (beach lifestyle), and <strong>Malpe</strong> (coastal investment). Browse our <a href="/properties">verified listings</a> across all locations.</p>
+    </div>
+
+    <div class="faq-item fx">
+      <h3 class="faq-q">How do I buy a house in Udupi?</h3>
+      <p class="faq-answer">Buying a house in Udupi involves five steps: <strong>1.</strong> Set your budget and preferred area. <strong>2.</strong> Browse our title-verified listings and visit shortlisted properties. <strong>3.</strong> Our legal team conducts title verification and due diligence. <strong>4.</strong> We arrange a home loan through our 11 authorised banking partners at the best rates. <strong>5.</strong> We handle sale deed drafting and registration — fully end-to-end. <a href="/contact">Start here →</a></p>
+    </div>
+
+    <div class="faq-item fx">
+      <h3 class="faq-q">Does RichManAssets help with home loans in Udupi?</h3>
+      <p class="faq-answer">Yes. We are authorised channel partners for <strong>11 banks</strong> including SBI, HDFC, Bank of Baroda, Karnataka Bank, IDBI and Piramal Finance. We offer pre-approved offers, doorstep documentation and the best negotiated interest rates in Udupi and Mangaluru — at no cost to property buyers. <a href="/loans">Check your eligibility →</a></p>
+    </div>
+
+    <div class="faq-item fx">
+      <h3 class="faq-q">Can NRIs buy property in Udupi?</h3>
+      <p class="faq-answer">Yes. NRIs can purchase residential and commercial property in Udupi. RichManAssets handles the full process remotely — virtual tours, title verification, power of attorney, home loan processing and registration. Udupi is popular with NRIs from the Gulf, UK and US. <a href="/contact?service=nri">Contact our NRI desk →</a></p>
+    </div>
+
+  </div>
+</section>
+
+<!-- NAP Block — Local SEO signals for Google & Maps -->
+<section class="sec-tight" style="background:var(--paper-2)" data-screen-label="Office">
+  <div class="wrap" style="text-align:center;padding:32px 0">
+    <p style="font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px">Our office — Udupi</p>
+    <address style="font-style:normal;color:var(--ink-2);font-size:14px;line-height:1.8">
+      <strong>RichManAssets</strong> (Vittu Bharat Associates LLP)<br>
+      2nd Floor, Sri Ram Building, Opp. Manjunath Eye Hospital, Bannanje Road,<br>
+      Udupi, Karnataka — 576101, India<br>
+      <a href="tel:+919036001234" style="color:var(--accent)">+91 90360 01234</a> &nbsp;·&nbsp;
+      <a href="tel:+918202539961" style="color:var(--accent)">+91 820 253 9961</a> &nbsp;·&nbsp;
+      <a href="mailto:hello@richmanassets.com" style="color:var(--accent)">hello@richmanassets.com</a>
+    </address>
+  </div>
 </section>
 
 <%- include('partials/footer') %>
