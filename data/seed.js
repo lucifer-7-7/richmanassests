@@ -389,38 +389,45 @@ const TESTIMONIALS = [
   { initials:'AD', name:'Arjun & Divya', role:'Build & interiors · Udupi', quote:'Plot, construction and interiors with one team. No finger pointing, no surprises. We would do it again.', active:1 },
 ];
 
-module.exports = function seed(db) {
-  const insertProp = db.prepare(`
-    INSERT OR IGNORE INTO properties
-      (id, name, loc, area, type, listing, price, price_val, price_note,
-       beds, baths, sqft, subtype, featured, has_img, img_card, img_hero,
-       story_kicker, story_heading, story_body, amenities,
-       setting_heading, setting_body, setting_pills,
-       emi_label, emi_val, next_id, sort_order)
-    VALUES
-      (@id, @name, @loc, @area, @type, @listing, @price, @price_val, @price_note,
-       @beds, @baths, @sqft, @subtype, @featured, @has_img, @img_card, @img_hero,
-       @story_kicker, @story_heading, @story_body, @amenities,
-       @setting_heading, @setting_body, @setting_pills,
-       @emi_label, @emi_val, @next_id, @sort_order)
-  `);
-
-  const insertTestimonial = db.prepare(`
-    INSERT OR IGNORE INTO testimonials (initials, name, role, quote, active)
-    VALUES (@initials, @name, @role, @quote, @active)
-  `);
-
-  const insertAll = db.transaction(() => {
-    for (const p of HOMES) insertProp.run({
-      price_note: null, subtype: null, featured: 0,
+module.exports = async function seed(db) {
+  console.log('Seeding Supabase database...');
+  
+  try {
+    // 1. Seed properties
+    const propsToInsert = HOMES.map(p => ({
+      price_note: null, subtype: null, featured: false,
       badge_txt: null, story_kicker: null, story_heading: null,
       story_body: null, amenities: null, setting_heading: null,
       setting_body: null, setting_pills: null, emi_label: null,
       emi_val: null, next_id: null,
       ...p,
-    });
-    for (const t of TESTIMONIALS) insertTestimonial.run(t);
-  });
+      featured: p.featured === 1,
+      has_img: p.has_img === 1
+    }));
+    
+    console.log(`Inserting ${propsToInsert.length} properties...`);
+    const { error: propErr } = await db.from('properties').upsert(propsToInsert, { onConflict: 'id' });
+    if (propErr) throw propErr;
 
-  insertAll();
+    // 2. Seed testimonials
+    const testimonialsToInsert = TESTIMONIALS.map(t => ({
+      ...t,
+      active: t.active === 1
+    }));
+    
+    console.log(`Inserting ${testimonialsToInsert.length} testimonials...`);
+    const { error: testErr } = await db.from('testimonials').upsert(testimonialsToInsert, { onConflict: 'id', ignoreDuplicates: true });
+    if (testErr) throw testErr;
+    
+    console.log('Database seeding complete!');
+  } catch (err) {
+    console.error('Error seeding database:', err.message);
+  }
 };
+
+// Allow running directly from command line
+if (require.main === module) {
+  require('dotenv').config();
+  const { getDB } = require('../db/db');
+  module.exports(getDB()).then(() => process.exit(0));
+}

@@ -238,7 +238,14 @@ app.use((err, req, res, next) => {
 initDB();
 
 if (require.main === module) {
-  app.listen(PORT, () => console.log(`RichManAssets running → http://localhost:${PORT}`));
+  const server = app.listen(PORT, () => console.log(`RichManAssets running → http://localhost:${PORT}`));
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`[server warning] Port ${PORT} is already in use by an active background instance. The app is serving at http://localhost:${PORT}`);
+    } else {
+      console.error('[server error]', err);
+    }
+  });
 }
 
 module.exports = app;

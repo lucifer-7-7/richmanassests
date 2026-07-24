@@ -81,10 +81,10 @@
 .plist .meta span{display:flex;align-items:center;gap:5px}
 .plist .meta svg{width:13px;height:13px;color:var(--muted)}
 .plist .cta{margin-top:auto;display:flex;gap:7px;padding-top:12px}
-.plist .cta a{flex:1;text-align:center;padding:11px;border-radius:var(--r-sm);font-size:13px;letter-spacing:.02em;transition:.3s var(--ease)}
+.plist .cta a{flex:1;text-align:center;padding:10px 18px;border-radius:100px;font-size:12.5px;font-weight:600;letter-spacing:.02em;transition:.3s var(--ease)}
 .plist .cta .v{background:var(--ink);color:var(--paper)}
 .plist .cta .v:hover{background:var(--gold-deep)}
-.plist .cta .w{border:1px solid var(--line);color:var(--ink);flex:none;width:44px;display:grid;place-items:center;border-radius:var(--r-sm)}
+.plist .cta .w{border:1px solid var(--line);color:var(--ink);flex:none;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;padding:0}
 .plist .cta .w:hover{background:#25D366;border-color:#25D366;color:#fff}
 .plist .cta .w svg{width:16px;height:16px}
 .ph-placeholder{position:absolute;inset:0;background:repeating-linear-gradient(135deg,var(--paper-2),var(--paper-2) 10px,var(--paper-3) 10px,var(--paper-3) 20px);display:grid;place-items:center}

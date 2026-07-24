@@ -8,6 +8,7 @@ const { getDB, check } = require('../db/db');
 const propSvc  = require('../services/propertyService');
 const agentSvc = require('../services/agentService');
 const { getAllOrders, initiateRefund } = require('../services/paymentService');
+const { getPromoBanner, updatePromoBanner } = require('../lib/settings');
 
 // ── CSRF Protection: Verify Host Origin for all POST/PUT/DELETE requests ──
 router.use((req, res, next) => {
@@ -134,11 +135,12 @@ router.get('/', requireAdmin, async (req, res) => {
     res.render('admin/dashboard', {
       flash: req.session.flash || null,
       properties, enquiries, agentProps, agents, orders, logs, stats,
+      promoBanner: getPromoBanner(),
     });
     delete req.session.flash;
   } catch (err) {
     console.error('[admin/dashboard]', err.message);
-    res.render('admin/dashboard', { flash: { type:'err', msg: err.message }, properties:[], enquiries:[], agentProps:[], agents:[], stats:{} });
+    res.render('admin/dashboard', { flash: { type:'err', msg: err.message }, properties:[], enquiries:[], agentProps:[], agents:[], orders:[], logs:[], stats:{} });
   }
 });
 
@@ -312,6 +314,16 @@ router.get('/webhook-logs', requireAdmin, async (req, res) => {
   } catch (err) {
     res.render('admin/webhook-logs', { title: 'Webhook Logs | Admin', flash: { type:'err', msg: err.message }, logs: [] });
   }
+});
+
+router.post('/settings/promo-banner', requireAdmin, (req, res) => {
+  const { active, kicker, title, subtitle, bg_img, cta_text, cta_link } = req.body;
+  updatePromoBanner({
+    active: active === 'on' || active === 'true' || active === true,
+    kicker, title, subtitle, bg_img, cta_text, cta_link,
+  });
+  req.session.flash = 'Promotional Ad Banner settings updated successfully!';
+  res.redirect('/admin');
 });
 
 module.exports = router;

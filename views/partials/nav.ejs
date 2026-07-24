@@ -1,61 +1,23 @@
 <nav class="nav" id="nav">
-  <a href="/" class="brand">RichMan<span class="mono">Assets</span></a>
+  <a href="/" class="brand">RichMan<span class="mono">ASSETS</span></a>
   <div class="nav-links">
     <a href="/properties?listing=sale">Buy</a>
     <a href="/properties?listing=rent">Rent</a>
+    <a href="/interiors">Interiors</a>
     <a href="/services">Services</a>
     <a href="/loans">Loans</a>
     <a href="/about">About</a>
-    <a href="/contact" class="nav-cta">Enquire</a>
+    <a href="/agent/login">Agent Portal</a>
+    <a href="/contact" class="nav-cta">Enquire →</a>
   </div>
-  <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
-
-<!-- mobile drawer -->
-<div class="drawer-overlay" id="drawerOverlay"></div>
-<nav class="nav-drawer" id="navDrawer" aria-label="Mobile menu">
-  <a href="/properties?listing=sale">Buy</a>
-  <a href="/properties?listing=rent">Rent</a>
-  <a href="/properties">Browse all</a>
-  <a href="/services">Services</a>
-  <a href="/loans">Home Loans</a>
-  <a href="/about">About</a>
-  <a href="/contact" class="drawer-cta">Enquire now →</a>
 </nav>
 
 <script>
 (function(){
-  var burger = document.getElementById('navBurger');
-  var drawer = document.getElementById('navDrawer');
-  var overlay = document.getElementById('drawerOverlay');
-  if (!burger) return;
-  function open() {
-    drawer.classList.add('open');
-    overlay.classList.add('show');
-    burger.setAttribute('aria-expanded','true');
-    document.body.style.overflow = 'hidden';
-    // animate burger to X
-    var spans = burger.querySelectorAll('span');
-    spans[0].style.transform = 'translateY(6.5px) rotate(45deg)';
-    spans[1].style.opacity = '0';
-    spans[2].style.transform = 'translateY(-6.5px) rotate(-45deg)';
-  }
-  function close() {
-    drawer.classList.remove('open');
-    overlay.classList.remove('show');
-    burger.setAttribute('aria-expanded','false');
-    document.body.style.overflow = '';
-    var spans = burger.querySelectorAll('span');
-    spans[0].style.transform = '';
-    spans[1].style.opacity = '';
-    spans[2].style.transform = '';
-  }
-  burger.addEventListener('click', function() {
-    drawer.classList.contains('open') ? close() : open();
-  });
-  overlay.addEventListener('click', close);
-  drawer.querySelectorAll('a').forEach(function(a) { a.addEventListener('click', close); });
+  var nav = document.getElementById('nav');
+  if (!nav) return;
+  const onScroll = () => nav.classList.toggle('solid', window.scrollY > 40);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
 })();
 </script>

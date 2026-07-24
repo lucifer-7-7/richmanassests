@@ -52,6 +52,7 @@
         <td>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <% if (l.status === 'published') { %>
+              <a href="/agent/listings/<%= l.id %>/manage" class="btn btn-primary btn-sm">Manage</a>
               <a href="/property/<%= l.id %>" class="btn btn-outline btn-sm" target="_blank">View Live</a>
             <% } %>
             <% if (['draft','payment_failed'].includes(l.status)) { %>

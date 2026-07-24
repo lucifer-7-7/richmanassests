@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDB } = require('../db/db');
+const { getPromoBanner } = require('../lib/settings');
 
 // canonical site origin (production domain) for SEO tags
 const SITE = process.env.SITE_URL || 'https://richmanassets.com';
@@ -135,6 +136,7 @@ router.get('/', async (req, res) => {
       services: withIcons(SERVICES),
       testimonials,
       areas,
+      promoBanner: getPromoBanner(),
     });
   } catch (err) {
     console.error('[/] error:', err.message);
@@ -216,10 +218,18 @@ router.get('/property/:id', async (req, res) => {
     const similar = similarRes.data || [];
     const next = nextRes.data || null;
 
-    const absImg = (u) => !u ? null : (u.indexOf('http') === 0 ? u : SITE + '/' + u.replace(/^\//, ''));
+    const absImg = (u) => !u ? null : (u.indexOf('http') === 0 ? u : '/' + u.replace(/^\//, ''));
     let gallery = [];
     try { gallery = JSON.parse(p.gallery || '[]'); } catch (_) { }
-    const images = [p.img_hero, p.img_card, ...gallery].map(absImg).filter(Boolean);
+    const rawImages = [p.img_hero, p.img_card, ...gallery].map(absImg).filter(Boolean);
+    const SAMPLE_FALLERY_FALLBACKS = [
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80'
+    ];
+    const allImages = [...new Set([...rawImages, ...SAMPLE_GALLERY_FALLBACKS])].slice(0, 5);
 
     const listLabel = p.listing === 'rent' ? 'for Rent' : p.listing === 'lease' ? 'for Lease' : 'for Sale';
     const pageTitle = `${p.name} in ${p.loc}, ${p.type} ${listLabel} at ${p.price} | RichManAssets`;
@@ -229,7 +239,7 @@ router.get('/property/:id', async (req, res) => {
     const productLd = {
       '@context': 'https://schema.org', '@type': 'Product',
       'name': `${p.name}, ${p.loc}`, 'description': pageDesc,
-      'image': images.length ? images : undefined,
+      'image': allImages,
       'category': `${p.type} for ${p.listing === 'rent' ? 'Rent' : p.listing === 'lease' ? 'Lease' : 'Sale'} in ${p.loc}`,
       'brand': { '@type': 'Brand', 'name': 'RichManAssets' },
       'seller': { '@type': 'RealEstateAgent', '@id': `${SITE}/#organization`, 'name': 'RichManAssets', 'telephone': '+919036001234', 'url': SITE },
@@ -252,9 +262,9 @@ router.get('/property/:id', async (req, res) => {
     res.render('property', {
       title: pageTitle, description: pageDesc,
       canonical: canon('/property/' + p.id), siteUrl: SITE,
-      ogType: 'product', ogImage: images[0] || undefined,
+      ogType: 'product', ogImage: allImages[0],
       jsonld: JSON.stringify([productLd, breadcrumbLd]),
-      p, similar, next,
+      p, similar, next, allImages,
     });
   } catch (err) {
     console.error('[/property/:id] error:', err.message);
@@ -282,6 +292,16 @@ router.get('/services', (req, res) => {
     siteUrl: SITE,
     services: withIcons(SERVICES),
     serviceDetails: withIcons(SERVICES),
+  });
+});
+
+// ── INTERIOR DESIGN SHOWCASE ──────────────────────────────────────
+router.get('/interiors', (req, res) => {
+  res.render('interiors', {
+    title: 'Interior Design & Bespoke Spaces in Udupi & Mangaluru | RichManAssets',
+    description: 'Explore turnkey interior design, 3D renders, and custom joinery for coastal villas, penthouses, modular kitchens, and corporate offices across coastal Karnataka.',
+    canonical: canon('/interiors'),
+    siteUrl: SITE,
   });
 });
 

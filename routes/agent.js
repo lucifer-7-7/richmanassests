@@ -200,10 +200,11 @@ router.get('/listings', requireAgent, async (req, res) => {
       filterStatus: status || 'all',
       feeRs: (fee.amount_paise / 100).toLocaleString('en-IN'),
       flash: req.session.agentFlash || null,
+      csrfToken: genCsrf(req),
     });
     delete req.session.agentFlash;
   } catch (err) {
-    res.render('agent/listings', { title: 'My Listings', robots: 'noindex,nofollow', agent: req.agent, listings: [], filterStatus: 'all', feeRs: '999', flash: { type:'err', msg: err.message } });
+    res.render('agent/listings', { title: 'My Listings', robots: 'noindex,nofollow', agent: req.agent, listings: [], filterStatus: 'all', feeRs: '999', flash: { type:'err', msg: err.message }, csrfToken: genCsrf(req) });
   }
 });
 
@@ -350,6 +351,53 @@ router.post('/listings/:id/delete', requireAgent, requirePropertyOwner, checkCsr
     req.session.agentFlash = { type: 'err', msg: err.message };
   }
   res.redirect('/agent/listings');
+});
+
+// ────────────────────────── MANAGE PUBLISHED LISTING ─────────────
+
+// GET /agent/listings/:id/manage
+router.get('/listings/:id/manage', requireAgent, requirePropertyOwner, (req, res) => {
+  const prop = req.property;
+  if (!['published', 'expired'].includes(prop.status)) {
+    req.session.agentFlash = { type: 'err', msg: 'Only published or expired listings can be managed here.' };
+    return res.redirect('/agent/listings');
+  }
+  let gallery = [];
+  try { gallery = JSON.parse(prop.gallery || '[]'); } catch (_) {}
+  res.render('agent/manage-listing', {
+    title: `Manage: ${prop.name} | RichManAssets Agent`,
+    robots: 'noindex,nofollow',
+    agent: req.agent,
+    prop,
+    gallery,
+    flash: req.session.agentFlash || null,
+    csrfToken: genCsrf(req),
+  });
+  delete req.session.agentFlash;
+});
+
+// POST /agent/listings/:id/manage
+router.post('/listings/:id/manage', requireAgent, requirePropertyOwner, checkCsrf, upload.fields([
+  { name: 'img_card', maxCount: 1 },
+  { name: 'img_hero', maxCount: 1 },
+  { name: 'gallery',  maxCount: 10 },
+]), async (req, res) => {
+  const propId = req.params.id;
+  try {
+    const files   = req.files || {};
+    const imgCard = files.img_card ? await resolveImg(files.img_card[0], `agent-${req.agent.id}-${propId}-card`) : null;
+    const imgHero = files.img_hero ? await resolveImg(files.img_hero[0], `agent-${req.agent.id}-${propId}-hero`) : null;
+    const gallery = files.gallery  ? await Promise.all(files.gallery.map((f, i) => resolveImg(f, `agent-${req.agent.id}-${propId}-g${i}-${Date.now()}`))) : [];
+
+    await propSvc.updatePublishedListing(propId, req.agent.id, req.body, {
+      img_card: imgCard, img_hero: imgHero, gallery: gallery.filter(Boolean),
+    });
+    req.session.agentFlash = { type: 'ok', msg: 'Listing updated successfully.' };
+    res.redirect(`/agent/listings/${propId}/manage`);
+  } catch (err) {
+    req.session.agentFlash = { type: 'err', msg: err.message };
+    res.redirect(`/agent/listings/${propId}/manage`);
+  }
 });
 
 // ────────────────────────── PROFILE ──────────────────────────────

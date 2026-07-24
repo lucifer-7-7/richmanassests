@@ -555,6 +555,20 @@
   </div>
 </section>
 
+<!-- DYNAMIC ADMIN-MANAGED PROMO / AD BANNER -->
+<% if (typeof promoBanner !== 'undefined' && promoBanner && promoBanner.active) { %>
+<section class="promo-ad-sec wrap" data-screen-label="Promotion">
+  <div class="promo-ad-card" style="background-image: linear-gradient(180deg, rgba(18,16,11,0.4), rgba(18,16,11,0.85)), url('<%= promoBanner.bg_img %>');">
+    <div class="promo-ad-content">
+      <span class="promo-badge"><%= promoBanner.kicker %></span>
+      <h2><%- promoBanner.title %></h2>
+      <% if (promoBanner.subtitle) { %><p><%= promoBanner.subtitle %></p><% } %>
+      <a href="<%= promoBanner.cta_link %>" class="promo-cta-btn"><%= promoBanner.cta_text %></a>
+    </div>
+  </div>
+</section>
+<% } %>
+
 <!-- STATS -->
 <section class="stats" data-screen-label="Stats">
   <div class="wrap"><div class="stats-in">

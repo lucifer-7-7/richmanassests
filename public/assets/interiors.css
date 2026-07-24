@@ -1,0 +1,204 @@
+/* ============ RichManAssets — interiors.css ============ */
+
+/* ── HERO HEADER ── */
+.interiors-hero {
+  padding: clamp(48px, 8vw, 100px) 0 clamp(24px, 4vw, 48px);
+  text-align: center;
+  border-bottom: 1px solid var(--line-soft);
+}
+.interiors-hero .kicker { display: block; margin-bottom: 14px; }
+.interiors-hero h1 {
+  font-family: var(--f-display);
+  font-size: clamp(32px, 5.5vw, 64px);
+  font-weight: 500; line-height: 1.05;
+  letter-spacing: -.02em; color: var(--ink);
+  max-width: 22ch; margin: 0 auto 18px;
+}
+.interiors-hero p.lead {
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.65; color: var(--ink-2);
+  max-width: 58ch; margin: 0 auto 28px;
+}
+
+/* Stats Pill Row */
+.interiors-stats-row {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 16px; flex-wrap: wrap;
+  background: var(--white); border: 1.5px solid var(--line);
+  padding: 10px 24px; border-radius: var(--r-pill);
+  box-shadow: 0 4px 16px rgba(10,9,6,0.04);
+}
+.interiors-stats-row .item {
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-2); font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+}
+.interiors-stats-row .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+/* ── CATEGORY FILTER TABS ── */
+.interiors-filter-bar {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line-soft);
+  position: sticky; top: 0; z-index: 30;
+  background: rgba(247,244,237,.92); backdrop-filter: blur(14px);
+}
+.interiors-filter-bar .filter-pills {
+  display: flex; gap: 8px; overflow-x: auto;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px; justify-content: flex-start;
+}
+@media (min-width: 768px) {
+  .interiors-filter-bar .filter-pills { justify-content: center; }
+}
+.interiors-filter-bar .filter-pills::-webkit-scrollbar { display: none; }
+
+.int-pill {
+  font-family: var(--f-sans); font-size: 13px; font-weight: 600;
+  padding: 8px 18px; border-radius: var(--r-pill);
+  background: var(--paper-2); color: var(--ink-2);
+  border: 1px solid transparent; cursor: pointer;
+  white-space: nowrap; transition: all .2s var(--ease); flex: none;
+}
+.int-pill:hover { background: var(--paper-3); color: var(--ink); }
+.int-pill.active {
+  background: var(--ink); color: #FFFFFF; font-weight: 700;
+}
+
+/* ── PORTFOLIO GRID ── */
+.interiors-grid-sec { padding: clamp(32px, 6vw, 72px) 0; }
+.interiors-grid {
+  display: grid; grid-template-columns: 1fr;
+  gap: clamp(24px, 3.5vw, 40px);
+}
+@media (min-width: 640px) {
+  .interiors-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .interiors-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Interior Work Card */
+.int-card {
+  background: #FFFFFF; border: 1.5px solid var(--line);
+  border-radius: var(--r-lg); overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.int-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px -12px rgba(10,9,6,0.12);
+}
+
+.int-card .img-wrap {
+  position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--paper-2);
+}
+.int-card .img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.8s var(--ease);
+}
+.int-card:hover .img-wrap img { transform: scale(1.05); }
+
+.int-card .tag-badge {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .12em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: var(--r-pill);
+  background: rgba(20,18,12,0.85); backdrop-filter: blur(8px);
+  color: #FFFFFF; font-weight: 600;
+}
+
+.int-card .card-body {
+  padding: 22px 20px; display: flex; flex-direction: column; flex: 1;
+}
+.int-card h3 {
+  font-family: var(--f-display); font-size: 22px; font-weight: 500;
+  line-height: 1.2; color: var(--ink); margin-bottom: 6px;
+}
+.int-card .location {
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+}
+.int-card p.desc {
+  font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
+  margin-bottom: 16px; flex: 1;
+}
+
+.int-card .materials-list {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;
+  padding-top: 12px; border-top: 1px solid var(--line-soft);
+}
+.int-card .mat-chip {
+  font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .06em;
+  text-transform: uppercase; background: var(--paper-2); color: var(--ink-3);
+  padding: 4px 10px; border-radius: var(--r-pill); border: 1px solid var(--line-soft);
+}
+
+.int-card .card-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.int-card .cta-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 11px 18px; border-radius: var(--r-pill);
+  background: var(--ink); color: #FFFFFF; font-size: 12.5px; font-weight: 700;
+  text-decoration: none; transition: background .2s var(--ease);
+}
+.int-card .cta-btn:hover { background: var(--gold-deep); }
+
+/* ── DESIGN PROCESS SECTION ── */
+.interiors-process-sec {
+  background: var(--paper-2); padding: clamp(48px, 8vw, 96px) 0;
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+.interiors-process-sec .sec-head { text-align: center; margin-bottom: clamp(36px, 5vw, 64px); }
+.interiors-process-sec .sec-head h2 {
+  font-family: var(--f-display); font-size: clamp(28px, 4vw, 48px);
+  font-weight: 500; color: var(--ink); margin-top: 8px;
+}
+
+.process-grid {
+  display: grid; grid-template-columns: 1fr; gap: 24px;
+}
+@media (min-width: 768px) {
+  .process-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.process-card {
+  background: #FFFFFF; border: 1.5px solid var(--line);
+  border-radius: var(--r-lg); padding: 32px 26px; position: relative;
+}
+.process-card .step-num {
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: .18em;
+  color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 14px;
+}
+.process-card h3 {
+  font-family: var(--f-display); font-size: 22px; font-weight: 500;
+  color: var(--ink); margin-bottom: 10px;
+}
+.process-card p {
+  font-size: 14px; line-height: 1.65; color: var(--ink-2);
+}
+
+/* ── CTA BANNER ── */
+.interiors-cta-sec {
+  padding: clamp(48px, 8vw, 96px) 0; text-align: center;
+}
+.interiors-cta-box {
+  background: var(--ink); color: var(--paper);
+  border-radius: var(--r-lg); padding: clamp(36px, 6vw, 64px) clamp(24px, 4vw, 48px);
+  max-width: 900px; margin: 0 auto; box-shadow: 0 20px 48px rgba(10,9,6,0.2);
+}
+.interiors-cta-box h2 {
+  font-family: var(--f-display); font-size: clamp(28px, 4vw, 44px);
+  font-weight: 500; margin-bottom: 12px; line-height: 1.1;
+}
+.interiors-cta-box p {
+  font-size: 15px; color: rgba(247,244,237,0.76); max-width: 48ch;
+  margin: 0 auto 28px; line-height: 1.6;
+}
+.interiors-cta-box .btn-gold {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--gold); color: var(--ink); font-size: 14px; font-weight: 700;
+  padding: 14px 32px; border-radius: var(--r-pill); text-decoration: none;
+  transition: transform .2s, background .2s;
+}
+.interiors-cta-box .btn-gold:hover { background: #D8B56C; transform: translateY(-2px); }

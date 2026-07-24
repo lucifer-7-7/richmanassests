@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+<link rel="stylesheet" href="/assets/market.css?v=3">
+<link rel="stylesheet" href="/assets/interiors.css?v=1">
+</head>
+<body data-screen-label="Interior Design">
+
+<%- include('partials/nav') %>
+
+<!-- HERO HEADER -->
+<header class="interiors-hero wrap">
+  <div class="crumb" style="justify-content:center;margin-bottom:12px;">
+    <a href="/">Home</a><span class="sep">/</span><a href="/services">Services</a><span class="sep">/</span><span>Interior Design</span>
+  </div>
+  <span class="kicker">Bespoke Spaces &amp; Turnkey Interiors</span>
+  <h1>Creative Interiors Designed for <span class="it">Coastal Living.</span></h1>
+  <p class="lead">From beachfront luxury villas to modern corporate offices in Udupi &amp; Mangaluru, we craft signature interiors with 3D visualization, custom joinery, and turnkey execution.</p>
+
+  <div class="interiors-stats-row">
+    <div class="item"><span>45+ Projects Delivered</span></div>
+    <div class="dot"></div>
+    <div class="item"><span>3D Render Visualization</span></div>
+    <div class="dot"></div>
+    <div class="item"><span>Turnkey Execution</span></div>
+  </div>
+</header>
+
+<!-- CATEGORY FILTER BAR -->
+<div class="interiors-filter-bar wrap">
+  <div class="filter-pills" id="intPills">
+    <button class="int-pill active" onclick="filterInteriors('all', this)">All Works</button>
+    <button class="int-pill" onclick="filterInteriors('villas', this)">Coastal Villas</button>
+    <button class="int-pill" onclick="filterInteriors('kitchens', this)">Modular Kitchens</button>
+    <button class="int-pill" onclick="filterInteriors('lounges', this)">Penthouse &amp; Lounges</button>
+    <button class="int-pill" onclick="filterInteriors('offices', this)">Executive Offices</button>
+  </div>
+</div>
+
+<!-- PORTFOLIO GRID -->
+<section class="interiors-grid-sec wrap">
+  <div class="interiors-grid" id="intGrid">
+    
+    <!-- Item 1 -->
+    <article class="int-card" data-category="villas">
+      <div class="img-wrap">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Beachfront Villa Living Room" loading="lazy">
+        <span class="tag-badge">Coastal Villa</span>
+      </div>
+      <div class="card-body">
+        <h3>Sea-View Villa Living Pavilion</h3>
+        <div class="location">📍 Kapu Beachfront · 3,800 sq ft</div>
+        <p class="desc">Open-plan living pavilion with floor-to-ceiling glass, custom teak wood rafters, and natural slate accents designed for sea-breeze circulation.</p>
+        <div class="materials-list">
+          <span class="mat-chip">Burma Teak</span>
+          <span class="mat-chip">Italian Travertine</span>
+          <span class="mat-chip">Acoustic Glass</span>
+        </div>
+        <div class="card-foot">
+          <a href="/contact?service=interior&ref=Kapu-Villa" class="cta-btn">Enquire for This Design →</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Item 2 -->
+    <article class="int-card" data-category="kitchens">
+      <div class="img-wrap">
+        <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80" alt="Contemporary Modular Kitchen" loading="lazy">
+        <span class="tag-badge">Modular Kitchen</span>
+      </div>
+      <div class="card-body">
+        <h3>Matte Charcoal &amp; Brass Kitchen</h3>
+        <div class="location">📍 Manipal Town · 450 sq ft</div>
+        <p class="desc">Handless acrylic modular kitchen equipped with Blum soft-close fittings, waterfall quartz island, and integrated warm LED accent lighting.</p>
+        <div class="materials-list">
+          <span class="mat-chip">Quartz Island</span>
+          <span class="mat-chip">Blum Fittings</span>
+          <span class="mat-chip">Brushed Brass</span>
+        </div>
+        <div class="card-foot">
+          <a href="/contact?service=interior&ref=Manipal-Kitchen" class="cta-btn">Enquire for This Design →</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Item 3 -->
+    <article class="int-card" data-category="lounges">
+      <div class="img-wrap">
+        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80" alt="Penthouse Terrace Lounge" loading="lazy">
+        <span class="tag-badge">Penthouse Lounge</span>
+      </div>
+      <div class="card-body">
+        <h3>Sunset Sky Terrace &amp; Lounge</h3>
+        <div class="location">📍 Mangaluru Penthouse · 1,200 sq ft</div>
+        <p class="desc">Bespoke rooftop sky lounge featuring weather-resistant wicker seating, fluted wooden wall panelling, and an outdoor brass wet bar.</p>
+        <div class="materials-list">
+          <span class="mat-chip">Teak Decking</span>
+          <span class="mat-chip">Weatherproof Wicker</span>
+          <span class="mat-chip">Ambient LEDs</span>
+        </div>
+        <div class="card-foot">
+          <a href="/contact?service=interior&ref=Mangaluru-Penthouse" class="cta-btn">Enquire for This Design →</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Item 4 -->
+    <article class="int-card" data-category="villas">
+      <div class="img-wrap">
+        <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80" alt="Coastal Teak Bedroom Suite" loading="lazy">
+        <span class="tag-badge">Coastal Villa</span>
+      </div>
+      <div class="card-body">
+        <h3>Heritage Teak Master Suite</h3>
+        <div class="location">📍 Mulki Backwaters · 650 sq ft</div>
+        <p class="desc">Serene master bedroom suite featuring handcrafted four-poster teak bed, cane wardrobe doors, and warm oat linen upholstery.</p>
+        <div class="materials-list">
+          <span class="mat-chip">Solid Teak</span>
+          <span class="mat-chip">Handwoven Cane</span>
+          <span class="mat-chip">Linen Fabric</span>
+        </div>
+        <div class="card-foot">
+          <a href="/contact?service=interior&ref=Mulki-Suite" class="cta-btn">Enquire for This Design →</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Item 5 -->
+    <article class="int-card" data-category="offices">
+      <div class="img-wrap">
+        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80" alt="Executive IT Office Suite" loading="lazy">
+        <span class="tag-badge">Executive Office</span>
+      </div>
+      <div class="card-body">
+        <h3>Corporate Tech Headquarters</h3>
+        <div class="location">📍 Udupi City · 2,400 sq ft</div>
+        <p class="desc">Modern acoustic workplace with glass conference rooms, ergonomic oak workstations, and biophilic indoor green planters.</p>
+        <div class="materials-list">
+          <span class="mat-chip">Acoustic Panels</span>
+          <span class="mat-chip">Oak Veneer</span>
+          <span class="mat-chip">Glass Partition</span>
+        </div>
+        <div class="card-foot">
+          <a href="/contact?service=interior&ref=Udupi-Office" class="cta-btn">Enquire for This Design →</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Item 6 -->
+    <article class="int-card" data-category="lounges">
+      <div class="img-wrap">
+        <img src="https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=800&q=80" alt="Contemporary Dining Hall" loading="lazy">
+        <span class="tag-badge">Penthouse Lounge</span>
+      </div>
+      <div class="card-body">
+        <h3>Minimalist Dining &amp; Wine Gallery</h3>
+        <div class="location">📍 Surathkal · 800 sq ft</div>
+        <p class="desc">Sculptural 10-seater marble dining table flanked by custom climate-controlled glass wine display cabinets and ambient brass pendants.</p>
+        <div class="materials-list">
+          <span class="mat-chip">Nero Marble</span>
+          <span class="mat-chip">Climate Glass</span>
+          <span class="mat-chip">Brass Pendants</span>
+        </div>
+        <div class="card-foot">
+          <a href="/contact?service=interior&ref=Surathkal-Dining" class="cta-btn">Enquire for This Design →</a>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- DESIGN PROCESS SECTION -->
+<section class="interiors-process-sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">How We Work</span>
+      <h2>Our 3-Step Turnkey Interior Workflow</h2>
+    </div>
+
+    <div class="process-grid">
+      <div class="process-card">
+        <div class="step-num">01 · CONCEPT &amp; 3D RENDERS</div>
+        <h3>3D Visualisation &amp; Space Planning</h3>
+        <p>We produce photorealistic 3D renders, material mood boards, and detailed floor plans before a single wall is touched.</p>
+      </div>
+
+      <div class="process-card">
+        <div class="step-num">02 · MATERIAL SELECTION</div>
+        <h3>Curated Woods, Stones &amp; Metals</h3>
+        <p>You inspect actual wood samples, marble slabs, hardware, and fabrics in person with our senior interior architects.</p>
+      </div>
+
+      <div class="process-card">
+        <div class="step-num">03 · TURNKEY EXECUTION</div>
+        <h3>In-House Joinery &amp; On-Time Delivery</h3>
+        <p>Our experienced craftsmen handle all civil, electrical, carpentry, and final styling with fixed timeline guarantees.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="interiors-cta-sec wrap">
+  <div class="interiors-cta-box">
+    <h2>Ready to transform your home or office?</h2>
+    <p>Schedule a free consultation and 3D space assessment with RichManAssets' interior design team.</p>
+    <a href="/contact?service=interior" class="btn-gold">Book Free Interior Consultation →</a>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+<%- include('partials/mobile-tabbar') %>
+
+<script>
+function filterInteriors(cat, btn) {
+  var pills = document.querySelectorAll('#intPills .int-pill');
+  pills.forEach(function(p) { p.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+
+  var cards = document.querySelectorAll('#intGrid .int-card');
+  cards.forEach(function(card) {
+    if (cat === 'all' || card.getAttribute('data-category') === cat) {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+</script>
+
+</body>
+</html>

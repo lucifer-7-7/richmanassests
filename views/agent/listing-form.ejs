@@ -6,7 +6,7 @@
 
 <% if (flash) { %><div class="flash <%= flash.type %>"><%- flash.msg %></div><% } %>
 
-<form method="post" action="<%= isEdit ? '/agent/listings/' + prop.id + '/edit' : '/agent/listings' %>" enctype="multipart/form-data" id="listingForm">
+<form method="post" action="<%= isEdit ? '/agent/listings/' + prop.id + '/edit' : '/agent/listings' %>" enctype="multipart/form-data" id="listingForm" class="form-card">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
   <!-- BASIC INFO -->

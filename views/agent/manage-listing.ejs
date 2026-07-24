@@ -1,0 +1,356 @@
+<%
+  var statusLabel = prop.status.charAt(0).toUpperCase() + prop.status.slice(1);
+  var isExpired = prop.status === 'expired';
+%>
+<%- include('../partials/agent-layout-start', { activeNav: 'listings', pageTitle: 'Manage Listing' }) %>
+
+<% if (flash) { %><div class="flash <%= flash.type %>"><%- flash.msg %></div><% } %>
+
+<!-- Listing Header Card -->
+<div class="manage-header-card">
+  <div class="manage-header-info">
+    <div class="manage-status-row">
+      <span class="status-badge status-<%= prop.status %>"><%= statusLabel %></span>
+      <% if (prop.expires_at) { %>
+      <span class="manage-expiry <% if (isExpired) { %>expired<% } %>">
+        <%= isExpired ? 'Expired' : 'Expires' %>: <%= new Date(prop.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+      </span>
+      <% } %>
+    </div>
+    <h1 class="manage-prop-name"><%= prop.name %></h1>
+    <div class="manage-prop-meta">
+      <span>📍 <%= prop.loc %></span>
+      <span>·</span>
+      <span><%= prop.type %> · <%= prop.listing %></span>
+      <span>·</span>
+      <span class="manage-price"><%= prop.price %></span>
+    </div>
+  </div>
+  <div class="manage-header-actions">
+    <a href="/property/<%= prop.id %>" class="btn btn-outline btn-sm" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      View Live
+    </a>
+    <a href="/agent/listings" class="btn btn-ghost btn-sm">← Back to Listings</a>
+  </div>
+</div>
+
+<!-- Info Notice -->
+<div class="manage-notice">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <span>You can update description, amenities, images and specifications below. Price and listing type changes require admin approval — contact us to request those.</span>
+</div>
+
+<form method="post" action="/agent/listings/<%= prop.id %>/manage" enctype="multipart/form-data" id="manageForm">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+  <!-- Current Images Preview -->
+  <div class="manage-section">
+    <div class="manage-section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Property Images
+    </div>
+
+    <!-- Current card + hero side by side -->
+    <div class="manage-img-grid">
+      <div class="manage-img-slot">
+        <div class="manage-img-label">Card / Thumbnail</div>
+        <% if (prop.img_card) { %>
+        <div class="manage-img-preview">
+          <img src="<%- prop.img_card %>" alt="Card image">
+          <div class="manage-img-overlay">Current</div>
+        </div>
+        <% } else { %>
+        <div class="manage-img-empty">No image uploaded</div>
+        <% } %>
+        <label class="manage-upload-label" for="img_card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Replace Card Image
+        </label>
+        <input type="file" id="img_card" name="img_card" accept="image/jpeg,image/png,image/webp" class="manage-file-input" onchange="previewFile(this, 'card-preview')">
+        <div class="manage-new-preview" id="card-preview"></div>
+        <div class="manage-hint">JPEG/PNG/WebP · max 15 MB</div>
+      </div>
+
+      <div class="manage-img-slot">
+        <div class="manage-img-label">Hero / Full-size</div>
+        <% if (prop.img_hero) { %>
+        <div class="manage-img-preview">
+          <img src="<%- prop.img_hero %>" alt="Hero image">
+          <div class="manage-img-overlay">Current</div>
+        </div>
+        <% } else { %>
+        <div class="manage-img-empty">No image uploaded</div>
+        <% } %>
+        <label class="manage-upload-label" for="img_hero">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Replace Hero Image
+        </label>
+        <input type="file" id="img_hero" name="img_hero" accept="image/jpeg,image/png,image/webp" class="manage-file-input" onchange="previewFile(this, 'hero-preview')">
+        <div class="manage-new-preview" id="hero-preview"></div>
+        <div class="manage-hint">Shown on the property detail page</div>
+      </div>
+    </div>
+
+    <!-- Gallery -->
+    <% if (gallery && gallery.length > 0) { %>
+    <div class="manage-gallery-section">
+      <div class="manage-img-label">Gallery (<%= gallery.length %> images)</div>
+      <div class="manage-gallery-grid">
+        <% gallery.forEach(function(img, i) { %>
+        <div class="manage-gallery-item">
+          <img src="<%- img %>" alt="Gallery <%= i+1 %>">
+          <label class="manage-gallery-remove">
+            <input type="checkbox" name="gallery_remove" value="<%= i %>">
+            <span>Remove</span>
+          </label>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Add gallery images -->
+    <div class="manage-form-group" style="margin-top: 16px;">
+      <label class="manage-form-label" for="gallery">Add Gallery Images (up to 10)</label>
+      <input type="file" id="gallery" name="gallery" multiple accept="image/jpeg,image/png,image/webp" class="manage-file-input-multi">
+      <div class="manage-hint">Select multiple files. New images are added to existing gallery.</div>
+    </div>
+  </div>
+
+  <!-- Description & Amenities -->
+  <div class="manage-section">
+    <div class="manage-section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Description & Amenities
+    </div>
+    <div class="manage-form-group">
+      <label class="manage-form-label" for="mdesc">Property Description</label>
+      <textarea id="mdesc" name="description" rows="6" class="manage-textarea" placeholder="Describe the property in detail — location highlights, views, condition, neighbourhood…"><%= prop.description || '' %></textarea>
+    </div>
+    <div class="manage-form-group">
+      <label class="manage-form-label" for="mamen">Amenities</label>
+      <textarea id="mamen" name="amenities" rows="4" class="manage-textarea" placeholder="e.g. Swimming Pool · Gym · 24/7 Security · Parking · Backup Power"><%= prop.amenities || '' %></textarea>
+      <div class="manage-hint">Separate with · (bullet) or new lines.</div>
+    </div>
+    <div class="manage-form-group">
+      <label class="manage-form-label" for="mprice_note">Price Note</label>
+      <input type="text" id="mprice_note" name="price_note" class="manage-input" placeholder="e.g. Negotiable · Bank loan available" value="<%= prop.price_note || '' %>">
+    </div>
+  </div>
+
+  <!-- Specifications -->
+  <div class="manage-section">
+    <div class="manage-section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Specifications
+    </div>
+    <div class="manage-form-row">
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="mbeds">Bedrooms</label>
+        <input type="text" id="mbeds" name="beds" class="manage-input" placeholder="e.g. 3 BHK or —" value="<%= prop.beds || '' %>">
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="mbaths">Bathrooms</label>
+        <input type="text" id="mbaths" name="baths" class="manage-input" placeholder="e.g. 2 or —" value="<%= prop.baths || '' %>">
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="msqft">Area (sqft / Acres)</label>
+        <input type="text" id="msqft" name="sqft" class="manage-input" placeholder="e.g. 1,800 sqft" value="<%= prop.sqft || '' %>">
+      </div>
+    </div>
+    <div class="manage-form-group">
+      <label class="manage-form-label" for="msubtype">Sub-type / Tag</label>
+      <input type="text" id="msubtype" name="subtype" class="manage-input" placeholder="e.g. Beachfront, Gated community" value="<%= prop.subtype || '' %>">
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="manage-actions">
+    <button type="submit" class="btn btn-primary btn-lg" id="manageSaveBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save Changes
+    </button>
+    <a href="/agent/listings" class="btn btn-ghost">Cancel</a>
+  </div>
+</form>
+
+<style>
+/* ── Manage Listing Page Styles ─────────────────────────────── */
+.manage-header-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.manage-status-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.manage-expiry { font-size: 12px; color: var(--muted); }
+.manage-expiry.expired { color: var(--danger); }
+.manage-prop-name { font-family: var(--serif); font-size: 22px; color: var(--cream); margin-bottom: 8px; line-height: 1.3; }
+.manage-prop-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.manage-price { color: var(--gold); font-weight: 600; }
+.manage-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+
+.manage-notice {
+  background: rgba(201,168,76,.06);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.manage-notice svg { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+
+.manage-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+.manage-section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 600; color: var(--cream);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border2);
+}
+.manage-section-title svg { color: var(--gold); }
+
+.manage-img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.manage-img-slot { display: flex; flex-direction: column; gap: 10px; }
+.manage-img-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+
+.manage-img-preview {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface2);
+  aspect-ratio: 16/9;
+}
+.manage-img-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.manage-img-overlay {
+  position: absolute; bottom: 6px; left: 6px;
+  background: rgba(0,0,0,.6); color: var(--muted);
+  font-size: 10px; padding: 2px 8px; border-radius: 4px;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+.manage-img-empty {
+  aspect-ratio: 16/9;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 12px;
+  background: var(--surface2);
+}
+
+.manage-upload-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 12px; font-weight: 500; color: var(--cream);
+  transition: all .2s; width: fit-content;
+}
+.manage-upload-label:hover { border-color: var(--gold-dim); color: var(--gold); }
+.manage-file-input { display: none; }
+.manage-file-input-multi {
+  display: block; width: 100%;
+  padding: 10px 14px;
+  background: var(--surface2); border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text); font: 13px var(--font);
+  cursor: pointer;
+}
+.manage-file-input-multi:hover { border-color: var(--gold-dim); }
+
+.manage-new-preview img { width: 100%; border-radius: var(--radius-sm); margin-top: 6px; max-height: 140px; object-fit: cover; }
+.manage-hint { font-size: 11px; color: var(--muted); }
+
+.manage-gallery-section { margin-top: 20px; }
+.manage-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
+.manage-gallery-item { position: relative; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface2); }
+.manage-gallery-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+.manage-gallery-remove {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 4px; background: rgba(224,83,83,.15); border-top: 1px solid rgba(224,83,83,.2);
+  font-size: 11px; color: var(--danger); cursor: pointer;
+  transition: background .2s;
+}
+.manage-gallery-remove:hover { background: rgba(224,83,83,.25); }
+.manage-gallery-remove input { accent-color: var(--danger); }
+
+.manage-form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.manage-form-group:last-child { margin-bottom: 0; }
+.manage-form-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.manage-input {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  color: var(--cream); font: 14px var(--font);
+  transition: border-color .2s;
+  width: 100%;
+}
+.manage-input:focus { outline: none; border-color: var(--gold-dim); }
+.manage-textarea {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  color: var(--cream); font: 14px/1.6 var(--font);
+  resize: vertical; width: 100%; min-height: 100px;
+  transition: border-color .2s;
+}
+.manage-textarea:focus { outline: none; border-color: var(--gold-dim); }
+.manage-form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.manage-actions { display: flex; align-items: center; gap: 12px; padding: 8px 0 32px; flex-wrap: wrap; }
+
+@media (max-width: 768px) {
+  .manage-header-card { flex-direction: column; padding: 20px; }
+  .manage-img-grid { grid-template-columns: 1fr; }
+  .manage-form-row { grid-template-columns: 1fr; }
+  .manage-section { padding: 20px; }
+}
+</style>
+
+<script>
+// Preview newly selected images inline before upload
+function previewFile(input, previewId) {
+  const container = document.getElementById(previewId);
+  if (!container) return;
+  container.innerHTML = '';
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.createElement('img');
+    img.src = e.target.result;
+    img.style.borderRadius = '8px';
+    img.style.maxHeight = '140px';
+    img.style.width = '100%';
+    img.style.objectFit = 'cover';
+    img.style.marginTop = '6px';
+    container.appendChild(img);
+  };
+  reader.readAsDataURL(file);
+}
+
+// Disable submit button to prevent double-submit
+document.getElementById('manageForm').addEventListener('submit', function() {
+  var btn = document.getElementById('manageSaveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving…';
+});
+</script>
+
+<%- include('../partials/agent-layout-end') %>

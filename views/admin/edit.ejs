@@ -5,41 +5,49 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Edit <%= p.name %> · Admin · RichManAssets</title>
 <meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f1;color:#17150F;font-size:14px}
-  .topbar{background:#17150F;color:#F7F4ED;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;position:sticky;top:0;z-index:50}
-  .topbar .brand{font-size:16px;font-weight:600}
-  .topbar a{color:rgba(247,244,237,.7);font-size:13px;text-decoration:none}
-  .topbar a:hover{color:#F7F4ED}
-  .main{max-width:960px;margin:0 auto;padding:32px 24px}
-  .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#6A6354;text-decoration:none;margin-bottom:20px}
-  .back:hover{color:#17150F}
-  .flash-ok{background:#e8f5e9;color:#2e7d32;padding:12px 18px;border-radius:8px;margin-bottom:20px;font-size:13px}
-  .flash-err{background:#fdecea;color:#c62828;padding:12px 18px;border-radius:8px;margin-bottom:20px;font-size:13px}
-  .form-card{background:#fff;border-radius:10px;padding:32px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-  .form-card h2{font-size:20px;font-weight:600;margin-bottom:24px}
+  :root{
+    --bg: #F8F6F2; --white: #FFFFFF; --surface2: #FAF8F5;
+    --ink: #17150F; --ink-2: #3B362C; --muted: #8C8475;
+    --line: #E5E0D8; --line2: #ECE7E0; --r: 20px; --r-sm: 12px; --r-pill: 999px;
+  }
+  body{font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+  .topbar{background:var(--white);color:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:64px;position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line)}
+  .topbar .brand{font-size:17px;font-weight:800;letter-spacing:-.03em}
+  .topbar a{color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;padding:8px 16px;background:var(--surface2);border-radius:var(--r-pill);transition:.18s}
+  .topbar a:hover{background:var(--ink);color:#fff}
+  .main{max-width:980px;margin:0 auto;padding:32px 24px}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;margin-bottom:20px;padding:6px 14px;background:var(--white);border-radius:var(--r-pill);border:1px solid var(--line)}
+  .back:hover{color:var(--ink);border-color:var(--ink)}
+  .flash-ok{background:#F0FAF4;color:#27694A;border:1px solid rgba(39,105,74,0.18);padding:14px 18px;border-radius:var(--r-sm);margin-bottom:24px;font-size:13.5px;font-weight:600}
+  .flash-err{background:#FDF2F2;color:#D93838;border:1px solid rgba(217,56,56,0.18);padding:14px 18px;border-radius:var(--r-sm);margin-bottom:24px;font-size:13.5px;font-weight:600}
+  .form-card{background:var(--white);border-radius:var(--r);padding:clamp(22px,4vw,36px);border:1px solid var(--line)}
+  .form-card h2{font-size:22px;font-weight:800;margin-bottom:24px;letter-spacing:-.02em}
   .fg{display:grid;gap:16px;grid-template-columns:1fr 1fr}
   @media(max-width:700px){.fg{grid-template-columns:1fr}}
   .fg.cols3{grid-template-columns:1fr 1fr 1fr}
   .fg.full{grid-template-columns:1fr}
-  .field{display:flex;flex-direction:column;gap:6px}
-  .field label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#928A79;font-weight:500}
-  .field input,.field select,.field textarea{padding:11px 14px;border:1px solid #e0ddd6;border-radius:7px;font:inherit;font-size:14px;color:#17150F;outline:none;transition:border .2s}
-  .field input:focus,.field select:focus,.field textarea:focus{border-color:#17150F}
-  .field textarea{resize:vertical;min-height:90px}
-  .field small{font-size:11.5px;color:#928A79}
-  .curr-img{width:120px;height:80px;object-fit:cover;border-radius:6px;display:block;margin-top:6px}
-  .form-actions{display:flex;gap:12px;margin-top:24px}
-  .btn-primary{padding:12px 28px;background:#17150F;color:#F7F4ED;border:0;border-radius:8px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:.3s}
-  .btn-primary:hover{background:#9A7B3F}
-  .btn-secondary{padding:12px 22px;background:none;border:1px solid #e0ddd6;border-radius:8px;font:inherit;font-size:14px;color:#6A6354;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:.2s}
-  .btn-secondary:hover{border-color:#17150F;color:#17150F}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+  .field label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-top:4px}
+  .field input,.field select,.field textarea{padding:13px 16px;border:1.5px solid var(--line);border-radius:var(--r-sm);font:inherit;font-size:14px;font-weight:500;color:var(--ink);outline:none;transition:border-color .18s, box-shadow .18s;background:var(--white);-webkit-appearance:none}
+  .field input:focus,.field select:focus,.field textarea:focus{background:var(--white);border-color:var(--ink);box-shadow:0 0 0 3.5px rgba(28,25,23,0.08)}
+  .field textarea{resize:vertical;min-height:100px}
+  .field small,.form-hint{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:5px;margin-bottom:14px;line-height:1.4}
+  .curr-img{width:130px;height:86px;object-fit:cover;border-radius:10px;display:block;margin-top:6px;border:1px solid var(--line)}
+  .form-actions{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+  .btn-primary{padding:13px 28px;background:var(--ink);color:#fff;border:0;border-radius:var(--r-pill);font:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 4px 14px rgba(0,0,0,0.12)}
+  .btn-primary:hover{background:#2A2A32;transform:translateY(-1px)}
+  .btn-secondary{padding:13px 22px;background:var(--surface2);border:1px solid transparent;border-radius:var(--r-pill);font:inherit;font-size:14px;font-weight:700;color:var(--ink-2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:.18s}
+  .btn-secondary:hover{background:var(--ink);color:#fff}
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="brand">RichManAssets <span style="font-size:8px;letter-spacing:.26em;text-transform:uppercase;opacity:.45;margin-left:6px;font-weight:400;vertical-align:2px">Admin</span></div>
+  <div class="brand">RichManAssets <span style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-left:8px;font-weight:700;vertical-align:2px">Admin</span></div>
   <a href="/admin">← Dashboard</a>
 </div>
 
@@ -89,21 +97,21 @@
         <div class="field"><label>Price value (numeric)</label><input name="price_val" type="number" value="<%= p.price_val || 0 %>"></div>
       </div>
 
-      <hr style="border:0;border-top:1px solid #f0ede7;margin:24px 0">
+      <hr style="border:0;border-top:1px solid var(--line2);margin:24px 0">
 
       <div class="fg full">
         <div class="field"><label>Story kicker</label><input name="story_kicker" value="<%= p.story_kicker || '' %>"></div>
         <div class="field"><label>Story heading</label><input name="story_heading" value="<%= p.story_heading || '' %>"></div>
         <div class="field"><label>Story body</label><textarea name="story_body" rows="5"><%= p.story_body || '' %></textarea></div>
         <div class="field">
-          <label>Amenities <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#928A79">(type and press Enter or comma)</span></label>
+          <label>Amenities <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--muted)">(type and press Enter or comma)</span></label>
           <div class="tag-input" id="amen-tags" data-init="<%= (p.amenities||'').replace(/"/g,'&quot;') %>"></div>
           <input type="hidden" name="amenities" id="amenities-hidden" value="<%= p.amenities || '' %>">
         </div>
         <div class="field"><label>Setting heading</label><input name="setting_heading" value="<%= p.setting_heading || '' %>"></div>
         <div class="field"><label>Setting body</label><textarea name="setting_body" rows="3"><%= p.setting_body || '' %></textarea></div>
         <div class="field">
-          <label>Location pills <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#928A79">(type and press Enter or comma)</span></label>
+          <label>Location pills <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--muted)">(type and press Enter or comma)</span></label>
           <div class="tag-input" id="pills-tags" data-init="<%= (p.setting_pills||'').replace(/"/g,'&quot;') %>"></div>
           <input type="hidden" name="setting_pills" id="setting_pills-hidden" value="<%= p.setting_pills || '' %>">
         </div>
@@ -111,7 +119,7 @@
         <div class="field"><label>EMI value</label><input name="emi_val" value="<%= p.emi_val || '' %>" placeholder="e.g. ₹5,53,237"></div>
       </div>
 
-      <hr style="border:0;border-top:1px solid #f0ede7;margin:24px 0">
+      <hr style="border:0;border-top:1px solid var(--line2);margin:24px 0">
 
       <div class="fg">
         <div class="field">
@@ -130,7 +138,7 @@
         </div>
       </div>
 
-      <hr style="border:0;border-top:1px solid #f0ede7;margin:20px 0">
+      <hr style="border:0;border-top:1px solid var(--line2);margin:24px 0">
 
       <div class="field">
         <label>Gallery images</label>
@@ -139,10 +147,10 @@
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
           <% galleryArr.forEach(function(url, idx) { %>
           <div style="position:relative;display:inline-block">
-            <img src="/<%= url.startsWith('http') ? '' : '' %><%= url %>" alt="Gallery <%= idx+1 %>" style="width:90px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #e0ddd6">
-            <label style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);border-radius:3px;padding:2px 4px;cursor:pointer;display:flex;align-items:center;gap:2px">
-              <input type="checkbox" name="gallery_remove[]" value="<%= idx %>" style="width:11px;height:11px;accent-color:#c62828">
-              <span style="font-size:9px;color:#fff;letter-spacing:.06em">DEL</span>
+            <img src="/<%= url.startsWith('http') ? '' : '' %><%= url %>" alt="Gallery <%= idx+1 %>" style="width:90px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
+            <label style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.65);border-radius:4px;padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:2px">
+              <input type="checkbox" name="gallery_remove[]" value="<%= idx %>" style="width:11px;height:11px;accent-color:#E03E3E">
+              <span style="font-size:9px;color:#fff;letter-spacing:.06em;font-weight:700">DEL</span>
             </label>
           </div>
           <% }) %>
@@ -154,7 +162,7 @@
         <small>1200×800 JPG recommended · up to 10 · select multiple files at once</small>
       </div>
 
-      <div class="fg">
+      <div class="fg" style="margin-top:16px">
         <div class="field"><label>Featured on homepage?</label>
           <select name="featured">
             <option value="0" <%= !p.featured ? 'selected' : '' %>>No</option>
@@ -174,11 +182,11 @@
 </div>
 
 <style>
-  .tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border:1px solid #e0ddd6;border-radius:7px;min-height:42px;cursor:text;background:#fff}
-  .tag-input:focus-within{border-color:#17150F}
-  .tag-chip{display:inline-flex;align-items:center;gap:5px;background:#f0ede7;border-radius:4px;padding:3px 8px;font-size:12.5px;color:#17150F}
-  .tag-chip button{background:none;border:0;cursor:pointer;color:#928A79;font-size:14px;line-height:1;padding:0 1px}
-  .tag-chip button:hover{color:#c62828}
+  .tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border:1px solid transparent;border-radius:12px;min-height:44px;cursor:text;background:var(--surface2)}
+  .tag-input:focus-within{background:#fff;border-color:#0F0F12;box-shadow:0 0 0 3px rgba(15,15,18,0.06)}
+  .tag-chip{display:inline-flex;align-items:center;gap:6px;background:#0F0F12;color:#fff;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}
+  .tag-chip button{background:none;border:0;cursor:pointer;color:#8E8E93;font-size:14px;line-height:1;padding:0 2px}
+  .tag-chip button:hover{color:#E03E3E}
   .tag-typeahead{border:0;outline:0;flex:1;min-width:120px;font:inherit;font-size:13.5px;background:none;padding:2px 4px}
 </style>
 <script>
@@ -192,7 +200,7 @@ function prevGalleryEdit(input, containerId) {
   Array.from(input.files).forEach(function(f) {
     var img = document.createElement('img');
     img.src = URL.createObjectURL(f);
-    img.style.cssText = 'width:90px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #e0ddd6';
+    img.style.cssText = 'width:90px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)';
     c.appendChild(img);
   });
 }
@@ -237,7 +245,6 @@ function initTagInput(containerEl, hiddenEl) {
   });
   containerEl.addEventListener('click', function() { input.focus(); });
 
-  // pre-populate
   (hiddenEl.value || '').split('|').forEach(function(v) { if (v.trim()) addChip(v.trim()); });
 }
 

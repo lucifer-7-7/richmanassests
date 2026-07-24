@@ -1,18 +1,15 @@
-<article class="plist fx" data-filter-cat="<%= typeof filterCat !== 'undefined' ? filterCat : '' %>">
-  <div class="ph">
+<article class="plist fx" data-filter-cat="<%= typeof filterCat !== 'undefined' ? filterCat : '' %>" onclick="if (!event.target.closest('a')) window.location.href='/property/<%= p.id %>';" style="cursor:pointer;">
+  <a href="/property/<%= p.id %>" class="ph" style="display:block;text-decoration:none;color:inherit;">
     <% if (p.has_img && p.img_card) { %>
     <img src="<%= p.img_card.startsWith('http') ? p.img_card : '/' + p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
     <% } else { %>
     <div class="ph-placeholder"><span>Photos on request</span></div>
     <% } %>
     <span class="badge <%= p.listing %>"><%= p.badge_txt || (p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease') %></span>
-    <button class="fav" aria-label="Save">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14S2 10 2 5.8C2 3.5 3.8 2 5.8 2 7 2 8 3 8 3s1-1 2.2-1C12.2 2 14 3.5 14 5.8 14 10 8 14 8 14z"/></svg>
-    </button>
-  </div>
+  </a>
   <div class="body">
-    <div class="price"><%= p.price %><% if (p.price_note) { %><small><%= p.price_note %></small><% } %></div>
-    <h3><%= p.name %></h3>
+    <div class="price"><a href="/property/<%= p.id %>" style="color:inherit;text-decoration:none;"><%= p.price %><% if (p.price_note) { %><small style="margin-left:4px;"><%= p.price_note %></small><% } %></a></div>
+    <h3><a href="/property/<%= p.id %>" style="color:inherit;text-decoration:none;"><%= p.name %></a></h3>
     <div class="loc">
       <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
       <%= p.loc %> · <%= p.type %><% if (p.subtype) { %> · <%= p.subtype %><% } %>
