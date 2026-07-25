@@ -4,6 +4,12 @@
   var _desc = (typeof locals.description !== 'undefined' && locals.description)
     ? locals.description
     : 'Buy, rent or lease property in Udupi, Mangaluru & coastal Karnataka. Verified villas, 2BHK & 3BHK apartments, residential plots, commercial space, beach-facing land & agricultural sites. Home loans, legal services & interiors under one roof. 15+ years · 1,200+ families · ₹500 Cr+ transacted.';
+  var _keywords = (typeof locals.keywords !== 'undefined' && locals.keywords)
+    ? locals.keywords
+    : 'real estate udupi, property in udupi, flats for sale in udupi, villas in udupi, plots in udupi, real estate agent udupi, property in mangaluru, home loans udupi, richman assets, luxury homes udupi, commercial space mangaluru';
+  var _geoPlacename = (typeof locals.geoPlace !== 'undefined' && locals.geoPlace)
+    ? (locals.geoPlace.indexOf('Karnataka') !== -1 ? locals.geoPlace : (locals.geoPlace + ', Karnataka, India'))
+    : 'Udupi, Karnataka, India';
   var _ogImg = (typeof locals.ogImage !== 'undefined' && locals.ogImage) ? locals.ogImage : (_site + '/assets/img/site-hero.jpg');
   if (_ogImg.indexOf('http') !== 0) _ogImg = _site + (_ogImg.charAt(0) === '/' ? '' : '/') + _ogImg;
   var _ogType = (typeof locals.ogType !== 'undefined' && locals.ogType) ? locals.ogType : 'website';
@@ -14,13 +20,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title><%= title %></title>
 <meta name="description" content="<%= _desc %>"/>
+<meta name="keywords" content="<%= _keywords %>"/>
+<meta name="author" content="RichManAssets — Vittu Bharat Associates LLP"/>
 <meta name="robots" content="<%= _robots %>"/>
 <link rel="canonical" href="<%= _canonical %>"/>
 <meta name="theme-color" content="#17150F"/>
 
+<!-- Favicon & Touch Icons -->
+<link rel="icon" type="image/svg+xml" href="/assets/img/logo-icon.svg"/>
+<link rel="alternate icon" href="/favicon.svg"/>
+<link rel="apple-touch-icon" href="/assets/img/logo.svg"/>
+<meta name="application-name" content="RichManAssets"/>
+<meta name="apple-mobile-web-app-title" content="RichManAssets"/>
+
 <!-- Geo targeting (Google & Bing local signals) -->
 <meta name="geo.region" content="IN-KA"/>
-<meta name="geo.placename" content="Udupi, Karnataka, India"/>
+<meta name="geo.placename" content="<%= _geoPlacename %>"/>
 <meta name="geo.position" content="13.343869;74.7435883"/>
 <meta name="ICBM" content="13.343869, 74.7435883"/>
 
@@ -39,6 +54,7 @@
 <meta property="og:url" content="<%= _canonical %>"/>
 <meta property="og:site_name" content="RichManAssets"/>
 <meta property="og:locale" content="en_IN"/>
+<meta property="og:logo" content="<%= _site %>/assets/img/logo.svg"/>
 
 <!-- Twitter / X Card -->
 <meta name="twitter:card" content="summary_large_image"/>
@@ -74,9 +90,9 @@
   "url": "<%= _site %>",
   "logo": {
     "@type": "ImageObject",
-    "url": "<%= _site %>/assets/img/site-hero.jpg",
-    "width": 1200,
-    "height": 630
+    "url": "<%= _site %>/assets/img/logo.svg",
+    "width": 512,
+    "height": 512
   },
   "image": "<%= _site %>/assets/img/site-hero.jpg",
   "telephone": "+919036001234",

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C170" />
+      <stop offset="50%" stop-color="#C69C4E" />
+      <stop offset="100%" stop-color="#9E7728" />
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#242119" />
+      <stop offset="100%" stop-color="#12110C" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Background Shield / Badge -->
+  <rect x="24" y="24" width="464" height="464" rx="96" fill="url(#darkGrad)" stroke="url(#goldGrad)" stroke-width="8" filter="url(#shadow)" />
+
+  <!-- Architectural 'RM' Emblem Monogram -->
+  <g transform="translate(256, 256)">
+    <!-- Outer Diamond / Roof Silhouette -->
+    <path d="M 0 -150 L 150 0 L 0 150 L -150 0 Z" fill="none" stroke="url(#goldGrad)" stroke-width="12" stroke-linejoin="round" opacity="0.4" />
+
+    <!-- Main Architectural Gable / Roof (Peak) -->
+    <path d="M -120 40 L 0 -110 L 120 40" fill="none" stroke="url(#goldGrad)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Left Pillar / R Leg -->
+    <path d="M -70 40 L -70 120 M -70 -10 L 0 -10 L 0 40" fill="none" stroke="url(#goldGrad)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Right Pillar / M Gable peak -->
+    <path d="M 70 40 L 70 120 M 0 -10 L 70 40 L 70 120" fill="none" stroke="url(#goldGrad)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Central Diamond Star / Apex Accent -->
+    <polygon points="0,-140 12,-115 0,-90 -12,-115" fill="url(#goldGrad)" />
+    <circle cx="0" cy="115" r="10" fill="url(#goldGrad)" />
+  </g>
+</svg>

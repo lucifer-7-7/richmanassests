@@ -42,7 +42,7 @@ function showResult(status, propId) {
   if (status === 'paid') {
     icon.className  = 'result-icon success';
     icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="#4CAF82" stroke-width="2.5" width="36" height="36"><polyline points="20 6 9 17 4 12"/></svg>';
-    title.textContent = '🎉 Payment Successful!';
+    title.textContent = 'Payment Successful!';
     msg.textContent   = 'Your listing is now live on RichManAssets.';
     btn.href = propId ? '/property/' + propId : '/agent/listings';
     btn.textContent = 'View Live Listing →';

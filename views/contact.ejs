@@ -4,11 +4,11 @@
 <%- include('partials/head') %>
 <link rel="stylesheet" href="/assets/market.css?v=3">
 <style>
-  .page-top{padding:118px 0 12px}
+  .page-top{padding:clamp(96px, 12vw, 120px) var(--gutter, 20px) 12px}
   .page-top h1{font-family:var(--f-display);font-weight:500;font-size:clamp(34px,5.6vw,72px);line-height:1;letter-spacing:-.015em;margin-top:14px;max-width:16ch}
   .page-top h1 .it{font-style:italic;color:var(--accent)}
   .page-top p{margin-top:16px;color:var(--ink-3);font-size:16px;max-width:50ch;line-height:1.6}
-  .c-grid{display:grid;gap:clamp(30px,4vw,60px);align-items:start;padding:clamp(34px,5vw,60px) 0 clamp(60px,9vw,110px)}
+  .c-grid{display:grid;gap:clamp(30px,4vw,60px);align-items:start;padding:clamp(28px,5vw,50px) var(--gutter, 20px) clamp(60px,9vw,110px)}
   @media(min-width:900px){.c-grid{grid-template-columns:1.05fr .95fr}}
   .c-info .block{padding:24px 0;border-bottom:1px solid var(--line)}
   .c-info .block:first-child{padding-top:0}

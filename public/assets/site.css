@@ -65,10 +65,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 }
 .nav.solid{
   background:rgba(255, 255, 255, 0.98);
-  box-shadow:0 14px 36px -10px rgba(10, 9, 6, 0.12);
   border-color:rgba(23, 21, 15, 0.14);
 }
-.nav .brand{display:flex;align-items:baseline;gap:6px;font-family:var(--f-display);font-size:22px;font-weight:500;letter-spacing:-.015em;color:var(--ink);text-decoration:none;}
+.nav .brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:21px;font-weight:600;letter-spacing:-.015em;color:var(--ink);text-decoration:none;}
+.nav .brand-logo{width:32px;height:32px;object-fit:contain;flex-shrink:0;}
+.nav .brand-name{display:flex;align-items:baseline;gap:6px;}
 .nav .brand .mono{
   font-family:var(--f-mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;
   color:var(--gold-deep);font-weight:700;
@@ -85,9 +86,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .nav-cta{
   border-radius:100px;padding:9px 20px;font-family:var(--f-sans);font-size:13px;
   font-weight:700;background:var(--ink);color:#F6F2EC!important;margin-left:6px;
-  box-shadow:0 4px 14px rgba(10,9,6,0.15);transition:all .2s var(--ease);text-decoration:none;
+  transition:all .2s var(--ease);text-decoration:none;
 }
-.nav-cta:hover{background:var(--gold-deep);color:#FFFFFF!important;transform:translateY(-1px);box-shadow:0 6px 20px rgba(179,142,70,0.35)}
+.nav-cta:hover{background:var(--gold-deep);color:#FFFFFF!important;}
 
 /* Hide top floating navbar on mobile since mobile bottom tabbar handles navigation */
 @media (max-width: 768px) {
@@ -105,10 +106,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .menu-sheet {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 199;
   background: #F7F4ED; border-radius: 24px 24px 0 0;
-  border-top: 1px solid rgba(23,21,15,0.12);
+  border-top: 1px solid var(--line);
   padding: 22px 18px 84px;
   transform: translateY(100%); transition: transform .32s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
   max-height: 85vh; overflow-y: auto;
 }
 .menu-sheet.open { transform: translateY(0); }
@@ -117,8 +117,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   display: flex; align-items: center; justify-content: space-between;
   padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid rgba(23,21,15,0.08);
 }
-.menu-sheet-head .brand { font-family: var(--f-display); font-size: 20px; font-weight: 500; color: var(--ink); }
-.menu-sheet-head .brand span { font-family: var(--f-mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-left: 6px; }
+.menu-sheet-head .brand { display: flex; align-items: center; gap: 8px; font-family: var(--f-display); font-size: 20px; font-weight: 500; color: var(--ink); text-decoration: none; }
+.menu-sheet-head .brand-logo { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
+.menu-sheet-head .brand span { font-family: var(--f-mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-left: 4px; }
 .menu-sheet-head .close-btn {
   width: 32px; height: 32px; border-radius: 50%; background: rgba(23,21,15,0.08);
   display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink);
@@ -204,8 +205,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    FLOATING ACTIONS (WhatsApp / Call)
    ══════════════════════════════════════════ */
 .floaters{position:fixed;right:16px;bottom:16px;z-index:80;display:flex;flex-direction:column;gap:10px}
-.floaters a{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:0 6px 20px -4px rgba(0,0,0,.4);transition:transform .3s var(--ease)}
-.floaters a:hover{transform:scale(1.1)}
+.floaters a{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;transition:background .2s var(--ease)}
 .floaters .wa{background:#25D366}
 .floaters .call{background:var(--gold-deep)}
 .floaters a svg{width:24px;height:24px}
@@ -216,10 +216,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;z-index:70;
   display:none;grid-template-columns:repeat(5,1fr);align-items:center;
-  background:rgba(247,244,237,.96);backdrop-filter:blur(18px) saturate(1.2);
+  background:#F7F4ED;
   border-top:1px solid var(--line-soft);
   padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));
-  box-shadow:0 -8px 30px -16px rgba(10,9,6,.4);
 }
 .tabbar .tab{
   display:flex;flex-direction:column;align-items:center;gap:3px;
@@ -236,7 +235,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   width:46px;height:46px;border-radius:50%;
   background:var(--ink);color:var(--paper);
   display:grid;place-items:center;margin-top:-20px;margin-bottom:1px;
-  box-shadow:0 10px 22px -6px rgba(10,9,6,.55);border:3px solid var(--paper);
+  border:2px solid var(--paper);
 }
 .tabbar .tab-cta .cta-ring svg{width:22px;height:22px;stroke:currentColor}
 .tabbar .tab-cta.is-active .cta-ring,.tabbar .tab-cta:active .cta-ring{background:var(--gold-deep)}

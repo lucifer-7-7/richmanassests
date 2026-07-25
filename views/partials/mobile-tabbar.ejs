@@ -1,5 +1,5 @@
 <%
-  var _p = (typeof path !== 'undefined' && path) ? path : '/';
+  var _p = (typeof path === 'string' && path) ? path : '/';
   function on(test){ return test ? ' is-active' : ''; }
   var isHome   = _p === '/';
   var isBuy    = _p.indexOf('/properties') === 0 || _p.indexOf('/property') === 0;
@@ -35,7 +35,10 @@
 <div class="menu-sheet-overlay" id="menuSheetOverlay" onclick="toggleMobileMenuSheet(false)"></div>
 <div class="menu-sheet" id="menuSheet" aria-label="Mobile Navigation Menu">
   <div class="menu-sheet-head">
-    <div class="brand">RichMan<span>Assets</span></div>
+    <a href="/" class="brand">
+      <img src="/assets/img/logo-icon.svg" alt="RichManAssets Logo" class="brand-logo" width="28" height="28" />
+      <span>RichMan<span style="font-family:var(--f-mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-left:4px">Assets</span></span>
+    </a>
     <button type="button" class="close-btn" onclick="toggleMobileMenuSheet(false)" aria-label="Close menu">✕</button>
   </div>
 

@@ -99,6 +99,96 @@ function applyBudgetFilter(q, budget) {
   return q;
 }
 
+function buildPropertiesSEO({ listing, area, type, budget, count = 0 }) {
+  const listingMap = {
+    rent: { verb: 'for Rent', noun: 'Rentals' },
+    lease: { verb: 'for Lease', noun: 'Lease Listings' },
+    sale: { verb: 'for Sale', noun: 'Properties for Sale' },
+  };
+  const typeMap = {
+    Apartment: { plural: 'Apartments & Flats', singular: 'Apartment', keyword: 'flats' },
+    Villa: { plural: 'Villas & Luxury Homes', singular: 'Villa', keyword: 'villas' },
+    Plot: { plural: 'Plots & Layout Sites', singular: 'Plot', keyword: 'plots' },
+    Commercial: { plural: 'Commercial Spaces & Offices', singular: 'Commercial Property', keyword: 'commercial spaces' },
+    Agricultural: { plural: 'Agricultural Land & Farms', singular: 'Agricultural Land', keyword: 'agricultural land' },
+    House: { plural: 'Independent Houses & Villas', singular: 'House', keyword: 'houses' },
+  };
+  const budgetMap = {
+    'u30': 'Under ₹30 Lakhs',
+    '30-1c': '₹30L to ₹1 Crore',
+    '1-5c': '₹1 Cr to ₹5 Crores',
+    '5c': 'Above ₹5 Crores',
+  };
+
+  const lInfo = listingMap[listing] || { verb: 'for Sale & Rent', noun: 'Properties' };
+  const tInfo = typeMap[type] || { plural: 'Properties', singular: 'Property', keyword: 'property' };
+  const targetArea = area ? String(area).trim() : '';
+
+  let pageTitle = '';
+  if (targetArea && type && listing) {
+    pageTitle = `${tInfo.plural} ${lInfo.verb} in ${targetArea} | RichManAssets`;
+  } else if (targetArea && type) {
+    pageTitle = `${tInfo.plural} in ${targetArea} — Buy & Rent | RichManAssets`;
+  } else if (targetArea && listing) {
+    pageTitle = `Properties ${lInfo.verb} in ${targetArea} | RichManAssets`;
+  } else if (targetArea) {
+    pageTitle = `Real Estate & Property in ${targetArea} | RichManAssets`;
+  } else if (type && listing) {
+    pageTitle = `${tInfo.plural} ${lInfo.verb} in Udupi & Mangaluru | RichManAssets`;
+  } else if (type) {
+    pageTitle = `${tInfo.plural} for Sale & Rent in Coastal Karnataka | RichManAssets`;
+  } else if (listing) {
+    pageTitle = `Properties ${lInfo.verb} in Udupi, Manipal & Mangaluru | RichManAssets`;
+  } else {
+    pageTitle = `Properties for Sale & Rent in Udupi & Mangaluru | RichManAssets`;
+  }
+
+  if (budgetMap[budget]) {
+    pageTitle = `${pageTitle.replace(' | RichManAssets', '')} (${budgetMap[budget]}) | RichManAssets`;
+  }
+
+  const locText = targetArea ? `in ${targetArea}` : 'in Udupi, Manipal, Mangaluru & coastal Karnataka';
+  const countText = count > 0 ? `${count} verified` : 'verified';
+  const pageDesc = `Browse ${countText} ${tInfo.plural.toLowerCase()} ${lInfo.verb.toLowerCase()} ${locText}. Title-checked properties with photos, pricing, direct enquiry & loan support.`;
+
+  const locKw = targetArea ? targetArea.toLowerCase() : 'udupi';
+  const typeKw = tInfo.keyword;
+
+  const kwSet = new Set([
+    `${typeKw} ${lInfo.verb.toLowerCase()} in ${locKw}`,
+    `real estate in ${locKw}`,
+    `property in ${locKw}`,
+    `${tInfo.singular.toLowerCase()} in ${locKw}`,
+    `buy ${typeKw} ${locKw}`,
+    `rent ${typeKw} ${locKw}`,
+    `${locKw} property portal`,
+    `verified ${typeKw} ${locKw}`,
+    `richman assets ${locKw}`,
+    `coastal karnataka real estate`,
+  ]);
+
+  if (targetArea && targetArea.toLowerCase() !== 'udupi') {
+    kwSet.add(`property in udupi`);
+    kwSet.add(`real estate mangaluru`);
+  }
+  if (budgetMap[budget]) {
+    kwSet.add(`budget ${typeKw} ${locKw}`);
+    kwSet.add(`affordable property ${locKw}`);
+  }
+
+  const keywords = Array.from(kwSet).join(', ');
+  const geoPlace = targetArea ? `${targetArea}, Karnataka, India` : 'Udupi, Karnataka, India';
+
+  let queryParams = [];
+  if (listing) queryParams.push(`listing=${encodeURIComponent(listing)}`);
+  if (targetArea) queryParams.push(`area=${encodeURIComponent(targetArea)}`);
+  if (type) queryParams.push(`type=${encodeURIComponent(type)}`);
+  if (budget) queryParams.push(`budget=${encodeURIComponent(budget)}`);
+  const canonPath = '/properties' + (queryParams.length ? '?' + queryParams.join('&') : '');
+
+  return { pageTitle, pageDesc, keywords, geoPlace, canonPath };
+}
+
 // ── HOME ─────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
@@ -125,8 +215,10 @@ router.get('/', async (req, res) => {
     const allListings = allProps;
 
     res.render('index', {
-      title: 'Real Estate in Udupi & Mangaluru: Villas, Flats, Plots, Rentals | RichManAssets',
-      description: 'Buy, rent or lease property in Udupi, Mangaluru & coastal Karnataka. Verified villas, apartments, plots, commercial space & agricultural land, plus home loans, legal & interiors under one roof.',
+      title: 'Real Estate & Property in Udupi & Mangaluru | RichManAssets',
+      description: 'Buy, rent or lease verified villas, flats, plots & commercial property in Udupi, Manipal & Mangaluru. Home loans, legal & interiors by RichManAssets.',
+      keywords: 'real estate udupi, property in udupi, flats for sale in udupi, villas in udupi, plots for sale in udupi, real estate agent udupi, property in mangaluru, home loans udupi, richman assets, luxury homes udupi, commercial space mangaluru',
+      geoPlace: 'Udupi, Karnataka, India',
       canonical: canon('/'),
       siteUrl: SITE,
       heroSlides: finalHero,
@@ -167,16 +259,11 @@ router.get('/properties', async (req, res) => {
     const properties = propsRes.data || [];
     const areas = [...new Set((areasRes.data || []).map(r => r.area).filter(Boolean))].sort();
 
-    const listLabel = listing === 'rent' ? 'for Rent' : listing === 'lease' ? 'for Lease' : listing === 'sale' ? 'for Sale' : 'for Sale, Rent & Lease';
-    const typeLabel = type ? (type === 'Plot' ? 'Plots' : type + 's') : 'Property';
-    const where = area ? ` in ${area}` : ' in Udupi & Mangaluru';
-    const pageTitle = `${typeLabel} ${listLabel}${where} | RichManAssets`;
-    const pageDesc = `Browse ${properties.length} verified ${typeLabel.toLowerCase()} ${listLabel.toLowerCase()}${where} and across coastal Karnataka. Title-checked listings with photos, price and direct enquiry.`;
-    const canonPath = '/properties' + (area ? '?area=' + encodeURIComponent(area) : '');
+    const seo = buildPropertiesSEO({ listing, area, type, budget, count: properties.length });
 
     const itemList = {
       '@context': 'https://schema.org', '@type': 'ItemList',
-      'name': pageTitle, 'description': pageDesc,
+      'name': seo.pageTitle, 'description': seo.pageDesc,
       'numberOfItems': properties.length,
       'itemListElement': properties.slice(0, 20).map((p, i) => ({
         '@type': 'ListItem', 'position': i + 1,
@@ -193,8 +280,12 @@ router.get('/properties', async (req, res) => {
     };
 
     res.render('properties', {
-      title: pageTitle, description: pageDesc,
-      canonical: canon(canonPath), siteUrl: SITE,
+      title: seo.pageTitle,
+      description: seo.pageDesc,
+      keywords: seo.keywords,
+      geoPlace: seo.geoPlace,
+      canonical: canon(seo.canonPath),
+      siteUrl: SITE,
       jsonld: JSON.stringify([itemList, breadcrumbLdList]),
       properties, areas, q: { listing, area, type, budget },
     });
@@ -222,19 +313,14 @@ router.get('/property/:id', async (req, res) => {
     let gallery = [];
     try { gallery = JSON.parse(p.gallery || '[]'); } catch (_) { }
     const rawImages = [p.img_hero, p.img_card, ...gallery].map(absImg).filter(Boolean);
-    const SAMPLE_FALLERY_FALLBACKS = [
-      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80'
-    ];
-    const allImages = [...new Set([...rawImages, ...SAMPLE_GALLERY_FALLBACKS])].slice(0, 5);
+    const allImages = [...new Set(rawImages)];
 
     const listLabel = p.listing === 'rent' ? 'for Rent' : p.listing === 'lease' ? 'for Lease' : 'for Sale';
-    const pageTitle = `${p.name} in ${p.loc}, ${p.type} ${listLabel} at ${p.price} | RichManAssets`;
-    const pageDesc = (p.story_body ? String(p.story_body).replace(/\s+/g, ' ').slice(0, 150)
-      : `${p.type} ${listLabel.toLowerCase()} in ${p.loc}, coastal Karnataka. ${p.beds && p.beds !== '—' ? p.beds + ' beds · ' : ''}${p.sqft || ''}. Price ${p.price}.`).trim() + '…';
+    const pageTitle = `${p.name} — ${p.type} ${listLabel} in ${p.loc} | RichManAssets`;
+    const specsStr = [p.beds && p.beds !== '—' ? `${p.beds} Beds` : null, p.sqft ? p.sqft : null, p.price ? `Price: ${p.price}` : null].filter(Boolean).join(' · ');
+    const pageDesc = `${p.name} in ${p.loc}: Verified ${p.type.toLowerCase()} ${listLabel.toLowerCase()}. ${specsStr}. Title-cleared real estate in Udupi & Mangaluru.`;
+    const propKeywords = `${p.name.toLowerCase()}, ${p.type.toLowerCase()} in ${p.loc.toLowerCase()}, ${p.loc.toLowerCase()} real estate, ${p.type.toLowerCase()} ${listLabel.toLowerCase()} ${p.loc.toLowerCase()}, property for ${p.listing} in ${p.loc.toLowerCase()}, richman assets`;
+    const propGeoPlace = `${p.loc}, Karnataka, India`;
 
     const productLd = {
       '@context': 'https://schema.org', '@type': 'Product',
@@ -260,7 +346,10 @@ router.get('/property/:id', async (req, res) => {
     };
 
     res.render('property', {
-      title: pageTitle, description: pageDesc,
+      title: pageTitle,
+      description: pageDesc,
+      keywords: propKeywords,
+      geoPlace: propGeoPlace,
       canonical: canon('/property/' + p.id), siteUrl: SITE,
       ogType: 'product', ogImage: allImages[0],
       jsonld: JSON.stringify([productLd, breadcrumbLd]),
@@ -275,8 +364,10 @@ router.get('/property/:id', async (req, res) => {
 // ── CONTACT ──────────────────────────────────────────────────────
 router.get('/contact', (req, res) => {
   res.render('contact', {
-    title: 'Contact & Enquire: Property Specialists in Udupi & Mangaluru | RichManAssets',
-    description: 'Talk to a RichManAssets property specialist in Udupi or Mangaluru. Call, WhatsApp or send your brief for a same-day response on buying, renting, plots, loans, legal and interiors.',
+    title: 'Contact Us | Real Estate Agency in Udupi & Mangaluru | RichManAssets',
+    description: 'Contact RichManAssets property consultants in Udupi & Mangaluru. Call +91 90360 01234 or submit your enquiry for site visits, loans & legal aid.',
+    keywords: 'contact richman assets, property dealer contact udupi, real estate agent udupi number, property consultant mangaluru, enquire real estate udupi',
+    geoPlace: 'Udupi, Karnataka, India',
     canonical: canon('/contact'),
     siteUrl: SITE,
     ref: req.query.ref || '',
@@ -286,8 +377,10 @@ router.get('/contact', (req, res) => {
 // ── SERVICES ─────────────────────────────────────────────────────
 router.get('/services', (req, res) => {
   res.render('services', {
-    title: 'Real Estate Services in Udupi & Mangaluru: Sales, Loans, Legal & Interiors | RichManAssets',
-    description: 'One team for everything property in coastal Karnataka: builder & resale sales, commercial space, plots, home loans, legal due-diligence, construction and interiors.',
+    title: 'Real Estate Services in Udupi & Mangaluru | RichManAssets',
+    description: 'End-to-end real estate services in coastal Karnataka: builder sales, commercial leases, plot verification, home loans, legal checks & turnkey interiors.',
+    keywords: 'real estate services udupi, property legal title check udupi, property management udupi, commercial leasing mangaluru, plot verification rera, builder sales agency',
+    geoPlace: 'Udupi & Mangaluru, Karnataka, India',
     canonical: canon('/services'),
     siteUrl: SITE,
     services: withIcons(SERVICES),
@@ -298,8 +391,10 @@ router.get('/services', (req, res) => {
 // ── INTERIOR DESIGN SHOWCASE ──────────────────────────────────────
 router.get('/interiors', (req, res) => {
   res.render('interiors', {
-    title: 'Interior Design & Bespoke Spaces in Udupi & Mangaluru | RichManAssets',
-    description: 'Explore turnkey interior design, 3D renders, and custom joinery for coastal villas, penthouses, modular kitchens, and corporate offices across coastal Karnataka.',
+    title: 'Turnkey Interior Design in Udupi & Mangaluru | RichManAssets',
+    description: 'Turnkey interior design, 3D renders, modular kitchens & corporate office fitouts in Udupi, Manipal & Mangaluru with transparent fixed pricing.',
+    keywords: 'interior design udupi, modular kitchen udupi, home interior designer manipal, villa interior design mangaluru, office fitout udupi, turnkey interior package',
+    geoPlace: 'Udupi, Karnataka, India',
     canonical: canon('/interiors'),
     siteUrl: SITE,
   });
@@ -324,8 +419,10 @@ router.get('/about', async (req, res) => {
       ],
     };
     res.render('about', {
-      title: 'About RichManAssets: Property Consultants in Udupi & Mangaluru, Coastal Karnataka',
-      description: 'RichManAssets (Vittu Bharat Associates LLP) is a coastal-Karnataka real-estate firm in Udupi & Mangaluru. 15+ years, 1,200+ families, ₹500 Cr+ transacted across sales, loans, legal, construction and interiors under one roof.',
+      title: 'About Us | Real Estate Agency in Udupi & Mangaluru | RichManAssets',
+      description: 'RichManAssets (Vittu Bharat Associates LLP) is a premier property consultancy in Udupi & Mangaluru. 15+ years experience, 1,200+ families served.',
+      keywords: 'richman assets, vittu bharat associates llp, top real estate agency udupi, property consultants mangaluru, best property agent udupi, real estate company coastal karnataka',
+      geoPlace: 'Udupi, Karnataka, India',
       canonical: canon('/about'), siteUrl: SITE,
       jsonld: JSON.stringify(faqLd),
       testimonials: testimonials || [],
@@ -339,8 +436,10 @@ router.get('/about', async (req, res) => {
 // ── LOANS ─────────────────────────────────────────────────────────
 router.get('/loans', (req, res) => {
   res.render('loans', {
-    title: 'Home Loans & EMI in Udupi & Mangaluru: Partner Bank Rates | RichManAssets',
-    description: 'Pre-approved home and project loans in coastal Karnataka from SBI, Bank of Baroda, HDFC, Karnataka Bank and more. Compare EMI, check eligibility and get doorstep paperwork.',
+    title: 'Home Loans & EMI Assistance in Udupi & Mangaluru | RichManAssets',
+    description: 'Pre-approved home and project loans in coastal Karnataka with partner bank rates from SBI, HDFC, Bank of Baroda & Karnataka Bank.',
+    keywords: 'home loans udupi, sbi home loan udupi, hdfc home loan mangaluru, project loan udupi, property loan consultant, low interest rate home loan udupi',
+    geoPlace: 'Udupi & Mangaluru, Karnataka, India',
     canonical: canon('/loans'),
     siteUrl: SITE,
   });

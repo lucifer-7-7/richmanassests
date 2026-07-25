@@ -18,7 +18,10 @@
     <a class="cta-wa" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I\'m interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener" aria-label="WhatsApp">
       <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
     </a>
-    <a class="cta-btn" href="/contact?ref=<%= p.id %>">Book a visit</a>
+    <a class="cta-btn" href="/properties" style="gap:6px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>Search</span>
+    </a>
   </div>
 </div>
 
@@ -33,7 +36,7 @@
       <div class="meta-pills">
         <span class="pbadge <%= p.listing %>"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></span>
         <span class="pbadge"><%= p.type %></span>
-        <span style="font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">📍 <%= p.loc %></span>
+        <span style="font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)"><%= p.loc %></span>
       </div>
     </div>
     <div style="text-align:right;">
@@ -42,32 +45,40 @@
     </div>
   </div>
 
-  <div class="dt-gallery-grid">
+  <% var pImgs = (typeof allImages !== 'undefined' && allImages.length) ? allImages : [p.img_hero || p.img_card].filter(Boolean); %>
+  <% var fallbackMain = pImgs[0] || ''; %>
+  <div class="dt-gallery-grid dt-count-<%= Math.min(pImgs.length, 5) %>">
     <div class="dt-gallery-main" onclick="openLightbox(0)">
-      <img src="<%= (typeof allImages !== 'undefined' && allImages.length) ? allImages[0] : (p.img_hero || p.img_card) %>" alt="<%= p.name %> Main Hero" loading="eager">
+      <img src="<%= pImgs[0] %>" alt="<%= p.name %> Main Hero" loading="eager" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
     </div>
-    <div class="dt-gallery-side">
-      <% var dtImgs = (typeof allImages !== 'undefined' && allImages.length >= 5) ? allImages.slice(1, 5) : []; %>
-      <% dtImgs.forEach(function(imgUrl, idx) { %>
+    <% if (pImgs.length > 1) { %>
+    <div class="dt-gallery-side dt-side-count-<%= Math.min(pImgs.length - 1, 4) %>">
+      <% pImgs.slice(1, 5).forEach(function(imgUrl, idx) { %>
       <div class="dt-gallery-tile" onclick="openLightbox(<%= idx + 1 %>)">
-        <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 2 %>" loading="lazy">
+        <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 2 %>" loading="lazy" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
+        <% if (idx === 3 && pImgs.length > 5) { %>
+        <div class="dt-more-overlay">+<%= pImgs.length - 5 %> Photos</div>
+        <% } %>
       </div>
       <% }); %>
     </div>
+    <% } %>
     <button class="btn-all-photos" onclick="openLightbox(0)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      View All Photos (<%= typeof allImages !== 'undefined' ? allImages.length : 5 %>)
+      View All Photos (<%= pImgs.length %>)
     </button>
   </div>
 </section>
 
 <!-- MOBILE HERO (Mobile only <860px) -->
 <header class="phero">
-  <% if (p.img_hero) { %>
-  <img src="<%= p.img_hero.indexOf('http')===0 ? p.img_hero : '/' + p.img_hero %>" alt="<%= p.name %>, <%= p.loc %>" fetchpriority="high">
-  <% } else { %>
-  <div style="background:var(--paper-2);height:100%"></div>
-  <% } %>
+  <div class="phero-slider" id="pheroSlider">
+    <% pImgs.forEach(function(imgUrl, idx) { %>
+    <div class="phero-slide" onclick="openLightbox(<%= idx %>)">
+      <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 1 %>" loading="<%= idx === 0 ? 'eager' : 'lazy' %>" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
+    </div>
+    <% }); %>
+  </div>
   <div class="scrim"></div>
   <div class="phero-inner">
     <div class="badge-row">
@@ -76,7 +87,12 @@
     </div>
     <div class="eyebrow"><span class="ln"></span><span><%= p.loc %></span></div>
     <h1><%= p.name %></h1>
-    <div class="pprice"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
+    <div class="pprice-wrap" style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div class="pprice"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
+      <% if (pImgs.length > 1) { %>
+      <span style="font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);background:rgba(10,9,6,0.5);padding:4px 10px;border-radius:100px;">Swipe &rarr; (1/<%= pImgs.length %>)</span>
+      <% } %>
+    </div>
   </div>
 </header>
 
@@ -112,13 +128,16 @@ function closeLightbox() {
 }
 
 function lbMove(dir) {
+  if (!lbImages.length) return;
   lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length;
   updateLb();
 }
 
 function updateLb() {
   if (!lbImages.length) return;
-  document.getElementById('lbImg').src = lbImages[lbIndex];
+  var imgEl = document.getElementById('lbImg');
+  imgEl.onerror = function() { this.src = '<%= fallbackMain %>'; this.onerror = null; };
+  imgEl.src = lbImages[lbIndex];
   document.getElementById('lbCounter').innerText = (lbIndex + 1) + ' / ' + lbImages.length;
 }
 
@@ -129,70 +148,6 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowRight') lbMove(1);
 });
 </script>
-
-<style>
-.prop-gallery{padding:clamp(14px,2vw,24px) 0;position:relative;background:var(--paper)}
-.gallery-scroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:0 clamp(20px,5vw,72px);cursor:grab}
-.gallery-scroll:active{cursor:grabbing}
-.gallery-scroll::-webkit-scrollbar{display:none}
-.gal-thumb{flex:none;width:clamp(180px,22vw,280px);aspect-ratio:3/2;border-radius:8px;overflow:hidden;border:0;padding:0;cursor:pointer;position:relative}
-.gal-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
-.gal-thumb:hover img{transform:scale(1.05)}
-.gal-count{font-family:var(--f-mono,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted,#928A79);text-align:right;padding:8px clamp(20px,5vw,72px) 0}
-/* lightbox */
-.gal-lb{display:none;position:fixed;inset:0;background:rgba(10,8,5,.94);z-index:200;align-items:center;justify-content:center}
-.gal-lb.open{display:flex}
-.lb-img{max-width:90vw;max-height:88vh;object-fit:contain;border-radius:4px}
-.lb-close{position:absolute;top:18px;right:22px;background:none;border:0;color:#fff;font-size:22px;cursor:pointer;opacity:.8;line-height:1}
-.lb-close:hover{opacity:1}
-.lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:0;color:#fff;font-size:26px;padding:14px 18px;cursor:pointer;border-radius:4px;line-height:1}
-.lb-prev{left:14px}.lb-next{right:14px}
-.lb-prev:hover,.lb-next:hover{background:rgba(255,255,255,.22)}
-.lb-counter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-family:var(--f-mono,monospace);font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.1em}
-@media(max-width:600px){.lb-prev{left:6px;padding:10px 12px}.lb-next{right:6px;padding:10px 12px}}
-</style>
-<script>
-var _galImgs = <%- JSON.stringify(galleryImgs) %>;
-var _lbIdx = 0;
-function openLightbox(i) {
-  _lbIdx = i;
-  var lb = document.getElementById('galLb');
-  lb.classList.add('open'); lb.setAttribute('aria-hidden','false');
-  document.body.style.overflow = 'hidden';
-  _lbShow();
-}
-function closeLightbox() {
-  var lb = document.getElementById('galLb');
-  lb.classList.remove('open'); lb.setAttribute('aria-hidden','true');
-  document.body.style.overflow = '';
-}
-function lbMove(dir) { _lbIdx = (_lbIdx + dir + _galImgs.length) % _galImgs.length; _lbShow(); }
-function _lbShow() {
-  var url = _galImgs[_lbIdx]; if (!url) return;
-  document.getElementById('lbImg').src = '/' + url.replace(/^\//,'');
-  document.getElementById('lbCounter').textContent = (_lbIdx+1) + ' / ' + _galImgs.length;
-}
-document.addEventListener('keydown', function(e) {
-  var lb = document.getElementById('galLb');
-  if (!lb.classList.contains('open')) return;
-  if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowLeft') lbMove(-1);
-  if (e.key === 'ArrowRight') lbMove(1);
-});
-// drag-scroll gallery strip
-(function(){
-  var el = document.getElementById('galleryScroll');
-  if (!el) return;
-  var down=false,sx=0,sl=0;
-  el.addEventListener('pointerdown',function(e){down=true;sx=e.clientX;sl=el.scrollLeft;el.setPointerCapture(e.pointerId);});
-  el.addEventListener('pointermove',function(e){if(!down)return;el.scrollLeft=sl+(sx-e.clientX);});
-  el.addEventListener('pointerup',function(){down=false;});
-  el.addEventListener('pointercancel',function(){down=false;});
-  // prevent lightbox open when it was a drag
-  el.addEventListener('click',function(e){if(Math.abs(el.scrollLeft-sl)>5)e.stopPropagation();},true);
-})();
-</script>
-<% } %>
 
 <section class="specs">
   <div class="wrap"><div class="specs-in">
@@ -215,11 +170,36 @@ document.addEventListener('keydown', function(e) {
         paras.forEach(function(para) { if (para.trim()) { %>
       <p><%= para.trim() %></p>
       <% }})} %>
-      <% if (p.img_hero) { %>
-      <figure class="figcrop reveal" style="margin-top:34px;aspect-ratio:16/10">
-        <img src="/<%= p.img_hero %>" alt="<%= p.name %>" style="object-position:center" loading="lazy">
-      </figure>
-      <% } %>
+      <!-- Story Section Photo & Small Thumbnail Preview -->
+      <div class="story-media-sec reveal" style="margin-top:32px;width:100%;">
+        <div class="story-media-title" style="font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center;">
+          <span>Property Gallery</span>
+          <span><%= pImgs.length %> <%= pImgs.length === 1 ? 'Photo' : 'Photos' %></span>
+        </div>
+        
+        <!-- Big Main Image -->
+        <figure class="figcrop" onclick="openLightbox(0)" style="aspect-ratio:16/10;cursor:pointer;border-radius:14px;overflow:hidden;border:1px solid var(--line-soft);">
+          <img src="<%= pImgs[0] %>" alt="<%= p.name %>" loading="lazy" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
+        </figure>
+
+        <!-- Small Stacked Thumbnails Preview -->
+        <% if (pImgs.length > 1) { %>
+        <div class="story-thumb-preview" style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:12px;padding-bottom:4px;">
+          <% pImgs.forEach(function(imgUrl, idx) { %>
+          <div class="story-thumb-item" onclick="openLightbox(<%= idx %>)" style="flex:0 0 96px;aspect-ratio:16/11;border-radius:8px;overflow:hidden;border:1px solid var(--line-soft);position:relative;cursor:pointer;background:var(--paper-2);scroll-snap-align:start;">
+            <img src="<%= imgUrl %>" alt="<%= p.name %> Thumb <%= idx + 1 %>" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
+            <span style="position:absolute;bottom:4px;right:4px;font-family:var(--f-mono);font-size:8.5px;color:#FFF;background:rgba(10,9,6,0.7);padding:2px 5px;border-radius:4px;"><%= idx + 1 %></span>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+        <!-- Book a Visit CTA inside mobile property page -->
+        <div class="mobile-visit-btn-wrap" style="margin-top:16px;">
+          <a class="btn btn-dark" href="/contact?ref=<%= p.id %>" style="width:100%;justify-content:center;min-height:48px;border-radius:100px;font-size:14px;font-weight:600;">
+            <span>Book a visit</span><span class="arr">&rarr;</span>
+          </a>
+        </div>
+      </div>
     </div>
 
     <aside class="buy-card-wrap reveal">
