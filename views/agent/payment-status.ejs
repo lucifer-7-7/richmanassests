@@ -1,27 +1,18 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title><%= title %></title>
-<meta name="robots" content="noindex,nofollow"/>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/agent.css">
-</head>
-<body class="agent-portal">
-<div class="status-page">
-  <div class="status-box">
-    <div id="spinnerWrap">
-      <div class="spinner"></div>
+<%- include('../partials/agent-layout-start', { activeNav: 'listings', pageTitle: 'Verifying Payment' }) %>
+
+<div style="display:flex;justify-content:center;align-items:flex-start;min-height:unset;">
+  <div class="result-box" style="margin:20px auto 40px;max-width:480px;width:100%;">
+    <div id="spinnerWrap" style="text-align:center;">
+      <div class="spinner" style="margin:0 auto 16px;"></div>
       <h2 style="color:var(--cream);margin-bottom:8px">Verifying Payment</h2>
       <p style="color:var(--muted);font-size:14px">Please wait while we confirm your payment…</p>
     </div>
-    <div id="statusDone" style="display:none">
+    <div id="statusDone" style="display:none;text-align:center;">
       <div id="resultIcon" class="result-icon" style="margin:0 auto 16px"></div>
       <h2 id="resultTitle" style="color:var(--cream);margin-bottom:8px"></h2>
       <p id="resultMsg" style="color:var(--muted);font-size:14px;margin-bottom:20px"></p>
-      <a id="resultBtn" href="/agent/dashboard" class="btn btn-primary btn-full">Continue</a>
+      <a id="resultBtn" href="/agent/listings" class="btn btn-primary btn-full" style="margin-bottom:10px">Continue</a>
+      <a href="/agent/listings" class="btn btn-outline btn-full">← My Listings</a>
     </div>
   </div>
 </div>
@@ -54,7 +45,6 @@ function showResult(status, propId) {
     btn.href = '/agent/listings';
     btn.textContent = 'Back to Listings';
   } else {
-    // still processing
     icon.className  = 'result-icon';
     icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2" width="36" height="36"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>';
     title.textContent = 'Payment Pending';
@@ -86,5 +76,5 @@ async function poll() {
 // Start polling immediately
 poll();
 </script>
-</body>
-</html>
+
+<%- include('../partials/agent-layout-end') %>

@@ -1,69 +1,199 @@
 <%- include('../partials/agent-layout-start', { activeNav: 'listings', pageTitle: 'Pay to Publish' }) %>
 
-<% if (flash) { %><div class="flash <%= flash.type %>"><%- flash.msg %></div><% } %>
+<style>
+.checkout-card {
+  max-width: 580px;
+  margin: 20px auto 40px;
+  background: #FFFFFF;
+  border: 1px solid #E2DBD0;
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(28, 25, 23, 0.06);
+  overflow: hidden;
+}
+.checkout-header {
+  background: linear-gradient(135deg, #1C1917 0%, #2A2624 100%);
+  padding: 32px 28px;
+  color: #FFFFFF;
+  text-align: center;
+  position: relative;
+}
+.checkout-header .fee-badge {
+  display: inline-block;
+  background: rgba(181, 147, 76, 0.2);
+  border: 1px solid #B5934C;
+  color: #E6C875;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+.checkout-header .fee-amount {
+  font-family: 'Newsreader', serif;
+  font-size: 44px;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.checkout-header .fee-sub {
+  font-size: 13px;
+  color: #A8A29E;
+  font-weight: 500;
+}
+.checkout-body {
+  padding: 32px 28px;
+}
+.spec-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 28px;
+  background: #F6F2EC;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #EAE4DC;
+}
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+.spec-item .lbl {
+  color: #78716C;
+  font-weight: 500;
+}
+.spec-item .val {
+  color: #1C1917;
+  font-weight: 700;
+  text-align: right;
+}
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 2px dashed #D6CEC4;
+  margin-top: 8px;
+}
+.total-row .lbl {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1C1917;
+}
+.total-row .val {
+  font-family: 'Newsreader', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #B5934C;
+}
+.pay-btn-primary {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  background: #1C1917;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all .2s ease;
+  box-shadow: 0 8px 20px rgba(28,25,23,0.15);
+}
+.pay-btn-primary:hover {
+  background: #2A2624;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(28,25,23,0.2);
+}
+.pay-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.trust-footer {
+  text-align: center;
+  font-size: 12px;
+  color: #A8A29E;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+</style>
 
-<div class="payment-summary">
-  <div style="text-align:center;margin-bottom:28px">
-    <div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Listing Fee</div>
-    <div class="amount">₹<%= feeRs %></div>
-    <div class="amount-label">One-time fee · 1 year listing</div>
+<div class="checkout-card">
+  <div class="checkout-header">
+    <div class="fee-badge">1-Year Listing License</div>
+    <div class="fee-amount">₹<%= feeRs %></div>
+    <div class="fee-sub">One-time payment · No hidden charges</div>
   </div>
 
-  <div class="payment-row">
-    <span class="pkey">Property</span>
-    <span class="pval" style="max-width:60%;text-align:right"><%= prop.name %></span>
-  </div>
-  <div class="payment-row">
-    <span class="pkey">Location</span>
-    <span class="pval"><%= prop.loc %></span>
-  </div>
-  <div class="payment-row">
-    <span class="pkey">Type</span>
-    <span class="pval"><%= prop.type %> · For <%= prop.listing %></span>
-  </div>
-  <div class="payment-row">
-    <span class="pkey">Price</span>
-    <span class="pval"><%= prop.price %></span>
-  </div>
-  <div class="payment-row">
-    <span class="pkey">Listing valid for</span>
-    <span class="pval">1 Year from payment</span>
-  </div>
-  <div class="payment-row" style="border-bottom:2px solid var(--gold);margin-bottom:20px">
-    <span class="pkey" style="font-weight:700;color:var(--cream)">Total</span>
-    <span class="pval" style="color:var(--gold);font-weight:700;font-size:18px">₹<%= feeRs %></span>
-  </div>
+  <div class="checkout-body">
+    <div class="spec-grid">
+      <div class="spec-item">
+        <span class="lbl">Property Name</span>
+        <span class="val"><%= prop.name %></span>
+      </div>
+      <div class="spec-item">
+        <span class="lbl">Location</span>
+        <span class="val"><%= prop.loc %></span>
+      </div>
+      <div class="spec-item">
+        <span class="lbl">Category</span>
+        <span class="val"><%= prop.type %> · For <%= prop.listing %></span>
+      </div>
+      <div class="spec-item">
+        <span class="lbl">Display Price</span>
+        <span class="val"><%= prop.price %></span>
+      </div>
+      <div class="spec-item">
+        <span class="lbl">Validity</span>
+        <span class="val" style="color:#27694A;">365 Days Active</span>
+      </div>
+      <div class="total-row">
+        <span class="lbl">Total Payable</span>
+        <span class="val">₹<%= feeRs %></span>
+      </div>
+    </div>
 
-  <div id="payError" class="flash err" style="display:none"></div>
+    <div id="payError" class="toast-banner err" style="display:none;margin-bottom:16px;"></div>
 
-  <button id="payBtn" class="btn btn-primary btn-full btn-lg" onclick="initPayment()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-    Pay ₹<%= feeRs %> Securely
-  </button>
+    <button id="payBtn" class="pay-btn-primary" onclick="initPayment()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      Pay ₹<%= feeRs %> via Razorpay
+    </button>
 
-  <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px">
-    Payments secured by Cashfree · UPI, Cards, Net Banking accepted
-  </p>
-  <div style="text-align:center;margin-top:12px">
-    <a href="/agent/listings" class="btn btn-ghost btn-sm">← Back to listings</a>
+    <div class="trust-footer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Secured by Razorpay · UPI, Cards, NetBanking, Wallets
+    </div>
+
+    <div style="text-align:center;margin-top:16px">
+      <a href="/agent/listings" style="color:#78716C;font-size:13px;font-weight:600;text-decoration:none">← Back to listings</a>
+    </div>
   </div>
 </div>
 
-<!-- Cashfree JS SDK -->
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+<!-- Razorpay JS SDK -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-var CASHFREE_ENV   = '<%= cashfreeEnv %>';
-var PROPERTY_ID    = '<%- prop.id %>';
+var PROPERTY_ID = '<%- prop.id %>';
 
 async function initPayment() {
   var btn = document.getElementById('payBtn');
   var errDiv = document.getElementById('payError');
   btn.disabled = true;
-  btn.textContent = 'Initialising…';
+  btn.textContent = 'Initialising Razorpay…';
   errDiv.style.display = 'none';
 
   try {
-    // Create order on backend
     var resp = await fetch('/agent/payment/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -75,27 +205,59 @@ async function initPayment() {
       throw new Error(data.error || 'Could not create payment order.');
     }
 
-    // Launch Cashfree checkout
-    var cashfree = Cashfree({ mode: CASHFREE_ENV });
-    cashfree.checkout({
-      paymentSessionId: data.data.payment_session_id,
-      returnUrl: window.location.origin + '/agent/payment/status/' + data.data.internal_order_id,
-      redirectTarget: '_self',
-    }).then(function(result) {
-      if (result.error) {
-        throw new Error(result.error.message || 'Payment failed.');
+    var options = {
+      key: data.key_id,
+      amount: data.amount_paise,
+      currency: data.currency || 'INR',
+      name: 'RichManAssets',
+      description: 'Listing Fee: ' + data.property.name,
+      order_id: data.razorpay_order_id,
+      prefill: {
+        name: data.agent.name,
+        email: data.agent.email,
+        contact: data.agent.phone,
+      },
+      theme: { color: '#1C1917' },
+      handler: async function (response) {
+        btn.textContent = 'Verifying Payment…';
+        try {
+          var vResp = await fetch('/agent/payment/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              property_id: PROPERTY_ID,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+          var vData = await vResp.json();
+          if (vData.ok) {
+            window.location.href = '/agent/payment/success?order_id=' + response.razorpay_order_id;
+          } else {
+            throw new Error(vData.error || 'Signature verification failed.');
+          }
+        } catch (vErr) {
+          btn.disabled = false;
+          btn.innerHTML = 'Pay ₹<%= feeRs %> via Razorpay';
+          errDiv.style.display = 'flex';
+          errDiv.textContent = vErr.message || 'Payment verification failed.';
+        }
+      },
+      modal: {
+        ondismiss: function () {
+          btn.disabled = false;
+          btn.innerHTML = 'Pay ₹<%= feeRs %> via Razorpay';
+        }
       }
-      // success redirect handled by Cashfree returnUrl
-    }).catch(function(err) {
-      btn.disabled = false;
-      btn.innerHTML = 'Pay ₹<%= feeRs %> Securely';
-      errDiv.style.display = 'flex';
-      errDiv.textContent = err.message || 'Payment could not be completed. Please try again.';
-    });
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.open();
 
   } catch (err) {
     btn.disabled = false;
-    btn.innerHTML = 'Pay ₹<%= feeRs %> Securely';
+    btn.innerHTML = 'Pay ₹<%= feeRs %> via Razorpay';
     errDiv.style.display = 'flex';
     errDiv.textContent = err.message || 'Something went wrong. Please try again.';
   }

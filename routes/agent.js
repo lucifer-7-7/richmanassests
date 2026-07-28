@@ -53,9 +53,10 @@ async function resolveImg(file, publicId) {
   if (!file) return null;
   const url = await uploadToCloudinary(file.path, publicId).catch(() => null);
   if (url) return url;
-  const rel = file.path.replace(/\\/g, '/').split('public/')[1];
-  return rel || file.path;
+  const filename = path.basename(file.path);
+  return `/uploads/${filename}`;
 }
+
 
 // ── CSRF helpers (double-submit cookie, no extra package) ────────
 function genCsrf(req) {
@@ -65,7 +66,13 @@ function genCsrf(req) {
 function checkCsrf(req, res, next) {
   const token = req.body._csrf || req.headers['x-csrf-token'];
   if (!token || token !== req.session.csrfToken) {
-    return res.status(403).render('agent/login', { title: 'Session Expired', flash: { type:'err', msg:'Session expired. Please try again.' }, csrfToken: genCsrf(req) });
+    return res.status(403).render('agent/login', {
+      title: 'Session Expired',
+      robots: 'noindex,nofollow',
+      flash: { type: 'err', msg: 'Session expired. Please try again.' },
+      csrfToken: genCsrf(req),
+      next: '/agent/dashboard',
+    });
   }
   next();
 }
@@ -85,20 +92,14 @@ router.get('/register', (req, res) => {
 
 // POST /agent/register
 router.post('/register', authLimiter, checkCsrf, async (req, res) => {
-  const { name, email, phone, password, company_name, city, rera_number, gst_number } = req.body;
-  const errs = agentSvc.validateRegistration({ name, email, phone, password });
-  if (errs.length) {
-    return res.render('agent/register', {
-      title: 'Register as Agent | RichManAssets',
-      robots: 'noindex,nofollow',
-      flash: { type: 'err', msg: errs.join(' ') },
-      csrfToken: genCsrf(req),
-    });
-  }
+  const { name, email, phone, password, company_name, city, rera_number, gst_number, plan_id } = req.body;
   try {
-    const { agent } = await agentSvc.registerAgent({ name, email, phone, password, company_name, city, rera_number, gst_number });
-    req.session.agent = { id: agent.id, name: agent.name, email: agent.email };
-    res.redirect('/agent/dashboard?welcome=1');
+    const agentAuthSvc = require('../services/agentAuthService');
+    const agent = await agentAuthSvc.registerAgent({
+      name, email, phone, password, company_name, city, rera_number, gst_number, plan_id
+    });
+    req.session.agent = { id: agent.id, name: agent.name, email: agent.email, status: agent.status };
+    res.redirect('/agent/verify-otp');
   } catch (err) {
     res.render('agent/register', {
       title: 'Register as Agent | RichManAssets',
@@ -108,6 +109,69 @@ router.post('/register', authLimiter, checkCsrf, async (req, res) => {
     });
   }
 });
+
+// GET /agent/verify-otp
+router.get('/verify-otp', requireAgent, (req, res) => {
+  res.render('agent/verify-otp', {
+    title: 'Verify Account | RichManAssets Agent',
+    robots: 'noindex,nofollow',
+    agent: req.agent,
+    flash: null,
+    csrfToken: genCsrf(req),
+  });
+});
+
+// POST /agent/verify-otp
+router.post('/verify-otp', requireAgent, checkCsrf, async (req, res) => {
+  try {
+    const agentAuthSvc = require('../services/agentAuthService');
+    const updatedAgent = await agentAuthSvc.verifyAgentAccount(req.agent.id);
+    req.session.agent.status = updatedAgent.status;
+    res.redirect('/agent/checkout');
+  } catch (err) {
+    res.render('agent/verify-otp', {
+      title: 'Verify Account | RichManAssets Agent',
+      robots: 'noindex,nofollow',
+      agent: req.agent,
+      flash: { type: 'err', msg: err.message },
+      csrfToken: genCsrf(req),
+    });
+  }
+});
+
+// GET /agent/checkout
+router.get('/checkout', requireAgent, async (req, res) => {
+  try {
+    const agentAuthSvc = require('../services/agentAuthService');
+    const agentPaymentSvc = require('../services/agentPaymentService');
+
+    const agent = await agentAuthSvc.getAgentById(req.agent.id);
+    if (!agent) return res.redirect('/agent/login');
+
+    if (agent.status === 'active') {
+      return res.redirect('/agent/dashboard?status=active');
+    }
+
+    const orderData = await agentPaymentSvc.createPaymentOrder({
+      agentId: agent.id,
+      planId: agent.plan_id,
+      purpose: 'signup',
+    });
+
+    res.render('agent/checkout', {
+      title: 'Agent Membership Payment | RichManAssets',
+      robots: 'noindex,nofollow',
+      agent,
+      orderData,
+      flash: null,
+      csrfToken: genCsrf(req),
+    });
+  } catch (err) {
+    console.error('[GET /agent/checkout Error]:', err.message);
+    res.status(500).send('Server Error creating payment checkout session');
+  }
+});
+
 
 // GET /agent/login
 router.get('/login', (req, res) => {
@@ -128,13 +192,49 @@ router.post('/login', authLimiter, checkCsrf, async (req, res) => {
   const { email, password } = req.body;
   const nextUrl = req.body.next || '/agent/dashboard';
   try {
-    const { agent } = await agentSvc.loginAgent(email, password);
-    req.session.regenerate((err) => {
+    const agentAuthSvc = require('../services/agentAuthService');
+    const agent = await agentAuthSvc.authenticateAgent(email, password);
+    if (!agent) {
+      return res.render('agent/login', {
+        title: 'Agent Login | RichManAssets',
+        robots: 'noindex,nofollow',
+        flash: { type: 'err', msg: 'Invalid email or password.' },
+        csrfToken: genCsrf(req),
+        next: nextUrl,
+      });
+    }
+
+    if (['suspended', 'deactivated'].includes(agent.status) || agent.is_active === false) {
+      return res.render('agent/login', {
+        title: 'Agent Login | RichManAssets',
+        robots: 'noindex,nofollow',
+        flash: { type: 'err', msg: 'Your agent account has been suspended or deactivated.' },
+        csrfToken: genCsrf(req),
+        next: nextUrl,
+      });
+    }
+
+    req.session.regenerate(async (err) => {
       if (err) throw err;
+      const loginTime = Date.now();
       req.session.csrfToken = crypto.randomBytes(32).toString('hex');
-      req.session.agent = { id: agent.id, name: agent.name, email: agent.email };
+      req.session.agentLoginTime = loginTime;
+      req.session.agent = { id: agent.id, name: agent.name, email: agent.email, status: agent.status };
+
+      // Record sign-in log with IP & User Agent
+      await agentAuthSvc.recordLoginLog({
+        agentId: agent.id,
+        ip: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+        status: 'success',
+      });
+
+      if (agent.status === 'draft') return res.redirect('/agent/verify-otp');
+      if (['pending_payment', 'payment_failed'].includes(agent.status)) return res.redirect('/agent/checkout');
+
       res.redirect(nextUrl.startsWith('/agent') ? nextUrl : '/agent/dashboard');
     });
+
   } catch (err) {
     res.render('agent/login', {
       title: 'Agent Login | RichManAssets',
@@ -145,6 +245,7 @@ router.post('/login', authLimiter, checkCsrf, async (req, res) => {
     });
   }
 });
+
 
 // POST /agent/logout
 router.post('/logout', (req, res) => {
@@ -222,11 +323,11 @@ router.get('/listings/new', requireAgent, (req, res) => {
 });
 
 // POST /agent/listings  — create draft
-router.post('/listings', requireAgent, checkCsrf, upload.fields([
+router.post('/listings', requireAgent, upload.fields([
   { name: 'img_card', maxCount: 1 },
   { name: 'img_hero', maxCount: 1 },
   { name: 'gallery',  maxCount: 10 },
-]), async (req, res) => {
+]), checkCsrf, async (req, res) => {
   const errs = propSvc.validateProperty(req.body);
   if (errs.length) {
     return res.render('agent/listing-form', {
@@ -250,7 +351,7 @@ router.post('/listings', requireAgent, checkCsrf, upload.fields([
 
     // Redirect to payment flow
     req.session.agentFlash = { type: 'ok', msg: `Listing saved as draft. Complete payment to publish it.` };
-    res.redirect(`/agent/listings/${prop.id}/pay`);
+    res.redirect(`/agent/listings/${encodeURIComponent(prop.id)}/pay`);
   } catch (err) {
     res.render('agent/listing-form', {
       title: 'Add New Listing | RichManAssets Agent',
@@ -283,11 +384,11 @@ router.get('/listings/:id/edit', requireAgent, requirePropertyOwner, (req, res) 
 });
 
 // POST /agent/listings/:id/edit
-router.post('/listings/:id/edit', requireAgent, requirePropertyOwner, checkCsrf, upload.fields([
+router.post('/listings/:id/edit', requireAgent, requirePropertyOwner, upload.fields([
   { name: 'img_card', maxCount: 1 },
   { name: 'img_hero', maxCount: 1 },
   { name: 'gallery',  maxCount: 10 },
-]), async (req, res) => {
+]), checkCsrf, async (req, res) => {
   const errs = propSvc.validateProperty(req.body);
   if (errs.length) {
     return res.render('agent/listing-form', {
@@ -306,7 +407,7 @@ router.post('/listings/:id/edit', requireAgent, requirePropertyOwner, checkCsrf,
 
     await propSvc.updateDraft(propId, req.agent.id, req.body, { img_card: imgCard, img_hero: imgHero, gallery: gallery.filter(Boolean) });
     req.session.agentFlash = { type: 'ok', msg: 'Listing updated.' };
-    res.redirect(`/agent/listings/${propId}/pay`);
+    res.redirect(`/agent/listings/${encodeURIComponent(propId)}/pay`);
   } catch (err) {
     res.render('agent/listing-form', {
       title: 'Edit Listing | RichManAssets Agent',
@@ -377,11 +478,11 @@ router.get('/listings/:id/manage', requireAgent, requirePropertyOwner, (req, res
 });
 
 // POST /agent/listings/:id/manage
-router.post('/listings/:id/manage', requireAgent, requirePropertyOwner, checkCsrf, upload.fields([
+router.post('/listings/:id/manage', requireAgent, requirePropertyOwner, upload.fields([
   { name: 'img_card', maxCount: 1 },
   { name: 'img_hero', maxCount: 1 },
   { name: 'gallery',  maxCount: 10 },
-]), async (req, res) => {
+]), checkCsrf, async (req, res) => {
   const propId = req.params.id;
   try {
     const files   = req.files || {};
@@ -393,12 +494,13 @@ router.post('/listings/:id/manage', requireAgent, requirePropertyOwner, checkCsr
       img_card: imgCard, img_hero: imgHero, gallery: gallery.filter(Boolean),
     });
     req.session.agentFlash = { type: 'ok', msg: 'Listing updated successfully.' };
-    res.redirect(`/agent/listings/${propId}/manage`);
+    res.redirect(`/agent/listings/${encodeURIComponent(propId)}/manage`);
   } catch (err) {
     req.session.agentFlash = { type: 'err', msg: err.message };
-    res.redirect(`/agent/listings/${propId}/manage`);
+    res.redirect(`/agent/listings/${encodeURIComponent(propId)}/manage`);
   }
 });
+
 
 // ────────────────────────── PROFILE ──────────────────────────────
 

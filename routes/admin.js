@@ -286,12 +286,54 @@ router.post('/agent-listings/:id/refund', requireAdmin, async (req, res) => {
   res.redirect('/admin?tab=agent-listings');
 });
 
+// ── AGENT LISTINGS RESTORE (Admin Action) ─────────────────────────
+router.post('/agent-listings/:id/restore', requireAdmin, async (req, res) => {
+  try {
+    await propSvc.restoreProperty(req.params.id);
+    req.session.flash = { type: 'ok', msg: 'Listing restored successfully from Trash.' };
+  } catch (err) {
+    req.session.flash = { type: 'err', msg: err.message };
+  }
+  res.redirect('/admin?tab=agent-listings');
+});
+
 // ── AGENT MANAGEMENT ─────────────────────────────────────────────
 router.post('/agents/:id/toggle', requireAdmin, async (req, res) => {
   try {
     const newState = await agentSvc.toggleAgentActive(req.params.id);
     req.session.flash = { type:'ok', msg: `Agent ${newState ? 'reactivated' : 'banned'}.` };
   } catch (err) { req.session.flash = { type:'err', msg: err.message }; }
+  res.redirect('/admin?tab=agents');
+});
+
+// ── PURGE JUNK / TEST AGENTS (Admin Action) ──────────────────────
+router.post('/agents/purge-test-agents', requireAdmin, async (req, res) => {
+  const db = getDB();
+  try {
+    const { data: testAgents } = await db.from('agents').select('id, name, email').or('email.like.agent_test_%,email.like.testagent_%');
+    if (testAgents && testAgents.length > 0) {
+      const ids = testAgents.map(a => a.id);
+      await db.from('agents').delete().in('id', ids);
+      req.session.flash = { type: 'ok', msg: `Purged ${ids.length} test/junk accounts from database.` };
+    } else {
+      req.session.flash = { type: 'ok', msg: 'No test/junk accounts found.' };
+    }
+  } catch (err) {
+    req.session.flash = { type: 'err', msg: err.message };
+  }
+  res.redirect('/admin?tab=agents');
+});
+
+// ── DELETE INDIVIDUAL AGENT ACCOUNT (Admin Action) ───────────────
+router.post('/agents/:id/delete', requireAdmin, async (req, res) => {
+  const db = getDB();
+  try {
+    const { data: ag } = await db.from('agents').select('name').eq('id', req.params.id).maybeSingle();
+    await db.from('agents').delete().eq('id', req.params.id);
+    req.session.flash = { type: 'ok', msg: `Agent "${ag ? ag.name : req.params.id}" deleted permanently.` };
+  } catch (err) {
+    req.session.flash = { type: 'err', msg: err.message };
+  }
   res.redirect('/admin?tab=agents');
 });
 
@@ -316,14 +358,185 @@ router.get('/webhook-logs', requireAdmin, async (req, res) => {
   }
 });
 
-router.post('/settings/promo-banner', requireAdmin, (req, res) => {
-  const { active, kicker, title, subtitle, bg_img, cta_text, cta_link } = req.body;
+// ── ADMIN ANALYTICS DASHBOARDS ──────────────────────────────────
+const analyticsSvc = require('../services/adminAnalyticsService');
+
+router.get('/analytics/agents', requireAdmin, async (req, res) => {
+  try {
+    const analytics = await analyticsSvc.getAgentAnalytics();
+    res.render('admin/analytics-agents', {
+      title: 'Agent Analytics | Admin',
+      flash: req.session.flash || null,
+      analytics,
+    });
+    delete req.session.flash;
+  } catch (err) {
+    console.error('[GET /admin/analytics/agents]', err.message);
+    res.status(500).send('Error loading Agent Analytics');
+  }
+});
+
+router.get('/analytics/enquiries', requireAdmin, async (req, res) => {
+  try {
+    const analytics = await analyticsSvc.getEnquiryAnalytics();
+    res.render('admin/analytics-enquiries', {
+      title: 'Enquiry Analytics | Admin',
+      flash: req.session.flash || null,
+      analytics,
+    });
+    delete req.session.flash;
+  } catch (err) {
+    console.error('[GET /admin/analytics/enquiries]', err.message);
+    res.status(500).send('Error loading Enquiry Analytics');
+  }
+});
+
+router.get('/analytics/payments', requireAdmin, async (req, res) => {
+  try {
+    const analytics = await analyticsSvc.getPaymentAnalytics();
+    res.render('admin/analytics-payments', {
+      title: 'Payment Analytics & Reconciliation | Admin',
+      flash: req.session.flash || null,
+      analytics,
+    });
+    delete req.session.flash;
+  } catch (err) {
+    console.error('[GET /admin/analytics/payments]', err.message);
+    res.status(500).send('Error loading Payment Analytics');
+  }
+});
+
+// ── ADMIN REFUND ACTION ──────────────────────────────────────────
+router.post('/payments/:id/refund', requireAdmin, async (req, res) => {
+  const db = getDB();
+  const paymentId = req.params.id;
+  const { reason, amount_paise } = req.body;
+
+  try {
+    const { data: payment } = await db.from('payments').select('*, payment_orders(*)').eq('id', paymentId).single();
+    if (!payment) throw new Error('Payment not found');
+
+    const refundAmount = parseInt(amount_paise) || payment.amount_paise;
+    const razorpaySvc = require('../services/razorpayService');
+
+    const rzpRefund = await razorpaySvc.initiateRazorpayRefund({
+      razorpay_payment_id: payment.razorpay_payment_id,
+      amount_paise: refundAmount,
+      notes: { reason: reason || 'Admin Initiated Refund', admin: req.session.adminUser || 'admin' },
+    });
+
+    const refundRow = {
+      payment_id: payment.id,
+      razorpay_refund_id: rzpRefund.id,
+      amount_paise: refundAmount,
+      status: rzpRefund.status === 'processed' ? 'processed' : 'pending',
+      reason: reason || 'Admin Initiated Refund',
+      initiated_by: 'admin',
+      created_at: new Date().toISOString(),
+    };
+
+    await db.from('refunds').insert(refundRow);
+    await db.from('payments').update({ status: 'refunded' }).eq('id', payment.id);
+
+    req.session.flash = { type: 'ok', msg: `Refund initiated successfully: ${rzpRefund.id}` };
+  } catch (err) {
+    console.error('[Admin Refund Error]:', err.message);
+    req.session.flash = { type: 'err', msg: err.message };
+  }
+  res.redirect('/admin/analytics/payments');
+});
+
+// ── AGENT DEEP AUDIT VIEW & CONTROLS ─────────────────────────────
+router.get('/agents/:id', requireAdmin, async (req, res) => {
+  const agentAuthSvc = require('../services/agentAuthService');
+  try {
+    const auditData = await agentAuthSvc.getAgentFullAudit(req.params.id);
+    if (!auditData || !auditData.agent) {
+      req.session.flash = { type: 'err', msg: 'Agent not found.' };
+      return res.redirect('/admin?tab=agents');
+    }
+    res.render('admin/agent-detail', {
+      title: `Agent: ${auditData.agent.name} | Admin`,
+      flash: req.session.flash || null,
+      auditData,
+    });
+    delete req.session.flash;
+  } catch (err) {
+    console.error('[GET /admin/agents/:id Error]:', err.message);
+    res.status(500).send('Error loading Agent profile & audit details.');
+  }
+});
+
+// ── ADMIN RESET AGENT PASSWORD ───────────────────────────────────
+router.post('/agents/:id/reset-password', requireAdmin, async (req, res) => {
+  const agentAuthSvc = require('../services/agentAuthService');
+  const { new_password } = req.body;
+  if (!new_password || new_password.length < 8) {
+    req.session.flash = { type: 'err', msg: 'Password must be at least 8 characters long.' };
+    return res.redirect(`/admin/agents/${req.params.id}`);
+  }
+  try {
+    await agentAuthSvc.resetAgentPassword({
+      agentId: req.params.id,
+      newPassword: new_password,
+      adminUser: 'admin',
+    });
+    req.session.flash = { type: 'ok', msg: 'Agent password reset successfully. All active sessions revoked.' };
+  } catch (err) {
+    req.session.flash = { type: 'err', msg: err.message };
+  }
+  res.redirect(`/admin/agents/${req.params.id}`);
+});
+
+// ── ADMIN REVOKE ALL AGENT SESSIONS ──────────────────────────────
+router.post('/agents/:id/revoke-sessions', requireAdmin, async (req, res) => {
+  const agentAuthSvc = require('../services/agentAuthService');
+  try {
+    await agentAuthSvc.revokeAgentSessions({
+      agentId: req.params.id,
+      adminUser: 'admin',
+    });
+    req.session.flash = { type: 'ok', msg: 'All active sessions for this agent have been forcibly revoked.' };
+  } catch (err) {
+    req.session.flash = { type: 'err', msg: err.message };
+  }
+  res.redirect(`/admin/agents/${req.params.id}`);
+});
+
+// ── MANUAL AGENT STATUS OVERRIDE ─────────────────────────────────
+router.post('/agents/:id/status', requireAdmin, async (req, res) => {
+  const agentAuthSvc = require('../services/agentAuthService');
+  const { new_status, reason } = req.body;
+  try {
+    await agentAuthSvc.updateAgentStatus(req.params.id, new_status, reason || 'Admin manual override', 'admin');
+    req.session.flash = { type: 'ok', msg: `Agent status updated to "${new_status}".` };
+  } catch (err) {
+    req.session.flash = { type: 'err', msg: err.message };
+  }
+  res.redirect(`/admin/agents/${req.params.id}`);
+});
+
+
+router.post('/settings/promo-banner', requireAdmin, upload.single('banner_photo'), async (req, res) => {
+  const { active, placement, kicker, title, subtitle, bg_img, cta_text, cta_link } = req.body;
+  let bannerImg = bg_img;
+
+  if (req.file) {
+    const uploadedUrl = await resolveImg(req.file, `promo-ad-banner-${Date.now()}`);
+    if (uploadedUrl) bannerImg = uploadedUrl;
+  }
+
   updatePromoBanner({
     active: active === 'on' || active === 'true' || active === true,
-    kicker, title, subtitle, bg_img, cta_text, cta_link,
+    placement: placement || 'all',
+    kicker, title, subtitle,
+    bg_img: bannerImg,
+    cta_text, cta_link,
   });
-  req.session.flash = 'Promotional Ad Banner settings updated successfully!';
+
+  req.session.flash = { type: 'ok', msg: 'Promotional Ad Banner updated successfully!' };
   res.redirect('/admin');
 });
 
 module.exports = router;
+

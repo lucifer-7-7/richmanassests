@@ -13,28 +13,29 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Security headers ──────────────────────────────────────────────
+// ── Security headers ──────────────────────────────────────────────
 app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  // CSP: allow Cashfree SDK + Cloudinary images + Google Fonts
+  // CSP: allow Razorpay + Cashfree SDK + Cloudinary images + Google Fonts
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://sdk.cashfree.com https://unpkg.com https://cdnjs.cloudflare.com",
+    "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://sdk.cashfree.com https://unpkg.com https://cdnjs.cloudflare.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https://res.cloudinary.com https://upload.wikimedia.org blob:",
-    "connect-src 'self' https://sdk.cashfree.com https://*.supabase.co",
-    "frame-src https://sdk.cashfree.com",
+    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://sdk.cashfree.com https://*.supabase.co",
+    "frame-src https://checkout.razorpay.com https://api.razorpay.com https://sdk.cashfree.com",
     "worker-src 'none'",
   ].join('; '));
   next();
 });
 
 // ── Webhook route (MUST be before express.json()) ─────────────────
-// Raw body capture for Cashfree signature verification
+// Raw body capture for Razorpay signature verification
 app.use('/webhooks', rawBodyCapture);
 app.use('/webhooks', require('./routes/webhooks'));
 
@@ -47,16 +48,18 @@ app.use(express.json({ limit: '1mb' }));
 app.use('/assets', express.static(path.join(__dirname, 'public/assets'), {
   maxAge: '7d', etag: true, lastModified: true,
 }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
+
 
 // ── Session ───────────────────────────────────────────────────────
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret-change-me-in-production',
   resave: false,
   saveUninitialized: false,
-  name: 'rma.sid', // don't use default 'connect.sid'
+  name: 'rma.sid',
   cookie: {
-    maxAge: 8 * 60 * 60 * 1000, // 8 hours
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days persistent login
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -78,12 +81,17 @@ app.use((req, res, next) => {
 });
 
 // ── Routes ────────────────────────────────────────────────────────
-app.use('/',              require('./routes/public'));
-app.use('/admin',         require('./routes/admin'));
-app.use('/agent',         require('./routes/agent'));
-app.use('/agent/payment', require('./routes/agent-payment'));
-// /agent/invoices reuses the payment router (GET / → invoice list, GET /:id → invoice detail)
-app.use('/agent/invoices', require('./routes/agent-payment'));
+app.use('/',               require('./routes/public'));
+app.use('/admin',          require('./routes/admin'));
+app.use('/agent',          require('./routes/agent'));
+app.use('/payments',       require('./routes/payments'));
+app.use('/agent/payment',  require('./routes/agent-payment'));
+app.use('/agent/invoices', require('./routes/agent-invoices'));
+
+// Start background reconciliation cron for Razorpay
+const { startReconciliationCron } = require('./services/reconciliationService');
+startReconciliationCron();
+
 
 // ── SEO / GEO crawler directives ─────────────────────────────────
 app.get('/robots.txt', (req, res) => {

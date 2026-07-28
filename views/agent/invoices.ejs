@@ -1,32 +1,60 @@
 <%- include('../partials/agent-layout-start', { activeNav: 'invoices', pageTitle: 'My Invoices' }) %>
 
 <div class="ap-card">
-  <div class="ap-card-header">
-    <h2>Transaction History</h2>
-    <span style="font-size:13px;color:var(--muted)">Paid listings only</span>
+  <div class="ap-card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h2 style="font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--ink);">Transaction History &amp; GST Invoices</h2>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px;">Official GST compliant receipts for tax deduction and records</div>
+    </div>
+    <% if (orders && orders.length > 0) { %>
+    <span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);background:var(--gold-bg);padding:6px 14px;border-radius:100px;border:1px solid rgba(181,147,76,0.3);">
+      <%= orders.length %> <%= orders.length === 1 ? 'Invoice' : 'Invoices' %> Generated
+    </span>
+    <% } %>
   </div>
-  <% if (orders.length === 0) { %>
-  <div class="empty-state">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    <h3>No invoices yet</h3>
-    <p>Invoices appear here after successful payments.</p>
-    <a href="/agent/listings/new" class="btn btn-primary">Add a Listing</a>
+
+  <% if (!orders || orders.length === 0) { %>
+  <div class="empty-state" style="padding:60px 24px;text-align:center;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;color:var(--muted);margin-bottom:12px;opacity:0.6;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <h3 style="font-family:var(--font-serif);font-size:22px;margin-bottom:8px;">No invoices generated yet</h3>
+    <p style="color:var(--muted);font-size:14px;max-width:400px;margin:0 auto 20px;">Tax invoices and payment receipts will appear here automatically when you publish property listings.</p>
+    <a href="/agent/listings/new" class="btn btn-primary">Publish a Listing →</a>
   </div>
   <% } else { %>
-  <div style="padding:16px">
+  <div style="padding:20px;">
     <% orders.forEach(function(o) { %>
-    <div class="invoice-card">
-      <div>
-        <div class="invoice-id">#<%= o.internal_order_id %></div>
-        <div class="invoice-prop"><%= o.agent_properties && o.agent_properties.name ? o.agent_properties.name : 'Property' %></div>
-        <div style="font-size:12px;color:var(--muted)">
-          <%= new Date(o.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }) %>
-          · <span class="status-badge status-<%= o.status %>" style="font-size:11px"><%= o.status %></span>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border:1px solid var(--border);border-radius:16px;margin-bottom:14px;background:#FFFFFF;transition:all .2s ease;box-shadow:0 4px 16px rgba(0,0,0,0.02);" onmouseover="this.style.borderColor='var(--ink)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="flex:1;min-width:0;padding-right:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+          <span style="font-family:monospace;font-size:13px;font-weight:700;color:var(--ink);background:var(--surface2);padding:3px 10px;border-radius:6px;border:1px solid var(--border2);">
+            #<%= o.internal_order_id || o.razorpay_order_id %>
+          </span>
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:800;letter-spacing:.05em;background:<%= o.status==='paid'||o.status==='captured'?'#F0FAF4':o.status==='failed'?'#FDF2F2':'#FFFBEB' %>;color:<%= o.status==='paid'||o.status==='captured'?'#166534':o.status==='failed'?'#991B1B':'#B45309' %>;">
+            ✓ <%= (o.status || 'paid').toUpperCase() %>
+          </span>
+        </div>
+        
+        <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <%= o.agent_properties && o.agent_properties.name ? o.agent_properties.name : '1-Year Property Listing License' %>
+        </div>
+        
+        <div style="font-size:12.5px;color:var(--muted);display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <span>Date: <strong><%= new Date(o.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) %></strong></span>
+          <span>·</span>
+          <span>Gateway: <strong>Razorpay PG</strong></span>
+          <span>·</span>
+          <span>SAC: <strong>998313</strong></span>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-        <div class="invoice-amt">₹<%= (o.amount_paise / 100).toLocaleString('en-IN') %></div>
-        <a href="/agent/invoices/<%= o.internal_order_id %>" class="btn btn-ghost btn-sm" target="_blank">View Invoice</a>
+
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0;">
+        <div style="font-family:var(--font-serif);font-size:24px;font-weight:600;color:var(--ink);letter-spacing:-.02em;">
+          ₹<%= ((o.amount_paise || 99900) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
+        </div>
+        <a href="/agent/invoices/<%= o.internal_order_id || o.razorpay_order_id %>" class="btn btn-outline btn-sm" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:100px;font-size:12px;font-weight:700;text-decoration:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>View Tax Invoice</span>
+        </a>
       </div>
     </div>
     <% }) %>

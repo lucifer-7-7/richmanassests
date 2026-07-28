@@ -12,22 +12,53 @@ async function requireAgent(req, res, next) {
   }
   try {
     const db = getDB();
+    const agentAuthSvc = require('../services/agentAuthService');
+
+    let agent = null;
     const result = await db
       .from('agents')
       .select('id, name, email, phone, company_name, city, gst_number, rera_number, is_active')
       .eq('id', req.session.agent.id)
-      .single();
-    const agent = check(result, 'requireAgent');
-    if (!agent || !agent.is_active) {
+      .maybeSingle();
+
+    if (result.data) {
+      agent = result.data;
+    } else {
+      agent = await agentAuthSvc.getAgentById(req.session.agent.id);
+    }
+
+    if (!agent) {
+      req.session.destroy(() => {});
+      return res.redirect('/agent/login');
+    }
+
+    // Use DB-fetched status first; fall back to in-memory cache only if the DB column is missing
+    const currentStatus = agent.status || (agentAuthSvc.getAgentStatus ? agentAuthSvc.getAgentStatus(agent.id) : 'active');
+    agent.status = currentStatus;
+
+    if (agent.is_active === false || ['suspended', 'deactivated'].includes(agent.status)) {
       req.session.destroy(() => {});
       return res.redirect('/agent/login?reason=banned');
     }
+
+    if (!req.session.agentLoginTime) {
+      req.session.agentLoginTime = Date.now();
+    }
+
+    if (agentAuthSvc.isSessionRevoked(agent.id, req.session.agentLoginTime, agent)) {
+      req.session.destroy(() => {});
+      return res.redirect('/agent/login?reason=revoked');
+    }
+
+
     req.agent = agent;
     next();
   } catch (err) {
+
     console.error('requireAgent error:', err.message);
-    return res.status(500).render('500', { title: 'Server Error | RichManAssets' });
+    return res.status(500).send('Server error. Please refresh or try again.');
   }
 }
+
 
 module.exports = requireAgent;

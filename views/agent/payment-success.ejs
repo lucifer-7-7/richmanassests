@@ -1,25 +1,18 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title><%= title %></title><meta name="robots" content="noindex,nofollow"/>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/agent.css">
-</head>
-<body class="agent-portal">
-<div class="result-page">
-  <div class="result-box">
+<%- include('../partials/agent-layout-start', { activeNav: 'listings', pageTitle: 'Payment Successful' }) %>
+
+<div class="result-page" style="padding: 0; display: flex; justify-content: center; align-items: flex-start; min-height: unset;">
+  <div class="result-box" style="margin: 20px auto 40px; max-width: 520px; width: 100%;">
     <div class="result-icon success">
       <svg viewBox="0 0 24 24" fill="none" stroke="#4CAF82" stroke-width="2.5" width="36" height="36"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <h1>Listing Published!</h1>
-    <p>Your payment was successful and your property is now <strong style="color:var(--success)">live on RichManAssets</strong>. It will be visible to thousands of buyers and renters.</p>
+    <h1 style="font-family: var(--serif); color: var(--cream); margin-bottom: 12px;">Listing Published!</h1>
+    <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 28px;">Your payment was successful and your property is now <strong style="color: var(--success)">live on RichManAssets</strong>. It will be visible to buyers and renters in Udupi &amp; Mangaluru.</p>
     <% if (order && order.property_id) { %>
-    <a href="/property/<%= order.property_id %>" class="btn btn-primary btn-full" style="margin-bottom:10px">View Live Listing →</a>
+    <a href="/property/<%= order.property_id %>" class="btn btn-primary btn-full" style="margin-bottom: 10px;">View Live Listing →</a>
     <% } %>
-    <a href="/agent/listings" class="btn btn-outline btn-full" style="margin-bottom:10px">My Listings</a>
+    <a href="/agent/listings" class="btn btn-outline btn-full" style="margin-bottom: 10px;">← My Listings</a>
     <a href="/agent/invoices" class="btn btn-ghost btn-full">Download Invoice</a>
   </div>
 </div>
-</body>
-</html>
+
+<%- include('../partials/agent-layout-end') %>

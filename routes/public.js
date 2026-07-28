@@ -288,6 +288,7 @@ router.get('/properties', async (req, res) => {
       siteUrl: SITE,
       jsonld: JSON.stringify([itemList, breadcrumbLdList]),
       properties, areas, q: { listing, area, type, budget },
+      promoBanner: getPromoBanner(),
     });
   } catch (err) {
     console.error('[/properties] error:', err.message);
@@ -299,8 +300,20 @@ router.get('/properties', async (req, res) => {
 router.get('/property/:id', async (req, res) => {
   try {
     const db = getDB();
-    const { data: p } = await db.from('properties').select('*').eq('id', req.params.id).eq('active', true).maybeSingle();
+    let p = null;
+
+    const { data: adminProp } = await db.from('properties').select('*').eq('id', req.params.id).eq('active', true).maybeSingle();
+    p = adminProp;
+
+    if (!p) {
+      const { data: agentProp } = await db.from('agent_properties').select('*').eq('id', req.params.id).maybeSingle();
+      if (agentProp && (agentProp.status === 'published' || (req.session?.agent?.id && String(req.session.agent.id) === String(agentProp.agent_id)))) {
+        p = agentProp;
+      }
+    }
+
     if (!p) return res.status(404).render('404', { title: 'Property not found | RichManAssets' });
+
 
     const [similarRes, nextRes] = await Promise.all([
       db.from('properties').select('*').neq('id', p.id).eq('active', true).eq('type', p.type).eq('has_img', true).limit(3),
@@ -314,6 +327,8 @@ router.get('/property/:id', async (req, res) => {
     try { gallery = JSON.parse(p.gallery || '[]'); } catch (_) { }
     const rawImages = [p.img_hero, p.img_card, ...gallery].map(absImg).filter(Boolean);
     const allImages = [...new Set(rawImages)];
+
+
 
     const listLabel = p.listing === 'rent' ? 'for Rent' : p.listing === 'lease' ? 'for Lease' : 'for Sale';
     const pageTitle = `${p.name} — ${p.type} ${listLabel} in ${p.loc} | RichManAssets`;
@@ -354,6 +369,7 @@ router.get('/property/:id', async (req, res) => {
       ogType: 'product', ogImage: allImages[0],
       jsonld: JSON.stringify([productLd, breadcrumbLd]),
       p, similar, next, allImages,
+      promoBanner: getPromoBanner(),
     });
   } catch (err) {
     console.error('[/property/:id] error:', err.message);

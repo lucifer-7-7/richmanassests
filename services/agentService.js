@@ -84,11 +84,20 @@ async function getAgentById(id) {
 /** Update agent profile fields. */
 async function updateAgentProfile(id, { name, phone, company_name, city, rera_number, gst_number }) {
   const db = getDB();
+  const cleanedPhone = phone ? phone.replace(/\D/g, '').slice(0, 15) : null;
+
+  if (cleanedPhone) {
+    const { data: existing } = await db.from('agents').select('id').eq('phone', cleanedPhone).neq('id', id).maybeSingle();
+    if (existing) {
+      throw new Error(`Phone number ${cleanedPhone} is already registered to another agent account.`);
+    }
+  }
+
   const result = await db
     .from('agents')
     .update({
       name: name?.trim() || undefined,
-      phone: phone?.replace(/\D/g, '').slice(0, 15) || undefined,
+      phone: cleanedPhone || undefined,
       company_name: company_name?.trim() || null,
       city: city?.trim() || null,
       rera_number: rera_number?.trim() || null,
@@ -100,6 +109,7 @@ async function updateAgentProfile(id, { name, phone, company_name, city, rera_nu
     .single();
   return check(result, 'updateAgentProfile');
 }
+
 
 /** Admin: get all agents with listing counts. */
 async function getAllAgents() {
@@ -114,10 +124,25 @@ async function getAllAgents() {
 /** Admin: toggle agent active status. */
 async function toggleAgentActive(id) {
   const db = getDB();
-  const { data: agent } = await db.from('agents').select('is_active').eq('id', id).single();
+  const agentAuthSvc = require('./agentAuthService');
+  const agent = await agentAuthSvc.getAgentById(id);
   if (!agent) throw new Error('Agent not found.');
-  await db.from('agents').update({ is_active: !agent.is_active, updated_at: new Date().toISOString() }).eq('id', id);
-  return !agent.is_active;
+
+  const isCurrentlyActive = agent.is_active !== false && !['suspended', 'deactivated'].includes(agent.status);
+  const newActiveState = !isCurrentlyActive;
+  const newStatus = newActiveState ? 'active' : 'suspended';
+
+  try {
+    await db.from('agents').update({
+      is_active: newActiveState,
+      status: newStatus,
+      updated_at: new Date().toISOString()
+    }).eq('id', id);
+  } catch (_) {}
+
+  await agentAuthSvc.updateAgentStatus(id, newStatus, `Admin toggled active state to ${newStatus}`, 'admin');
+  return newActiveState;
 }
+
 
 module.exports = { validateRegistration, registerAgent, loginAgent, getAgentById, updateAgentProfile, getAllAgents, toggleAgentActive };

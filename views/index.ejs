@@ -556,7 +556,7 @@
 </section>
 
 <!-- DYNAMIC ADMIN-MANAGED PROMO / AD BANNER -->
-<% if (typeof promoBanner !== 'undefined' && promoBanner && promoBanner.active) { %>
+<% if (typeof promoBanner !== 'undefined' && promoBanner && promoBanner.active && (!promoBanner.placement || promoBanner.placement === 'all' || promoBanner.placement === 'home')) { %>
 <section class="promo-ad-sec wrap" data-screen-label="Promotion">
   <div class="promo-ad-card" style="background-image: linear-gradient(180deg, rgba(18,16,11,0.4), rgba(18,16,11,0.85)), url('<%= promoBanner.bg_img %>');">
     <div class="promo-ad-content">

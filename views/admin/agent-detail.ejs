@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %> · RichManAssets</title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F6F2EC; --white:#FFFFFF; --ink:#1C1917; --muted:#8C8275; --line:#E2DBD0;
+  --ok:#27694A; --ok-bg:#F0FAF4; --err:#D93838; --err-bg:#FDF2F2; --gold:#B5934C;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:60px;}
+.top{background:var(--white);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;}
+.top .brand{font-size:18px;font-weight:800;letter-spacing:-.03em;}
+.top .nav-links a{color:var(--ink);font-size:13px;text-decoration:none;padding:8px 16px;border-radius:999px;font-weight:600;background:#E8E2D8;margin-left:6px;}
+.top .nav-links a.active{background:var(--ink);color:#fff;}
+.container{max-width:1200px;margin:32px auto;padding:0 24px;}
+.back-link{display:inline-block;margin-bottom:16px;color:var(--muted);text-decoration:none;font-weight:600;font-size:13px;}
+.back-link:hover{color:var(--ink);}
+.header-box{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:32px;margin-bottom:32px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.profile-title h1{font-size:30px;font-weight:800;letter-spacing:-.02em;}
+.profile-title .meta{color:var(--muted);font-size:14px;margin-top:4px;}
+.badge{display:inline-block;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.badge.active{background:var(--ok-bg);color:var(--ok);}
+.badge.draft{background:#EAE4DC;color:var(--ink);}
+.badge.pending_payment{background:#FEF3C7;color:#92400E;}
+.badge.suspended,.badge.deactivated{background:var(--err-bg);color:var(--err);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;}
+.card-box{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:24px;}
+.card-box h3{font-size:18px;font-weight:700;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:12px;}
+.info-group{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3efe9;font-size:14px;}
+.info-group .lbl{color:var(--muted);font-weight:500;}
+.info-group .val{font-weight:700;}
+.btn{padding:10px 18px;border-radius:8px;font-weight:600;font-size:13px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-danger{background:var(--err-bg);color:var(--err);border:1px solid #fca5a5;}
+.btn-secondary{background:#E8E2D8;color:var(--ink);}
+.table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;}
+.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);}
+.table th{font-weight:700;color:var(--muted);font-size:11px;text-transform:uppercase;}
+.form-inline{display:flex;flex-direction:column;gap:12px;}
+.form-control{padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px;width:100%;}
+.flash{padding:12px 16px;border-radius:8px;margin-bottom:20px;font-weight:600;}
+.flash.ok{background:var(--ok-bg);color:var(--ok);}
+.flash.err{background:var(--err-bg);color:var(--err);}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">Rich<em>Man</em>Assets <span style="font-size:10px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;">ADMIN</span></div>
+  <div class="nav-links">
+    <a href="/admin">Overview</a>
+    <a href="/admin/analytics/agents" class="active">Agents</a>
+    <a href="/admin/analytics/enquiries">Enquiries</a>
+    <a href="/admin/analytics/payments">Payments</a>
+    <a href="/admin/logout">Sign Out</a>
+  </div>
+</div>
+
+<div class="container">
+  <a href="/admin?tab=agents" class="back-link">← Back to Agents List</a>
+
+  <% if (flash) { %>
+  <div class="flash <%= flash.type %>"><%= flash.msg %></div>
+  <% } %>
+
+  <div class="header-box">
+    <div class="profile-title">
+      <h1><%= auditData.agent.name %></h1>
+      <div class="meta">Email: <strong><%= auditData.agent.email %></strong> | Phone: <strong><%= auditData.agent.phone %></strong></div>
+    </div>
+    <div>
+      <span class="badge <%= auditData.agent.status %>"><%= auditData.agent.status %></span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Profile & Business Details -->
+    <div class="card-box">
+      <h3>Business & Verification Details</h3>
+      <div class="info-group"><span class="lbl">Agent ID</span><span class="val"><%= auditData.agent.id %></span></div>
+      <div class="info-group"><span class="lbl">Company / Agency</span><span class="val"><%= auditData.agent.company_name || 'N/A' %></span></div>
+      <div class="info-group"><span class="lbl">City</span><span class="val"><%= auditData.agent.city || 'Udupi' %></span></div>
+      <div class="info-group"><span class="lbl">RERA Number</span><span class="val"><%= auditData.agent.rera_number || 'Not provided' %></span></div>
+      <div class="info-group"><span class="lbl">GST Number</span><span class="val"><%= auditData.agent.gst_number || 'Not provided' %></span></div>
+      <div class="info-group"><span class="lbl">KYC Status</span><span class="val"><%= auditData.agent.kyc_status %></span></div>
+      <div class="info-group"><span class="lbl">Activated At</span><span class="val"><%= auditData.agent.activated_at ? new Date(auditData.agent.activated_at).toLocaleDateString('en-IN') : 'Not active' %></span></div>
+      <div class="info-group"><span class="lbl">Expires At</span><span class="val"><%= auditData.agent.expires_at ? new Date(auditData.agent.expires_at).toLocaleDateString('en-IN') : 'N/A' %></span></div>
+    </div>
+
+    <!-- Security & Account Controls -->
+    <div class="card-box">
+      <h3>Security & Session Controls</h3>
+
+      <div style="margin-bottom:20px;">
+        <h4 style="font-size:14px;margin-bottom:8px;">Reset Password</h4>
+        <form method="post" action="/admin/agents/<%= auditData.agent.id %>/reset-password" class="form-inline">
+          <input type="password" name="new_password" required placeholder="Enter new min 8-char password" minlength="8" class="form-control">
+          <button type="submit" class="btn btn-primary">Reset Password & Log Out Devices</button>
+        </form>
+      </div>
+
+      <div style="margin-bottom:20px;padding-top:16px;border-top:1px solid #f3efe9;">
+        <h4 style="font-size:14px;margin-bottom:8px;">Revoke Active Sessions</h4>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Instantly logs out this agent across all active mobile and desktop browsers.</p>
+        <form method="post" action="/admin/agents/<%= auditData.agent.id %>/revoke-sessions">
+          <button type="submit" class="btn btn-danger">Force Revoke All Sessions</button>
+        </form>
+      </div>
+
+      <div style="padding-top:16px;border-top:1px solid #f3efe9;">
+        <h4 style="font-size:14px;margin-bottom:8px;">Update Account Status</h4>
+        <form method="post" action="/admin/agents/<%= auditData.agent.id %>/status" class="form-inline">
+          <select name="new_status" class="form-control">
+            <option value="active" <%= auditData.agent.status === 'active' ? 'selected' : '' %>>Active</option>
+            <option value="pending_payment" <%= auditData.agent.status === 'pending_payment' ? 'selected' : '' %>>Pending Payment</option>
+            <option value="suspended" <%= auditData.agent.status === 'suspended' ? 'selected' : '' %>>Suspended / Banned</option>
+            <option value="deactivated" <%= auditData.agent.status === 'deactivated' ? 'selected' : '' %>>Deactivated</option>
+          </select>
+          <input type="text" name="reason" placeholder="Reason for status change" required class="form-control">
+          <button type="submit" class="btn btn-secondary">Update Agent Status</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign-In & Device Activity Logs -->
+  <div class="card-box" style="margin-bottom:32px;">
+    <h3>Sign-In & Device Activity Logs</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Sign-In Timestamp</th>
+          <th>IP Address</th>
+          <th>Device Type</th>
+          <th>Browser / User Agent</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (auditData.login_logs.length === 0) { %>
+        <tr><td colspan="5" style="color:var(--muted);">No sign-in activity recorded yet.</td></tr>
+        <% } else { %>
+        <% auditData.login_logs.forEach(log => { %>
+        <tr>
+          <td><%= new Date(log.created_at).toLocaleString('en-IN') %></td>
+          <td><code><%= log.ip_address %></code></td>
+          <td><strong><%= log.device_type %></strong></td>
+          <td style="font-size:11px;color:var(--muted);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="<%= log.user_agent %>"><%= log.user_agent %></td>
+          <td><span class="badge active"><%= log.status %></span></td>
+        </tr>
+        <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Status Audit Trail -->
+  <div class="card-box" style="margin-bottom:32px;">
+    <h3>Status Change History & Audit Trail</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>From Status</th>
+          <th>To Status</th>
+          <th>Reason</th>
+          <th>Changed By</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (auditData.status_history.length === 0) { %>
+        <tr><td colspan="5" style="color:var(--muted);">No status transitions logged yet.</td></tr>
+        <% } else { %>
+        <% auditData.status_history.forEach(hist => { %>
+        <tr>
+          <td><%= new Date(hist.changed_at).toLocaleString('en-IN') %></td>
+          <td><%= hist.from_status || 'N/A' %></td>
+          <td><strong><%= hist.to_status %></strong></td>
+          <td><%= hist.reason || '-' %></td>
+          <td><code><%= hist.changed_by %></code></td>
+        </tr>
+        <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Payment Orders & Invoices -->
+  <div class="card-box">
+    <h3>Payment Transactions &amp; Invoices</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Property Listing</th>
+          <th>Amount (₹)</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Invoice</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (auditData.orders.length === 0) { %>
+        <tr><td colspan="6" style="color:var(--muted);">No payment transactions found for this agent.</td></tr>
+        <% } else { %>
+        <% auditData.orders.forEach(o => { %>
+        <tr>
+          <td><code><%= o.internal_order_id || o.razorpay_order_id || o.id %></code></td>
+          <td><strong><%= o.agent_properties ? o.agent_properties.name : 'Property Listing Fee' %></strong></td>
+          <td><b>₹<%= ((o.amount_paise || 0) / 100).toLocaleString('en-IN') %></b></td>
+          <td><span class="badge <%= o.status === 'paid' || o.status === 'captured' ? 'active' : 'draft' %>"><%= o.status.toUpperCase() %></span></td>
+          <td><%= new Date(o.created_at).toLocaleDateString('en-IN') %></td>
+          <td>
+            <a href="/agent/invoices/<%= o.internal_order_id || o.razorpay_order_id || o.id %>" target="_blank" style="display:inline-block;padding:4px 10px;border:1px solid #17150F;border-radius:6px;color:#17150F;text-decoration:none;font-size:11px;font-weight:600;">View GST Invoice</a>
+          </td>
+        </tr>
+        <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

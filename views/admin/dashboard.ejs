@@ -600,6 +600,10 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
                   <button type="submit" style="padding:6px 14px;background:#FDF2F2;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#E03E3E">Refund</button>
                 </form>
                 <% } %>
+                <% } else if (p.status === 'deleted') { %>
+                <form method="post" action="/admin/agent-listings/<%= p.id %>/restore" style="display:inline">
+                  <button type="submit" style="padding:6px 14px;background:#F0FAF4;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#2D8A56">Restore ↺</button>
+                </form>
                 <% } %>
               </div>
             </td>
@@ -613,7 +617,12 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
 
     <!-- AGENTS PANEL -->
     <div class="panel" id="panel-agents">
-      <div class="page-head"><h1>Agents <span style="font-size:14px;font-weight:500;color:var(--muted)">(<%= stats.totalAgents||0 %> total)</span></h1></div>
+      <div class="page-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <h1>Agents <span style="font-size:14px;font-weight:500;color:var(--muted)">(<%= stats.totalAgents||0 %> total)</span></h1>
+        <form method="post" action="/admin/agents/purge-test-agents" onsubmit="return confirm('Purge all automated test accounts?')">
+          <button type="submit" style="padding:8px 16px;background:#FDF2F2;border:1px solid #F87171;border-radius:100px;font-size:12px;font-weight:700;color:#991B1B;cursor:pointer;">Purge Test Accounts 🗑</button>
+        </form>
+      </div>
       <% if (!agents || agents.length === 0) { %>
       <div class="empty"><h3>No agents registered yet</h3><p>Registered agents will appear here.</p></div>
       <% } else { %>
@@ -629,8 +638,10 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
           <% agents.forEach(function(a) { %>
           <tr style="border-bottom:1px solid var(--line2)">
             <td style="padding:14px 18px">
-              <div style="font-weight:700;color:var(--ink)"><%= a.name %></div>
-              <div style="font-size:12px;color:var(--muted)"><%= a.email %></div>
+              <a href="/admin/agents/<%= a.id %>" style="text-decoration:none;color:inherit;">
+                <div style="font-weight:700;color:var(--ink)"><%= a.name %> <span style="font-size:11px;color:var(--gold);">↗</span></div>
+                <div style="font-size:12px;color:var(--muted)"><%= a.email %></div>
+              </a>
             </td>
             <td style="padding:14px 18px">
               <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;background:<%= a.is_active?'#F0FAF4':'#FDF2F2' %>;color:<%= a.is_active?'#2D8A56':'#E03E3E' %>">
@@ -640,11 +651,15 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             <td style="padding:14px 18px;font-size:12px;color:var(--muted);font-weight:500">
               <%= new Date(a.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
             </td>
-            <td style="padding:14px 18px">
+            <td style="padding:14px 18px;white-space:nowrap;">
+              <a href="/admin/agents/<%= a.id %>" style="padding:6px 14px;background:#E8E2D8;border:0;border-radius:999px;font-size:12px;font-weight:700;text-decoration:none;color:var(--ink);margin-right:6px;display:inline-block;">View Profile &amp; Logs</a>
               <form method="post" action="/admin/agents/<%= a.id %>/toggle" style="display:inline">
                 <button type="submit" style="padding:6px 14px;background:<%= a.is_active?'#FDF2F2':'#F0FAF4' %>;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:<%= a.is_active?'#E03E3E':'#2D8A56' %>">
-                  <%= a.is_active ? 'Ban Agent' : 'Activate' %>
+                  <%= a.is_active ? 'Ban' : 'Activate' %>
                 </button>
+              </form>
+              <form method="post" action="/admin/agents/<%= a.id %>/delete" style="display:inline" onsubmit="return confirm('Delete agent account permanently?')">
+                <button type="submit" style="padding:6px 12px;background:#fee2e2;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#991b1b;margin-left:4px;">Delete</button>
               </form>
             </td>
           </tr>
@@ -671,25 +686,29 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Method</th>
             <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Status</th>
             <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Date</th>
+            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Invoice</th>
           </tr></thead>
           <tbody>
           <% orders.forEach(function(o) { %>
           <tr style="border-bottom:1px solid var(--line2)">
             <td style="padding:14px 18px;font-family:monospace;font-size:12px;font-weight:600"><%= o.internal_order_id %></td>
             <td style="padding:14px 18px">
-              <b><%= o.agents ? o.agents.name : '—' %></b>
+              <b><%= o.agents ? o.agents.name : ('Agent #' + o.agent_id) %></b>
               <div style="font-size:11.5px;color:var(--muted)"><%= o.agents ? o.agents.email : '' %></div>
             </td>
-            <td style="padding:14px 18px;font-weight:600"><%= o.agent_properties ? o.agent_properties.name : '—' %></td>
+            <td style="padding:14px 18px;font-weight:600"><%= o.agent_properties ? o.agent_properties.name : 'Property Listing' %></td>
             <td style="padding:14px 18px;font-weight:800">₹<%= ((o.amount_paise||0)/100).toLocaleString('en-IN') %></td>
-            <td style="padding:14px 18px"><%= o.payment_method || '—' %></td>
+            <td style="padding:14px 18px"><%= o.payment_method || 'Online' %></td>
             <td style="padding:14px 18px">
               <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;background:<%= o.status==='paid'?'#F0FAF4':o.status==='failed'?'#FDF2F2':'#FFF8EC' %>;color:<%= o.status==='paid'?'#2D8A56':o.status==='failed'?'#E03E3E':'#D97706' %>">
-                <%= o.status %>
+                <%= o.status.toUpperCase() %>
               </span>
             </td>
             <td style="padding:14px 18px;font-size:12px;color:var(--muted);font-weight:500">
               <%= new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+            </td>
+            <td style="padding:14px 18px;">
+              <a href="/agent/invoices/<%= o.internal_order_id %>" target="_blank" style="display:inline-flex;align-items:center;padding:4px 10px;border:1px solid var(--ink);border-radius:6px;color:var(--ink);text-decoration:none;font-size:11.5px;font-weight:600;">GST Invoice</a>
             </td>
           </tr>
           <% }) %>
@@ -704,14 +723,32 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
       </div>
       
       <div class="form-card">
-        <form method="post" action="/admin/settings/promo-banner">
+        <form method="post" action="/admin/settings/promo-banner" enctype="multipart/form-data">
           <div class="form-section">
-            <div class="form-section-title">Banner Status &amp; Visibility</div>
+            <div class="form-section-title">Banner Status &amp; Placement</div>
             <div class="field" style="display:flex;flex-direction:row;align-items:center;gap:12px;margin-bottom:14px;">
               <input type="checkbox" id="pb_active" name="active" <%= promoBanner && promoBanner.active ? 'checked' : '' %> style="width:20px;height:20px;cursor:pointer;">
-              <label for="pb_active" style="font-size:14px;font-weight:700;cursor:pointer;margin:0;">Enable Promotional Ad Banner on Home Page</label>
+              <label for="pb_active" style="font-size:14px;font-weight:700;cursor:pointer;margin:0;">Enable Promotional Ad Banner</label>
             </div>
-            <div class="form-hint">When checked, the promotional banner will be displayed live on the homepage. Uncheck to hide it instantly.</div>
+            
+            <div class="fg" style="margin-top:12px;">
+              <div class="field">
+                <label for="pb_placement">Display Placement on Website</label>
+                <select id="pb_placement" name="placement" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--line);font-size:14px;background:#fff;font-weight:600;">
+                  <option value="all" <%= (promoBanner && promoBanner.placement === 'all') ? 'selected' : '' %>>All Pages (Top Banner)</option>
+                  <option value="home" <%= (promoBanner && promoBanner.placement === 'home') ? 'selected' : '' %>>Homepage Only</option>
+                  <option value="properties" <%= (promoBanner && promoBanner.placement === 'properties') ? 'selected' : '' %>>Properties Browse Page</option>
+                  <option value="property" <%= (promoBanner && promoBanner.placement === 'property') ? 'selected' : '' %>>Property Detail Page</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pb_photo">Upload Banner Photo / Graphic</label>
+                <input type="file" id="pb_photo" name="banner_photo" accept="image/*" onchange="previewImg(this, 'bannerPhotoPreview')" style="padding:6px 0;">
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <img id="bannerPhotoPreview" src="<%= promoBanner && promoBanner.bg_img ? promoBanner.bg_img : '' %>" alt="Banner Preview" style="max-height:90px;border-radius:8px;object-fit:cover;border:1px solid var(--line);display:<%= promoBanner && promoBanner.bg_img ? 'block' : 'none' %>;">
+            </div>
           </div>
 
           <div class="form-section">
@@ -732,7 +769,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             </div>
             <div class="fg cols3">
               <div class="field">
-                <label for="pb_bg_img">Background Image URL</label>
+                <label for="pb_bg_img">Image URL (or use upload above)</label>
                 <input type="text" id="pb_bg_img" name="bg_img" value="<%= promoBanner ? promoBanner.bg_img : '' %>" placeholder="https://images.unsplash.com/...">
               </div>
               <div class="field">

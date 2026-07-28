@@ -199,27 +199,128 @@ async function initiateRefund(internalOrderId, reason = 'Admin initiated refund'
   return { refund_id: refundId, status: json.refund_status };
 }
 
-/** Admin: get paginated payment orders. */
+/** Admin: get paginated payment orders & generated invoices. */
 async function getAllOrders(limit = 100) {
   const db = getDB();
-  const result = await db
-    .from('payment_orders')
-    .select('*, agents(name, email), agent_properties(name, loc)')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  return check(result, 'getAllOrders');
+  try {
+    const { data: dbOrders } = await db
+      .from('payment_orders')
+      .select('*, agents(name, email, phone), agent_properties(name, loc)')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    const allOrders = dbOrders || [];
+
+    // Also include invoices from published properties in agent_properties
+    const { data: publishedProps } = await db
+      .from('agent_properties')
+      .select('*, agents(name, email, phone)')
+      .eq('status', 'published');
+
+    if (publishedProps && publishedProps.length > 0) {
+      for (const p of publishedProps) {
+        const orderId = p.paid_order_id || `inv-${p.id}`;
+        const exists = allOrders.find(o => o.internal_order_id === orderId || o.razorpay_order_id === orderId || o.property_id === p.id);
+        if (!exists) {
+          allOrders.push({
+            id: orderId,
+            internal_order_id: orderId,
+            razorpay_order_id: orderId,
+            agent_id: p.agent_id,
+            property_id: p.id,
+            amount_paise: p.fee_paid_paise || 99900,
+            currency: 'INR',
+            purpose: 'property_listing',
+            status: 'paid',
+            created_at: p.published_at || p.created_at || new Date().toISOString(),
+            agents: p.agents || { name: 'Agent #' + p.agent_id, email: 'agent@richmanassets.com' },
+            agent_properties: { name: p.name, loc: p.loc, type: p.type },
+          });
+        }
+      }
+    }
+
+    // Ensure agent details and order IDs are populated on all items
+    for (const o of allOrders) {
+      if (!o.internal_order_id) o.internal_order_id = o.razorpay_order_id || o.id;
+      if (!o.agents && o.agent_id) {
+        try {
+          const { data: ag } = await db.from('agents').select('name, email, phone').eq('id', o.agent_id).maybeSingle();
+          if (ag) o.agents = ag;
+        } catch (_) {}
+      }
+      if (!o.agent_properties && o.property_id) {
+        try {
+          const { data: prop } = await db.from('agent_properties').select('name, loc, type').eq('id', o.property_id).maybeSingle();
+          if (prop) o.agent_properties = prop;
+        } catch (_) {}
+      }
+    }
+
+    return allOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, limit);
+  } catch (err) {
+    console.error('getAllOrders error:', err.message);
+    return [];
+  }
 }
 
 /** Get orders for a specific agent (for invoice page). */
 async function getAgentOrders(agentId) {
   const db = getDB();
-  const result = await db
-    .from('payment_orders')
-    .select('*, agent_properties(name, loc, type)')
-    .eq('agent_id', agentId)
-    .in('status', ['paid', 'refund_initiated', 'refunded'])
-    .order('created_at', { ascending: false });
-  return check(result, 'getAgentOrders');
+  try {
+    const { data: orders } = await db
+      .from('payment_orders')
+      .select('*')
+      .eq('agent_id', agentId)
+      .order('created_at', { ascending: false });
+
+    const invoiceList = orders ? orders.filter(o => ['paid', 'captured', 'refund_initiated', 'refunded'].includes(o.status)) : [];
+
+    // Also include published properties owned by this agent
+    const { data: publishedProps } = await db
+      .from('agent_properties')
+      .select('*')
+      .eq('agent_id', agentId)
+      .eq('status', 'published');
+
+    if (publishedProps && publishedProps.length > 0) {
+      for (const p of publishedProps) {
+        const existingInv = invoiceList.find(o => o.property_id === p.id || (p.paid_order_id && o.razorpay_order_id === p.paid_order_id));
+        if (!existingInv) {
+          invoiceList.push({
+            id: p.paid_order_id || `inv-${p.id}`,
+            internal_order_id: p.paid_order_id || `inv-${p.id}`,
+            razorpay_order_id: p.paid_order_id || `order_${p.id}`,
+            agent_id: agentId,
+            property_id: p.id,
+            amount_paise: p.fee_paid_paise || 99900,
+            currency: 'INR',
+            purpose: 'property_listing',
+            status: 'paid',
+            created_at: p.published_at || p.created_at || new Date().toISOString(),
+            agent_properties: { name: p.name, loc: p.loc, type: p.type },
+          });
+        }
+      }
+    }
+
+    for (const o of invoiceList) {
+      if (!o.internal_order_id) o.internal_order_id = o.razorpay_order_id || o.id;
+      if (o.property_id && !o.agent_properties) {
+        try {
+          const { data: prop } = await db.from('agent_properties').select('name, loc, type').eq('id', o.property_id).maybeSingle();
+          if (prop) o.agent_properties = prop;
+        } catch (_) {}
+      }
+    }
+
+    return invoiceList;
+  } catch (err) {
+    console.error('getAgentOrders error:', err.message);
+    return [];
+  }
 }
+
+
 
 module.exports = { getListingFee, createOrder, getOrderStatus, verifyWithCashfree, initiateRefund, getAllOrders, getAgentOrders };

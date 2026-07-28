@@ -4,4 +4,7 @@ db/rma.db
 db/rma.db-shm
 db/rma.db-wal
 public/assets/img/uploads/
+uploads/
 *.log
+scratch/
+scratch_*.js

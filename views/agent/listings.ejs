@@ -43,7 +43,8 @@
         </td>
         <td><%= l.type %> · <%= l.listing %></td>
         <td><%= l.price %></td>
-        <td><span class="status-badge status-<%= l.status %>"><%= l.status.replace(/_/g,' ') %></span></td>
+        <td><span class="status-badge status-<%= l.status %>"><%= l.status.toUpperCase().replace(/_/g,' ') %></span></td>
+
         <td style="font-size:12px;color:var(--muted)">
           <% if (l.expires_at) { %>
             <%= new Date(l.expires_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) %>

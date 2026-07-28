@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/agent.css?v=glossier_v4">
+</head>
+<body class="agent-portal">
+<div class="ap-auth-page">
+  <div class="ap-auth-box">
+    <div class="ap-auth-logo">
+      <div class="brand">Rich<em>Man</em>Assets</div>
+      <div class="sub">Agent Account Verification</div>
+    </div>
+    <h1>Verify Your Account</h1>
+    <p class="sub">We sent a verification code to <strong><%= agent.email %></strong>. Enter code to complete signup step 1.</p>
+
+    <% if (flash) { %>
+    <div class="flash <%= flash.type %>">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <%- flash.msg %>
+    </div>
+    <% } %>
+
+    <form method="post" action="/agent/verify-otp" id="otpForm">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="form-group">
+        <label for="otp-code">Verification OTP (Default test: 754081)</label>
+        <input type="text" id="otp-code" name="otp" required placeholder="754081" maxlength="6" value="754081" style="font-size:24px;letter-spacing:6px;text-align:center;">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg" id="otp-submit">
+        Verify & Proceed to Payment →
+      </button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

@@ -7,34 +7,41 @@
 const { getDB, check } = require('../db/db');
 
 async function requirePropertyOwner(req, res, next) {
-  const propId = req.params.id;
-  if (!propId) return res.status(400).json({ ok: false, error: 'Missing property id' });
+  const rawPropId = req.params.id;
+  if (!rawPropId) return res.status(400).json({ ok: false, error: 'Missing property id' });
+
+  const propId = decodeURIComponent(rawPropId);
+  const normalizedId = propId.replace(/\s+/g, '-');
+  const dashedId = propId.replace(/-/g, ' ');
 
   try {
     const db = getDB();
-    const result = await db
+    const { data: prop } = await db
       .from('agent_properties')
       .select('*')
-      .eq('id', propId)
+      .in('id', [propId, normalizedId, dashedId, rawPropId])
       .eq('agent_id', req.agent.id)
       .not('status', 'eq', 'deleted')
-      .single();
+      .maybeSingle();
 
-    // If no row found, Supabase returns error with code PGRST116 (not found)
-    if (result.error && result.error.code === 'PGRST116') {
+    if (!prop) {
+      if (req.accepts('html')) {
+        req.session.agentFlash = { type: 'err', msg: 'Property listing not found or access denied.' };
+        return res.redirect('/agent/listings');
+      }
       return res.status(403).json({ ok: false, error: 'Access denied or property not found.' });
     }
 
-    const prop = check(result, 'requirePropertyOwner');
     req.property = prop;
     next();
   } catch (err) {
-    if (err.code === 'PGRST116') {
-      return res.status(403).json({ ok: false, error: 'Access denied.' });
-    }
     console.error('requirePropertyOwner error:', err.message);
+    if (req.accepts('html')) {
+      return res.redirect('/agent/listings');
+    }
     return res.status(500).json({ ok: false, error: 'Server error.' });
   }
 }
+
 
 module.exports = requirePropertyOwner;

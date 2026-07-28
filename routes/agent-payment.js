@@ -1,54 +1,55 @@
 'use strict';
 /**
  * routes/agent-payment.js
- * Handles payment creation, status polling, success/fail pages, and invoices.
+ * Handles Razorpay payment order creation, client verification,
+ * payment status polling, and success/failed result pages.
+ * Invoice routes are in routes/agent-invoices.js.
  */
 const express = require('express');
 const router  = express.Router();
 const requireAgent = require('../middleware/requireAgent');
 const { paymentLimiter } = require('../middleware/rateLimiter');
-const {
-  createOrder, getOrderStatus, getAgentOrders, getListingFee, initiateRefund,
-} = require('../services/paymentService');
-const { getAgentProperty, markPaymentPending } = require('../services/propertyService');
+const { getOrderStatus, getListingFee } = require('../services/paymentService');
 
-// ── CREATE PAYMENT ORDER ─────────────────────────────────────────
+const agentPaymentSvc = require('../services/agentPaymentService');
+
+// ── CREATE RAZORPAY PAYMENT ORDER ─────────────────────────────────
 // POST /agent/payment/create  { property_id }
 router.post('/create', requireAgent, paymentLimiter, async (req, res) => {
   const { property_id } = req.body;
   if (!property_id) return res.status(400).json({ ok: false, error: 'Missing property_id', code: 'MISSING_PROPERTY' });
 
   try {
-    // Ownership check
-    const prop = await getAgentProperty(property_id, req.agent.id);
-    if (!prop) return res.status(403).json({ ok: false, error: 'Property not found.', code: 'NOT_FOUND' });
-
-    // Status gate — only allow payment for draft or failed
-    if (!['draft','payment_pending','payment_failed'].includes(prop.status)) {
-      if (prop.status === 'published') return res.status(409).json({ ok: false, error: 'This listing is already published.', code: 'ALREADY_PAID' });
-      return res.status(409).json({ ok: false, error: `Cannot pay for a listing in "${prop.status}" status.`, code: 'INVALID_STATUS' });
-    }
-
-    // Mark as payment_pending before opening checkout
-    await markPaymentPending(property_id);
-
-    // Create / reuse Cashfree order
-    const order = await createOrder({ agent: req.agent, propertyId: property_id, propertyName: prop.name });
-
-    res.json({
-      ok: true,
-      data: {
-        payment_session_id: order.payment_session_id,
-        internal_order_id:  order.internal_order_id,
-        amount_paise:       order.amount_paise,
-        currency:           order.currency,
-      },
+    const result = await agentPaymentSvc.createPropertyPaymentOrder({
+      agentId: req.agent.id,
+      propertyId: property_id,
     });
+    res.json(result);
   } catch (err) {
     console.error('[payment/create]', err.message);
-    res.status(500).json({ ok: false, error: 'Could not create payment order. Please try again.', code: 'PAYMENT_CREATE_FAILED' });
+    res.status(500).json({ ok: false, error: err.message || 'Could not create payment order.', code: 'PAYMENT_CREATE_FAILED' });
   }
 });
+
+// ── VERIFY RAZORPAY PAYMENT ──────────────────────────────────────
+// POST /agent/payment/verify
+router.post('/verify', requireAgent, async (req, res) => {
+  const { property_id, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  try {
+    const result = await agentPaymentSvc.verifyPropertyPayment({
+      agentId: req.agent.id,
+      propertyId: property_id,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    });
+    res.json(result);
+  } catch (err) {
+    console.error('[payment/verify]', err.message);
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
 
 // ── PAYMENT STATUS PAGE (redirect target after checkout) ─────────
 // GET /agent/payment/status/:orderId
@@ -116,41 +117,6 @@ router.get('/failed', requireAgent, async (req, res) => {
     });
   } catch (_) {
     res.render('agent/payment-failed', { title: 'Payment Failed | RichManAssets Agent', robots: 'noindex,nofollow', order: null, agent: req.agent });
-  }
-});
-
-// ── INVOICES LIST ───────────────────────────────────────────────
-// GET /agent/invoices
-router.get('/', requireAgent, async (req, res) => {
-  try {
-    const orders = await getAgentOrders(req.agent.id);
-    res.render('agent/invoices', {
-      title: 'My Invoices | RichManAssets Agent',
-      robots: 'noindex,nofollow',
-      orders,
-      agent: req.agent,
-    });
-  } catch (err) {
-    console.error('[invoices]', err.message);
-    res.render('agent/invoices', { title: 'My Invoices', robots: 'noindex,nofollow', orders: [], agent: req.agent });
-  }
-});
-
-// ── INVOICE DETAIL (printable) ──────────────────────────────────
-// GET /agent/invoices/:orderId
-router.get('/:orderId', requireAgent, async (req, res) => {
-  try {
-    const orders = await getAgentOrders(req.agent.id);
-    const order = orders.find(o => o.internal_order_id === req.params.orderId);
-    if (!order) return res.status(404).send('Invoice not found');
-    res.render('agent/invoice-detail', {
-      title: `Invoice ${order.internal_order_id} | RichManAssets`,
-      robots: 'noindex,nofollow',
-      order,
-      agent: req.agent,
-    });
-  } catch (err) {
-    res.status(500).send('Server error');
   }
 });
 

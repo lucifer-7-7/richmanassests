@@ -42,7 +42,8 @@
 </header>
 
 <main class="wrap">
-  <% serviceDetails.forEach(function(s) { %>
+  <% var listDetails = typeof serviceDetails !== 'undefined' ? serviceDetails : (typeof services !== 'undefined' ? services : []); %>
+  <% listDetails.forEach(function(s) { %>
   <section class="srow" id="<%= s.id %>">
     <div class="si">
       <span class="n"><%= s.n %></span>

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %></title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/agent.css?v=glossier_v4">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+.checkout-card {
+  max-width: 580px;
+  margin: 40px auto;
+  background: var(--surface, #1e293b);
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  color: #fff;
+}
+.checkout-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.checkout-price {
+  font-size: 36px;
+  font-weight: 800;
+  color: #10b981;
+  margin: 12px 0;
+}
+.status-box {
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 14px;
+  display: none;
+}
+.status-box.info { background: rgba(59, 130, 246, 0.15); border: 1px solid #3b82f6; color: #93c5fd; }
+.status-box.success { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; }
+.status-box.warning { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fcd34d; }
+.status-box.error { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
+</style>
+</head>
+<body class="agent-portal">
+<div class="checkout-card">
+  <div class="checkout-header">
+    <div class="brand" style="font-size:24px;margin-bottom:8px;">Rich<em>Man</em>Assets</div>
+    <h2>Complete Agent Membership Signup</h2>
+    <p style="color:#94a3b8;font-size:14px;margin-top:6px;">Activate your partner account to publish listings & receive high-intent buyer enquiries.</p>
+    <div class="checkout-price">₹<%= (orderData.amount_paise / 100).toLocaleString('en-IN') %></div>
+    <div style="font-size:12px;color:#94a3b8;">Order ID: <%= orderData.razorpay_order_id %></div>
+  </div>
+
+  <div id="statusAlert" class="status-box"></div>
+
+  <div style="display:flex;flex-direction:column;gap:12px;margin-top:24px;">
+    <button id="rzp-pay-btn" class="btn btn-primary btn-full btn-lg" style="font-size:16px;padding:16px;">
+      Pay & Activate Account via Razorpay →
+    </button>
+    <a href="/agent/dashboard" class="btn btn-secondary btn-full" style="text-align:center;">Cancel / Skip for now</a>
+  </div>
+
+  <!-- Sandbox Test Mode Info -->
+  <div style="margin-top:32px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:#94a3b8;">
+    <strong>Razorpay Test Mode Helper:</strong><br>
+    • Test Visa Card: <code>4111 1111 1111 1111</code> (Expiry: 12/28, CVV: 123)<br>
+    • Test Success UPI ID: <code>success@razorpay</code><br>
+    • Test Failure UPI ID: <code>failure@razorpay</code>
+  </div>
+</div>
+
+<script>
+const razorpayKeyId = "<%= orderData.key_id %>";
+const orderId = "<%= orderData.razorpay_order_id %>";
+const amountPaise = <%= orderData.amount_paise %>;
+const agentName = "<%= orderData.agent.name %>";
+const agentEmail = "<%= orderData.agent.email %>";
+const agentPhone = "<%= orderData.agent.phone %>";
+const csrfToken = "<%= csrfToken %>";
+
+function showStatus(msg, type) {
+  const box = document.getElementById('statusAlert');
+  box.className = 'status-box ' + type;
+  box.innerHTML = msg;
+  box.style.display = 'block';
+}
+
+function startStatusPolling() {
+  showStatus('⏳ Payment signature verified! Activating account via server webhook...', 'info');
+  let attempts = 0;
+  const interval = setInterval(async () => {
+    attempts++;
+    try {
+      const resp = await fetch('/payments/status/' + orderId);
+      const data = await resp.json();
+      if (data.ok && data.data.is_active) {
+        clearInterval(interval);
+        showStatus('✅ Account activated successfully! Redirecting to Dashboard...', 'success');
+        setTimeout(() => { window.location.href = '/agent/dashboard?welcome=1'; }, 1500);
+      } else if (attempts > 15) {
+        clearInterval(interval);
+        showStatus('⚡ Payment received! Webhook processing is taking slightly longer than expected. The reconciliation worker will activate your account shortly.', 'warning');
+      }
+    } catch (_) {}
+  }, 2000);
+}
+
+document.getElementById('rzp-pay-btn').onclick = function(e) {
+  e.preventDefault();
+
+  const options = {
+    key: razorpayKeyId,
+    amount: amountPaise,
+    currency: "INR",
+    name: "RichManAssets",
+    description: "Agent Partner Membership Plan",
+    image: "/assets/img/logo.png",
+    order_id: orderId,
+    prefill: {
+      name: agentName,
+      email: agentEmail,
+      contact: agentPhone
+    },
+    theme: { color: "#10b981" },
+    handler: async function (response) {
+      showStatus('Verifying payment signature with server...', 'info');
+      try {
+        const verifyResp = await fetch('/payments/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          })
+        });
+
+        const verifyResult = await verifyResp.json();
+        if (verifyResult.ok) {
+          startStatusPolling();
+        } else {
+          showStatus('❌ Payment verification failed: ' + verifyResult.error, 'error');
+        }
+      } catch (err) {
+        showStatus('❌ Verification network error. Our reconciliation engine will process your order shortly.', 'warning');
+      }
+    },
+    modal: {
+      ondismiss: function() {
+        showStatus('⚠️ Payment window closed. Click "Pay & Activate Account" to retry.', 'warning');
+      }
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.on('payment.failed', function (response) {
+    showStatus('❌ Payment failed: ' + (response.error.description || response.error.code), 'error');
+  });
+  rzp.open();
+};
+</script>
+</body>
+</html>

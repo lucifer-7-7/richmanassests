@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title><%= title %> · RichManAssets</title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F6F2EC; --white:#FFFFFF; --ink:#1C1917; --muted:#8C8275; --line:#E2DBD0;
+  --ok:#27694A; --ok-bg:#F0FAF4; --err:#D93838; --err-bg:#FDF2F2;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:60px;}
+.top{background:var(--white);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;}
+.top .brand{font-size:18px;font-weight:800;letter-spacing:-.03em;}
+.top .nav-links a{color:var(--ink);font-size:13px;text-decoration:none;padding:8px 16px;border-radius:999px;font-weight:600;background:#E8E2D8;margin-left:6px;}
+.top .nav-links a.active{background:var(--ink);color:#fff;}
+.container{max-width:1200px;margin:32px auto;padding:0 24px;}
+.header{margin-bottom:24px;}
+.header h1{font-size:28px;font-weight:800;letter-spacing:-.02em;}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:32px;}
+.stat-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:24px;}
+.stat-card .num{font-size:32px;font-weight:800;margin-top:8px;}
+.stat-card .label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.card-box{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:32px;}
+.card-box h3{font-size:18px;font-weight:700;margin-bottom:16px;}
+.table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px;}
+.table th,.table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);}
+.table th{font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">Rich<em>Man</em>Assets <span style="font-size:10px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;">ADMIN</span></div>
+  <div class="nav-links">
+    <a href="/admin">Overview</a>
+    <a href="/admin/analytics/agents">Agent Analytics</a>
+    <a href="/admin/analytics/enquiries" class="active">Enquiry Analytics</a>
+    <a href="/admin/analytics/payments">Payment Analytics</a>
+    <a href="/admin/logout">Sign Out</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <h1>Enquiry Analytics & Conversion</h1>
+    <p style="color:var(--muted);">Buyer lead volume, conversion rates, response speed, and source channels.</p>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="label">Total Enquiries Received</div>
+      <div class="num"><%= analytics.total_enquiries %></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Overall Conversion Rate</div>
+      <div class="num" style="color:var(--ok)"><%= analytics.overall_conversion_rate %>%</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Avg First Response Time</div>
+      <div class="num"><%= analytics.avg_first_response_hours %> <span style="font-size:16px">hrs</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Converted Leads</div>
+      <div class="num"><%= analytics.status_breakdown.converted %></div>
+    </div>
+  </div>
+
+  <!-- Status Breakdown -->
+  <div class="card-box">
+    <h3>Enquiry Status Breakdown</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Lead Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>New</strong></td><td><%= analytics.status_breakdown.new %></td></tr>
+        <tr><td><strong>Contacted</strong></td><td><%= analytics.status_breakdown.contacted %></td></tr>
+        <tr><td><strong style="color:var(--ok)">Converted</strong></td><td><%= analytics.status_breakdown.converted %></td></tr>
+        <tr><td><strong>Closed</strong></td><td><%= analytics.status_breakdown.closed %></td></tr>
+        <tr><td><strong style="color:var(--err)">Lost</strong></td><td><%= analytics.status_breakdown.lost %></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Source Split -->
+  <div class="card-box">
+    <h3>Enquiry Sources</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Channel / Source</th>
+          <th>Volume</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% Object.keys(analytics.source_breakdown).forEach(src => { %>
+        <tr>
+          <td><strong><%= src %></strong></td>
+          <td><%= analytics.source_breakdown[src] %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

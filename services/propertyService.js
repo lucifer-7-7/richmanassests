@@ -212,6 +212,55 @@ async function deleteDraft(propId, agentId) {
   return true;
 }
 
+/**
+ * Restore a soft-deleted listing within 30 days.
+ */
+async function restoreProperty(propId, agentId = null) {
+  const db = getDB();
+  let query = db.from('agent_properties').select('*').eq('id', propId);
+  if (agentId) query = query.eq('agent_id', agentId);
+  const { data: existing } = await query.maybeSingle();
+
+  if (!existing) throw new Error('Listing not found.');
+  if (existing.status !== 'deleted') throw new Error('Listing is not in trash.');
+
+  const deletedTime = new Date(existing.updated_at || existing.created_at).getTime();
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+  if (Date.now() - deletedTime > thirtyDaysMs) {
+    throw new Error('This listing was deleted over 30 days ago and can no longer be restored.');
+  }
+
+  const restoredStatus = existing.paid_order_id ? 'published' : 'draft';
+  const result = await db.from('agent_properties')
+    .update({ status: restoredStatus, updated_at: new Date().toISOString() })
+    .eq('id', propId);
+
+  if (result.error) throw new Error('Could not restore listing: ' + result.error.message);
+  return { ...existing, status: restoredStatus };
+}
+
+/**
+ * Get all soft-deleted listings (within 30-day trash retention window).
+ */
+async function getTrashListings(agentId = null) {
+  const db = getDB();
+  let query = db.from('agent_properties').select('*, agents(name, email)').eq('status', 'deleted').order('updated_at', { ascending: false });
+  if (agentId) query = query.eq('agent_id', agentId);
+
+  const { data } = await query;
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+  return (data || []).map(p => {
+    const deletedTime = new Date(p.updated_at || p.created_at).getTime();
+    const daysLeft = Math.max(0, Math.ceil((deletedTime + thirtyDaysMs - Date.now()) / (24 * 60 * 60 * 1000)));
+    return {
+      ...p,
+      days_remaining: daysLeft,
+      can_restore: daysLeft > 0,
+    };
+  });
+}
+
 // ── Payment State Machine ─────────────────────────────────────────
 
 /**
@@ -376,6 +425,8 @@ module.exports = {
   createDraft,
   updateDraft,
   deleteDraft,
+  restoreProperty,
+  getTrashListings,
   // Payment state machine
   markPaymentPending,
   publishProperty,

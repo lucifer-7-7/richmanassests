@@ -372,19 +372,23 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
 .ap-table .prop-name { font-weight: 700; color: var(--ink); }
 .ap-table .prop-loc  { font-size: 12px; color: var(--muted); font-weight: 500; }
 
-/* ── STATUS BADGES ────────────────────────────────────────────── */
+/* ── STATUS BADGES (Luxury Crisp Badges) ────────────────────────── */
 .status-badge, .listing-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 12px; border-radius: var(--radius-pill); font-size: 11.5px; font-weight: 700; letter-spacing: .02em;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 4px 10px; border-radius: 6px; font-size: 10.5px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase; line-height: 1; white-space: nowrap;
 }
-.status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.status-draft            { color: var(--muted);   background: var(--surface2); }
-.status-payment_pending  { color: var(--warn);    background: var(--warn-bg);  }
-.status-payment_processing{ color: var(--warn);   background: var(--warn-bg);  }
-.status-payment_failed   { color: var(--danger);  background: var(--danger-bg); }
-.status-published        { color: var(--success); background: var(--success-bg); }
-.status-expired          { color: var(--muted);   background: var(--surface2); }
-.status-archived         { color: var(--muted);   background: var(--surface2); }
+.status-badge::before { display: none; }
+.status-draft            { color: #52525B; background: #F4F4F5; border: 1px solid #E4E4E7; }
+.status-payment_pending  { color: #B45309; background: #FFFBEB; border: 1px solid #FDE68A; }
+.status-payment_processing{ color: #B45309; background: #FFFBEB; border: 1px solid #FDE68A; }
+.status-payment_failed   { color: #B91C1C; background: #FEF2F2; border: 1px solid #FECACA; }
+.status-published        { color: #15803D; background: #F0FAF4; border: 1px solid #BBF7D0; }
+.status-active           { color: #15803D; background: #F0FAF4; border: 1px solid #BBF7D0; }
+.status-expired          { color: #71717A; background: #FAFAFA; border: 1px solid #E4E4E7; }
+.status-archived         { color: #71717A; background: #FAFAFA; border: 1px solid #E4E4E7; }
+.status-suspended        { color: #B91C1C; background: #FEF2F2; border: 1px solid #FECACA; }
+
 
 /* ── EMPTY STATE ──────────────────────────────────────────────── */
 .empty-state, .empty { text-align: center; padding: 64px 24px; }
@@ -462,3 +466,29 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
   .ap-mobile-tabbar { display: none !important; }
   .menu-toggle { display: none !important; }
 }
+
+/* ── PREMIUM TOAST NOTIFICATION ────────────────────────── */
+.toast-banner {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px; border-radius: var(--radius-md);
+  margin-bottom: 24px; font-size: 14px; font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  transition: opacity .3s ease, transform .3s ease;
+  position: relative;
+}
+.toast-banner.hide { opacity: 0; transform: translateY(-8px); pointer-events: none; }
+.toast-banner.ok {
+  background: #F0FAF4; color: #166534; border: 1px solid #BBF7D0;
+}
+.toast-banner.err {
+  background: #FDF2F2; color: #991B1B; border: 1px solid #FECACA;
+}
+.toast-icon { display: flex; align-items: center; flex-shrink: 0; }
+.toast-msg { flex: 1; line-height: 1.4; }
+.toast-close {
+  background: none; border: none; font-size: 16px; cursor: pointer;
+  color: inherit; opacity: 0.6; padding: 4px; border-radius: 4px;
+  transition: opacity .15s;
+}
+.toast-close:hover { opacity: 1; }
+

@@ -11,14 +11,17 @@
 
   <!-- BASIC INFO -->
   <div class="form-section">
-    <div class="form-section-title">Property Details</div>
+    <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+      <span>Property Details</span>
+      <span id="autosaveStatus" style="font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none;"></span>
+    </div>
     <div class="form-group">
-      <label for="pname">Property Name *</label>
+      <label for="pname">Property Name <span style="color:#D93838;font-weight:700">*</span></label>
       <input type="text" id="pname" name="name" required placeholder="e.g. Sea-View Villa, Kapu" value="<%= prop && prop.name ? prop.name : '' %>">
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label for="ploc">Location / Address *</label>
+        <label for="ploc">Location / Address <span style="color:#D93838;font-weight:700">*</span></label>
         <input type="text" id="ploc" name="loc" required placeholder="e.g. Kapu, Udupi District" value="<%= prop && prop.loc ? prop.loc : '' %>">
       </div>
       <div class="form-group">
@@ -28,7 +31,7 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label for="ptype">Property Type *</label>
+        <label for="ptype">Property Type <span style="color:#D93838;font-weight:700">*</span></label>
         <select id="ptype" name="type" required>
           <option value="">Select type…</option>
           <% ['Apartment','Villa','House','Plot','Land','Commercial','Office','Shop','Agricultural','Penthouse','Bungalow','Row House','Other'].forEach(function(t) { %>
@@ -37,7 +40,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label for="plisting">Listed For *</label>
+        <label for="plisting">Listed For <span style="color:#D93838;font-weight:700">*</span></label>
         <select id="plisting" name="listing" required>
           <option value="">Select…</option>
           <option value="sale"  <%= prop && prop.listing === 'sale'  ? 'selected' : '' %>>Sale</option>
@@ -48,12 +51,12 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label for="pprice">Price Display *</label>
+        <label for="pprice">Price Display <span style="color:#D93838;font-weight:700">*</span></label>
         <input type="text" id="pprice" name="price" required placeholder="e.g. ₹85 Lakhs or ₹25,000/mo" value="<%= prop && prop.price ? prop.price : '' %>">
         <div class="form-hint">Text shown on the listing card.</div>
       </div>
       <div class="form-group">
-        <label for="pprice_val">Price Value (₹ numeric) *</label>
+        <label for="pprice_val">Price Value (₹ numeric) <span style="color:#D93838;font-weight:700">*</span></label>
         <input type="number" id="pprice_val" name="price_val" required min="0" step="1" placeholder="8500000" value="<%= prop && prop.price_val ? prop.price_val : '' %>">
         <div class="form-hint">Used for budget filtering. No commas.</div>
       </div>
@@ -145,9 +148,9 @@
         <div class="form-hint">JPEG/PNG/WebP, max 15 MB. Shown in listings grid.</div>
       </div>
       <div class="form-group">
-        <label for="img_hero">Hero / Full-size Image</label>
-        <input type="file" id="img_hero" name="img_hero" accept="image/jpeg,image/png,image/webp">
-        <div class="form-hint">Shown on property detail page.</div>
+        <label for="img_hero">Hero / Full-size Image <span style="color:#D93838;font-weight:700">* (Compulsory)</span></label>
+        <input type="file" id="img_hero" name="img_hero" accept="image/jpeg,image/png,image/webp" <%= (!isEdit || !prop || !prop.img_hero) ? 'required' : '' %>>
+        <div class="form-hint">Compulsory primary image for property detail page.</div>
       </div>
     </div>
     <div class="form-group">
@@ -156,20 +159,69 @@
     </div>
   </div>
 
-  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px;">
     <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-      <%= isEdit ? 'Save Changes → Proceed to Payment' : 'Save Draft → Proceed to Payment' %>
+      <%= isEdit ? 'Save & Proceed to Payment →' : 'Proceed to Payment →' %>
     </button>
     <a href="/agent/listings" class="btn btn-outline">Cancel</a>
   </div>
 </form>
 
 <script>
-document.getElementById('listingForm').addEventListener('submit', function() {
+(function() {
+  var form = document.getElementById('listingForm');
   var btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-});
+  var statusEl = document.getElementById('autosaveStatus');
+  var draftKey = 'rma_draft_' + (<%- JSON.stringify(isEdit && prop ? prop.id : 'new') %>);
+
+  // Auto-restore saved draft if creating new listing and inputs are empty
+  try {
+    var saved = localStorage.getItem(draftKey);
+    if (saved && !<%- JSON.stringify(isEdit) %>) {
+      var data = JSON.parse(saved);
+      var restored = false;
+      Object.keys(data).forEach(function(k) {
+        var el = form.elements[k];
+        if (el && !el.value && data[k] && el.type !== 'file') {
+          el.value = data[k];
+          restored = true;
+        }
+      });
+      if (restored && statusEl) {
+        statusEl.textContent = 'Unsaved draft restored';
+        statusEl.style.color = '#3b82f6';
+      }
+    }
+  } catch(_) {}
+
+  // Auto-save input changes locally as the user types
+  var timer = null;
+  form.addEventListener('input', function(e) {
+    if (e.target.type === 'file' || e.target.name === '_csrf') return;
+    clearTimeout(timer);
+    timer = setTimeout(function() {
+      try {
+        var data = {};
+        var fields = ['name','loc','area','type','listing','price','price_val','price_note','beds','baths','sqft','subtype','description','amenities'];
+        fields.forEach(function(f) {
+          if (form.elements[f]) data[f] = form.elements[f].value;
+        });
+        localStorage.setItem(draftKey, JSON.stringify(data));
+        if (statusEl) {
+          statusEl.textContent = 'Draft auto-saved';
+          statusEl.style.color = '#10b981';
+        }
+      } catch(_) {}
+    }, 400);
+  });
+
+  // Clear local draft cache on form submission
+  form.addEventListener('submit', function() {
+    btn.disabled = true;
+    btn.textContent = 'Saving & Processing…';
+    try { localStorage.removeItem(draftKey); } catch(_) {}
+  });
+})();
 </script>
 
 <%- include('../partials/agent-layout-end') %>
