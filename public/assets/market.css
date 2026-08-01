@@ -27,7 +27,7 @@
   .search-go{grid-column:1/-1;padding:14px}
 }
 @media(min-width:900px){
-  .search-fields{display:grid;grid-template-columns:1.4fr 1fr 1fr auto}
+  .search-fields{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:8px}
   .search-go{grid-column:auto;padding:0 22px;width:auto}
 }
 

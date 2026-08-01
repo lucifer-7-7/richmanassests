@@ -2,7 +2,7 @@
 
 <% if (flash) { %><div class="flash <%= flash.type %>"><%- flash.msg %></div><% } %>
 
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+<div class="ap-action-bar">
   <div class="filter-tabs">
     <a href="/agent/listings" class="filter-tab <%= filterStatus === 'all' ? 'active' : '' %>">All (<%= listings.length %>)</a>
     <a href="/agent/listings?status=published"       class="filter-tab <%= filterStatus === 'published'       ? 'active' : '' %>">Published</a>
@@ -10,10 +10,10 @@
     <a href="/agent/listings?status=payment_failed"  class="filter-tab <%= filterStatus === 'payment_failed'  ? 'active' : '' %>">Failed</a>
     <a href="/agent/listings?status=expired"         class="filter-tab <%= filterStatus === 'expired'         ? 'active' : '' %>">Expired</a>
   </div>
-  <a href="/agent/listings/new" class="btn btn-primary btn-sm">+ Add Listing — ₹<%= feeRs %></a>
+  <a href="/agent/listings/new" class="btn btn-primary ap-add-btn">+ Add Listing</a>
 </div>
 
-<div class="ap-card">
+<div class="ap-card ap-listings-card">
   <% if (listings.length === 0) { %>
   <div class="empty-state">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -36,22 +36,45 @@
       </thead>
       <tbody>
       <% listings.forEach(function(l) { %>
-      <tr>
-        <td>
-          <div class="prop-name"><%= l.name %></div>
-          <div class="prop-loc"><%= l.loc %></div>
+      <tr class="ap-listing-item">
+        <td class="td-prop">
+          <div class="prop-info">
+            <div class="prop-name"><%= l.name %></div>
+            <div class="prop-loc">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span><%= l.loc || 'Location not specified' %></span>
+            </div>
+          </div>
+          <div class="prop-mobile-status">
+            <span class="status-badge status-<%= l.status %>"><%= l.status.toUpperCase().replace(/_/g,' ') %></span>
+          </div>
         </td>
-        <td><%= l.type %> · <%= l.listing %></td>
-        <td><%= l.price %></td>
-        <td><span class="status-badge status-<%= l.status %>"><%= l.status.toUpperCase().replace(/_/g,' ') %></span></td>
 
-        <td style="font-size:12px;color:var(--muted)">
-          <% if (l.expires_at) { %>
-            <%= new Date(l.expires_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) %>
-          <% } else { %>—<% } %>
+        <td class="td-type">
+          <span class="m-label">Type / For</span>
+          <span class="m-val"><%= l.type %> · <%= l.listing %></span>
         </td>
-        <td>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
+
+        <td class="td-price">
+          <span class="m-label">Price</span>
+          <span class="m-val price-highlight"><%= (l.price && l.price.toString().startsWith('₹')) ? l.price : ('₹' + (l.price || 0)) %></span>
+        </td>
+
+        <td class="td-status-desktop">
+          <span class="status-badge status-<%= l.status %>"><%= l.status.toUpperCase().replace(/_/g,' ') %></span>
+        </td>
+
+        <td class="td-expires">
+          <span class="m-label">Expires</span>
+          <span class="m-val expire-date">
+            <% if (l.expires_at) { %>
+              <%= new Date(l.expires_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) %>
+            <% } else { %>—<% } %>
+          </span>
+        </td>
+
+        <td class="td-actions">
+          <div class="action-buttons-wrap">
             <% if (l.status === 'published') { %>
               <a href="/agent/listings/<%= l.id %>/manage" class="btn btn-primary btn-sm">Manage</a>
               <a href="/property/<%= l.id %>" class="btn btn-outline btn-sm" target="_blank">View Live</a>

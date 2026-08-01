@@ -189,30 +189,109 @@ function buildPropertiesSEO({ listing, area, type, budget, count = 0 }) {
   return { pageTitle, pageDesc, keywords, geoPlace, canonPath };
 }
 
+// Helper to fetch all active admin properties AND published agent properties with error safety
+async function getAllPublicProperties(db) {
+  try {
+    let adminProps = [];
+    let agentProps = [];
+
+    try {
+      const { data } = await db.from('properties').select('*').eq('active', true);
+      adminProps = data || [];
+    } catch (e1) {
+      console.error('[getAllPublicProperties] properties err:', e1.message);
+    }
+
+    try {
+      const { data } = await db.from('agent_properties').select('*').eq('status', 'published');
+      agentProps = (data || []).map(p => ({
+        ...p,
+        active: true,
+        has_img: Boolean(p.img_card || p.img_hero),
+        is_agent_listing: true,
+      }));
+    } catch (e2) {
+      console.error('[getAllPublicProperties] agent_properties err:', e2.message);
+    }
+
+    return [...adminProps, ...agentProps];
+  } catch (err) {
+    console.error('[getAllPublicProperties] error:', err.message);
+    return [];
+  }
+}
+
+// Tokenized relevant keyword matcher & scorer
+function searchAndSortProperties(allProps, { listing, area, type, budget, q }) {
+  let list = [...allProps];
+
+  if (listing) list = list.filter(p => p.listing === listing);
+  if (area) {
+    const cleanArea = area.toLowerCase().trim();
+    list = list.filter(p => (p.area && p.area.toLowerCase().trim() === cleanArea) || (p.loc && p.loc.toLowerCase().includes(cleanArea)));
+  }
+  if (type) list = list.filter(p => p.type && p.type.toLowerCase().trim() === type.toLowerCase().trim());
+
+  if (budget === 'u30')   list = list.filter(p => (p.price_val || 0) < 3000000);
+  if (budget === '30-1c') list = list.filter(p => (p.price_val || 0) >= 3000000 && (p.price_val || 0) < 10000000);
+  if (budget === '1-5c')  list = list.filter(p => (p.price_val || 0) >= 10000000 && (p.price_val || 0) < 50000000);
+  if (budget === '5c')    list = list.filter(p => (p.price_val || 0) >= 50000000);
+
+  if (!q || !q.trim()) {
+    return list.sort((a, b) => {
+      if (Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1;
+      if ((a.sort_order || 0) !== (b.sort_order || 0)) return (a.sort_order || 0) - (b.sort_order || 0);
+      return (b.price_val || 0) - (a.price_val || 0);
+    });
+  }
+
+  const tokens = q.trim().toLowerCase().split(/\s+/).filter(t => t.length > 0);
+  if (!tokens.length) return list;
+
+  const scored = [];
+  for (const p of list) {
+    let score = 0;
+    const nameStr = (p.name || '').toLowerCase();
+    const locStr  = (p.loc || '').toLowerCase() + ' ' + (p.area || '').toLowerCase();
+    const typeStr = (p.type || '').toLowerCase() + ' ' + (p.subtype || '').toLowerCase() + ' ' + (p.listing || '').toLowerCase();
+    const descStr = (p.description || '').toLowerCase() + ' ' + (p.story_heading || '').toLowerCase() + ' ' + (p.story_body || '').toLowerCase() + ' ' + (p.amenities || '').toLowerCase() + ' ' + (p.price_note || '').toLowerCase();
+
+    for (const token of tokens) {
+      if (nameStr.includes(token)) score += 10;
+      if (locStr.includes(token))  score += 8;
+      if (typeStr.includes(token)) score += 6;
+      if (descStr.includes(token)) score += 3;
+    }
+
+    if (score > 0) {
+      scored.push({ property: p, score });
+    }
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.map(s => s.property);
+}
+
 // ── HOME ─────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
     const db = getDB();
     const heroIds = ['mermaid', 'kopparige', 'samudra', 'tara', 'honeyvale', 'ikigai'];
 
-    const [allRes, testimonialsRes, areasRes] = await Promise.all([
-      db.from('properties').select('*').eq('active', true).eq('has_img', true).order('sort_order', { ascending: true }),
+    const [allProps, testimonialsRes] = await Promise.all([
+      getAllPublicProperties(db),
       db.from('testimonials').select('*').eq('active', true),
-      db.from('properties').select('area').eq('active', true).neq('area', ''),
     ]);
 
-    const allProps    = allRes.data || [];
     const testimonials = testimonialsRes.data || [];
-    const areas = [...new Set((areasRes.data || []).map(r => r.area).filter(Boolean))].sort();
+    const areas = [...new Set(allProps.map(r => r.area || r.loc).filter(Boolean))].sort();
 
-    // hero slides: prioritise named IDs, fall back to first 6 featured
+    // hero slides: prioritise named IDs, fall back to featured or top active
     const heroSlides = heroIds
       .map(id => allProps.find(p => p.id === id))
       .filter(Boolean)
       .slice(0, 6);
-    const finalHero = heroSlides.length ? heroSlides : allProps.filter(p => p.featured).slice(0, 6);
-
-    const allListings = allProps;
+    const finalHero = heroSlides.length ? heroSlides : allProps.filter(p => p.featured || p.img_hero).slice(0, 6);
 
     res.render('index', {
       title: 'Real Estate & Property in Udupi & Mangaluru | RichManAssets',
@@ -222,8 +301,8 @@ router.get('/', async (req, res) => {
       canonical: canon('/'),
       siteUrl: SITE,
       heroSlides: finalHero,
-      featured: allProps.filter(p => p.featured).slice(0, 6),
-      allListings,
+      featured: allProps.filter(p => p.featured || p.has_img).slice(0, 6),
+      allListings: allProps,
       categories: CATEGORIES,
       services: withIcons(SERVICES),
       testimonials,
@@ -236,28 +315,15 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ── PROPERTIES BROWSE ────────────────────────────────────────────
+// ── PROPERTIES BROWSE & SEARCH ───────────────────────────────────
 router.get('/properties', async (req, res) => {
   try {
     const db = getDB();
-    const { listing, area, type, budget } = req.query;
+    const { listing, area, type, budget, q } = req.query;
 
-    let query = db.from('properties').select('*').eq('active', true);
-    if (listing) query = query.eq('listing', listing);
-    if (area)    query = query.eq('area', area);
-    if (type)    query = query.eq('type', type);
-    if (budget === 'u30')   query = query.lt('price_val', 3000000);
-    if (budget === '30-1c') query = query.gte('price_val', 3000000).lt('price_val', 10000000);
-    if (budget === '1-5c')  query = query.gte('price_val', 10000000).lt('price_val', 50000000);
-    if (budget === '5c')    query = query.gte('price_val', 50000000);
-    query = query.order('featured', { ascending: false }).order('sort_order', { ascending: true }).order('price_val', { ascending: false });
-
-    const [propsRes, areasRes] = await Promise.all([
-      query,
-      db.from('properties').select('area').eq('active', true).neq('area', ''),
-    ]);
-    const properties = propsRes.data || [];
-    const areas = [...new Set((areasRes.data || []).map(r => r.area).filter(Boolean))].sort();
+    const allProps = await getAllPublicProperties(db);
+    const properties = searchAndSortProperties(allProps, { listing, area, type, budget, q });
+    const areas = [...new Set(allProps.map(r => r.area || r.loc).filter(Boolean))].sort();
 
     const seo = buildPropertiesSEO({ listing, area, type, budget, count: properties.length });
 
@@ -287,7 +353,7 @@ router.get('/properties', async (req, res) => {
       canonical: canon(seo.canonPath),
       siteUrl: SITE,
       jsonld: JSON.stringify([itemList, breadcrumbLdList]),
-      properties, areas, q: { listing, area, type, budget },
+      properties, areas, q: { listing, area, type, budget, q: q || '' },
       promoBanner: getPromoBanner(),
     });
   } catch (err) {
@@ -314,21 +380,55 @@ router.get('/property/:id', async (req, res) => {
 
     if (!p) return res.status(404).render('404', { title: 'Property not found | RichManAssets' });
 
+    let agentInfo = {
+      id: null,
+      name: 'RichManAssets Advisory',
+      company_name: 'RichManAssets Corporate Office',
+      phone: '9036001234',
+      city: p.loc || 'Udupi & Mangaluru',
+      is_verified: true,
+      rera_number: 'PRM/KA/RERA/1251/309/PR/210312/004012'
+    };
 
-    const [similarRes, nextRes] = await Promise.all([
-      db.from('properties').select('*').neq('id', p.id).eq('active', true).eq('type', p.type).eq('has_img', true).limit(3),
-      p.next_id ? db.from('properties').select('*').eq('id', p.next_id).eq('active', true).maybeSingle() : Promise.resolve({ data: null }),
-    ]);
-    const similar = similarRes.data || [];
-    const next = nextRes.data || null;
+    if (p.agent_id) {
+      const { data: foundAgent } = await db.from('agents').select('id, name, company_name, phone, city, is_verified, rera_number').eq('id', p.agent_id).maybeSingle();
+      if (foundAgent) {
+        agentInfo = foundAgent;
+      }
+    }
+
+    const rawDate = p.published_at || p.created_at;
+    let postedDate = 'Recently';
+    let postedAgo = 'Recently posted';
+    if (rawDate) {
+      const d = new Date(rawDate);
+      postedDate = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const diffMs = Date.now() - d.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays === 0) postedAgo = 'Posted today';
+      else if (diffDays === 1) postedAgo = 'Posted 1 day ago';
+      else if (diffDays > 1 && diffDays < 30) postedAgo = `Posted ${diffDays} days ago`;
+      else postedAgo = `Posted on ${postedDate}`;
+    }
+
+    const allPublic = await getAllPublicProperties(db);
+    const similar = allPublic
+      .filter(item => item.id !== p.id && item.type && item.type.toLowerCase().trim() === (p.type || '').toLowerCase().trim() && item.has_img)
+      .slice(0, 3);
+
+    let next = p.next_id ? (allPublic.find(item => item.id === p.next_id) || null) : null;
+    if (!next && allPublic.length > 1) {
+      const idx = allPublic.findIndex(item => item.id === p.id);
+      if (idx !== -1) {
+        next = allPublic[(idx + 1) % allPublic.length];
+      }
+    }
 
     const absImg = (u) => !u ? null : (u.indexOf('http') === 0 ? u : '/' + u.replace(/^\//, ''));
     let gallery = [];
     try { gallery = JSON.parse(p.gallery || '[]'); } catch (_) { }
     const rawImages = [p.img_hero, p.img_card, ...gallery].map(absImg).filter(Boolean);
     const allImages = [...new Set(rawImages)];
-
-
 
     const listLabel = p.listing === 'rent' ? 'for Rent' : p.listing === 'lease' ? 'for Lease' : 'for Sale';
     const pageTitle = `${p.name} — ${p.type} ${listLabel} in ${p.loc} | RichManAssets`;
@@ -343,7 +443,7 @@ router.get('/property/:id', async (req, res) => {
       'image': allImages,
       'category': `${p.type} for ${p.listing === 'rent' ? 'Rent' : p.listing === 'lease' ? 'Lease' : 'Sale'} in ${p.loc}`,
       'brand': { '@type': 'Brand', 'name': 'RichManAssets' },
-      'seller': { '@type': 'RealEstateAgent', '@id': `${SITE}/#organization`, 'name': 'RichManAssets', 'telephone': '+919036001234', 'url': SITE },
+      'seller': { '@type': 'RealEstateAgent', '@id': `${SITE}/#organization`, 'name': agentInfo.name || 'RichManAssets', 'telephone': '+91' + (agentInfo.phone || '9036001234'), 'url': SITE },
       'offers': {
         '@type': 'Offer', 'price': p.price_val || undefined, 'priceCurrency': 'INR',
         'availability': 'https://schema.org/InStock', 'url': canon('/property/' + p.id),
@@ -369,11 +469,75 @@ router.get('/property/:id', async (req, res) => {
       ogType: 'product', ogImage: allImages[0],
       jsonld: JSON.stringify([productLd, breadcrumbLd]),
       p, similar, next, allImages,
+      agentInfo, postedDate, postedAgo,
       promoBanner: getPromoBanner(),
     });
   } catch (err) {
     console.error('[/property/:id] error:', err.message);
     res.status(500).render('404', { title: 'Error | RichManAssets' });
+  }
+});
+
+// ── PROPERTY ENQUIRY SUBMISSION (AJAX) ───────────────────────────
+router.post('/property/:id/enquire', async (req, res) => {
+  try {
+    const db = getDB();
+    const { name, phone, email, message } = req.body;
+    const propId = req.params.id;
+
+    if (!name || !phone) {
+      return res.status(400).json({ ok: false, error: 'Name and Phone number are required.' });
+    }
+
+    let p = null;
+    const { data: adminProp } = await db.from('properties').select('*').eq('id', propId).maybeSingle();
+    p = adminProp;
+    if (!p) {
+      const { data: agentProp } = await db.from('agent_properties').select('*').eq('id', propId).maybeSingle();
+      p = agentProp;
+    }
+
+    if (!p) {
+      return res.status(404).json({ ok: false, error: 'Property not found.' });
+    }
+
+    let agentId = p.agent_id || null;
+    let agentPhone = '9036001234';
+    let agentName = 'RichManAssets Advisory';
+
+    if (agentId) {
+      const { data: ag } = await db.from('agents').select('id, name, phone').eq('id', agentId).maybeSingle();
+      if (ag) {
+        if (ag.phone) agentPhone = ag.phone;
+        if (ag.name) agentName = ag.name;
+      }
+    }
+
+    const insertObj = {
+      agent_id: agentId,
+      property_id: p.id,
+      property_name: p.name,
+      name: name.trim(),
+      phone: phone.trim(),
+      email: (email || '').trim(),
+      message: (message || '').trim(),
+      property_ref: p.name + ' (' + p.loc + ')',
+      page: '/property/' + p.id,
+      created_at: new Date().toISOString(),
+    };
+
+    await db.from('enquiries').insert(insertObj);
+
+    // Formulate WhatsApp message
+    const cleanPhone = agentPhone.replace(/\D/g, '');
+    const fullPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+    const waText = `Hi ${agentName}, I am interested in "${p.name}" (${p.loc}, ${p.price}).\n\nBuyer: ${name.trim()}\nPhone: ${phone.trim()}${email ? '\nEmail: ' + email.trim() : ''}${message ? '\nMessage: ' + message.trim() : ''}`;
+    const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodeURIComponent(waText)}`;
+
+    res.json({ ok: true, whatsappUrl, msg: 'Enquiry submitted successfully!' });
+  } catch (err) {
+    console.error('[/property/:id/enquire] error:', err.message);
+    res.status(500).json({ ok: false, error: 'Failed to process enquiry. Please try again.' });
   }
 });
 

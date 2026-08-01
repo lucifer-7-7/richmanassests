@@ -103,12 +103,12 @@ router.get('/logout', (req, res) => { req.session.destroy(() => res.redirect('/a
 router.get('/', requireAdmin, async (req, res) => {
   try {
     const db = getDB();
-    const [propsRes, enquiriesRes, agentPropsRes, agentsRes, ordersRes, logsRes] = await Promise.all([
+    const [propsRes, enquiriesRes, agentPropsRes, agentsRes, orders, logsRes] = await Promise.all([
       db.from('properties').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
       db.from('enquiries').select('*').order('created_at', { ascending: false }).limit(100),
       db.from('agent_properties').select('*, agents(name, email, phone)').neq('status', 'deleted').order('created_at', { ascending: false }).limit(50),
       db.from('agents').select('id, name, email, is_active, created_at').order('created_at', { ascending: false }).limit(20),
-      db.from('payment_orders').select('*, agents(name, email), agent_properties(name, loc)').order('created_at', { ascending: false }).limit(100),
+      getAllOrders(200),
       db.from('webhook_logs').select('*').order('received_at', { ascending: false }).limit(100),
     ]);
 
@@ -116,7 +116,6 @@ router.get('/', requireAdmin, async (req, res) => {
     const enquiries   = enquiriesRes.data || [];
     const agentProps  = agentPropsRes.data || [];
     const agents      = agentsRes.data || [];
-    const orders      = ordersRes.data || [];
     const logs        = logsRes.data || [];
 
     const { count: totalProps }   = await db.from('properties').select('*', { count: 'exact', head: true });
@@ -132,15 +131,61 @@ router.get('/', requireAdmin, async (req, res) => {
       agentPublished: totalAgentP || 0, totalAgents: totalAgents || 0,
     };
 
+    // ── Analytics: fetch page_views aggregates ────────────────────
+    let analytics = { totalAll: 0, today: 0, week: 0, month: 0, devices: [], browsers: [], oses: [], countries: [], cities: [], topPages: [], topReferrers: [] };
+    try {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      const weekStart  = new Date(now - 7 * 86400000).toISOString();
+      const monthStart = new Date(now - 30 * 86400000).toISOString();
+
+      // Fetch recent 2000 page views for client-side aggregation (efficient for moderate traffic)
+      const pvRes = await db.from('page_views').select('path, device_type, browser, os, country, city, referrer, created_at')
+        .order('created_at', { ascending: false }).limit(2000);
+      const pvRows = pvRes.data || [];
+
+      const { count: pvTotal } = await db.from('page_views').select('*', { count: 'exact', head: true });
+      const { count: pvToday } = await db.from('page_views').select('*', { count: 'exact', head: true }).gte('created_at', todayStart);
+      const { count: pvWeek }  = await db.from('page_views').select('*', { count: 'exact', head: true }).gte('created_at', weekStart);
+      const { count: pvMonth } = await db.from('page_views').select('*', { count: 'exact', head: true }).gte('created_at', monthStart);
+
+      analytics.totalAll = pvTotal || 0;
+      analytics.today    = pvToday || 0;
+      analytics.week     = pvWeek  || 0;
+      analytics.month    = pvMonth || 0;
+
+      // Aggregate breakdowns from recent rows
+      function topN(arr, key, n) {
+        const map = {};
+        arr.forEach(r => { const v = r[key] || 'Unknown'; map[v] = (map[v] || 0) + 1; });
+        return Object.entries(map).sort((a,b) => b[1] - a[1]).slice(0, n).map(([k,v]) => ({ label: k, count: v }));
+      }
+      analytics.devices     = topN(pvRows, 'device_type', 5);
+      analytics.browsers    = topN(pvRows, 'browser', 8);
+      analytics.oses        = topN(pvRows, 'os', 8);
+      analytics.countries   = topN(pvRows, 'country', 10);
+      analytics.cities      = topN(pvRows, 'city', 10);
+      analytics.topPages    = topN(pvRows, 'path', 10);
+
+      // Top referrers (clean up)
+      const refRows = pvRows.filter(r => r.referrer && !r.referrer.includes(req.get('host') || 'richmanassets'));
+      analytics.topReferrers = topN(refRows, 'referrer', 10).map(r => {
+        try { r.label = new URL(r.label).hostname; } catch(_) {}
+        return r;
+      });
+    } catch (aErr) {
+      console.error('[admin/analytics]', aErr.message);
+    }
+
     res.render('admin/dashboard', {
       flash: req.session.flash || null,
-      properties, enquiries, agentProps, agents, orders, logs, stats,
+      properties, enquiries, agentProps, agents, orders, logs, stats, analytics,
       promoBanner: getPromoBanner(),
     });
     delete req.session.flash;
   } catch (err) {
     console.error('[admin/dashboard]', err.message);
-    res.render('admin/dashboard', { flash: { type:'err', msg: err.message }, properties:[], enquiries:[], agentProps:[], agents:[], orders:[], logs:[], stats:{} });
+    res.render('admin/dashboard', { flash: { type:'err', msg: err.message }, properties:[], enquiries:[], agentProps:[], agents:[], orders:[], logs:[], stats:{}, analytics:{ totalAll:0, today:0, week:0, month:0, devices:[], browsers:[], oses:[], countries:[], cities:[], topPages:[], topReferrers:[] } });
   }
 });
 
@@ -345,6 +390,55 @@ router.get('/payments', requireAdmin, async (req, res) => {
     delete req.session.flash;
   } catch (err) {
     res.render('admin/payments', { title: 'Payments | Admin', flash: { type:'err', msg: err.message }, orders: [] });
+  }
+});
+
+router.get('/invoices/:orderId', requireAdmin, async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const orders = await getAllOrders(500);
+    let order = orders.find(o => 
+      String(o.internal_order_id) === String(orderId) || 
+      String(o.id) === String(orderId) || 
+      String(o.cashfree_order_id) === String(orderId) || 
+      String(o.razorpay_order_id) === String(orderId) ||
+      String(o.property_id) === String(orderId)
+    );
+
+    if (!order) {
+      const db = getDB();
+      const { data: dbOrder } = await db
+        .from('payment_orders')
+        .select('*, agents(*), agent_properties(*)')
+        .or(`internal_order_id.eq.${orderId},cashfree_order_id.eq.${orderId},id.eq.${orderId}`)
+        .maybeSingle();
+      if (dbOrder) {
+        order = dbOrder;
+        if (!order.internal_order_id) order.internal_order_id = order.cashfree_order_id || String(order.id);
+      }
+    }
+
+    if (!order) return res.status(404).send('Invoice not found');
+
+    let agent = order.agents;
+    if (!agent && order.agent_id) {
+      try {
+        const db = getDB();
+        const { data: ag } = await db.from('agents').select('*').eq('id', order.agent_id).maybeSingle();
+        if (ag) agent = ag;
+      } catch (_) {}
+    }
+    if (!agent) agent = { name: 'Agent #' + (order.agent_id || ''), email: 'agent@richmanassets.com' };
+
+    res.render('agent/invoice-detail', {
+      title: `Invoice ${order.internal_order_id || order.id} | RichManAssets`,
+      robots: 'noindex,nofollow',
+      order,
+      agent,
+    });
+  } catch (err) {
+    console.error('[admin/invoices/:orderId]', err.message);
+    res.status(500).send('Server error loading invoice');
   }
 });
 

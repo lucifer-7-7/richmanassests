@@ -29,10 +29,17 @@ router.get('/', requireAgent, async (req, res) => {
 router.get('/:orderId', requireAgent, async (req, res) => {
   try {
     const orders = await getAgentOrders(req.agent.id);
-    const order = orders.find(o => o.internal_order_id === req.params.orderId);
+    const orderId = req.params.orderId;
+    const order = orders.find(o => 
+      String(o.internal_order_id) === String(orderId) || 
+      String(o.id) === String(orderId) || 
+      String(o.razorpay_order_id) === String(orderId) || 
+      String(o.cashfree_order_id) === String(orderId) ||
+      String(o.property_id) === String(orderId)
+    );
     if (!order) return res.status(404).send('Invoice not found');
     res.render('agent/invoice-detail', {
-      title: `Invoice ${order.internal_order_id} | RichManAssets`,
+      title: `Invoice ${order.internal_order_id || order.id} | RichManAssets`,
       robots: 'noindex,nofollow',
       order,
       agent: req.agent,

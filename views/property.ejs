@@ -48,35 +48,30 @@
   <% 
     var pImgs = (typeof allImages !== 'undefined' && allImages.length) ? allImages : [p.img_hero, p.img_card].filter(Boolean); 
     var fallbackMain = pImgs.length ? pImgs[0] : '/assets/img/site-hero.jpg';
-  %>
-  <% if (pImgs.length === 0) { %>
+  %>  <% if (pImgs.length === 0) { %>
   <div style="background:#F6F2EC;border:1px solid #EAE4DC;border-radius:16px;padding:60px 24px;text-align:center;color:#78716C;margin-bottom:32px;">
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px;opacity:0.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
     <div style="font-size:15px;font-weight:600">No property photos uploaded</div>
   </div>
   <% } else { %>
-  <div class="dt-gallery-grid dt-count-<%= Math.min(pImgs.length, 5) %>">
-    <div class="dt-gallery-main" onclick="openLightbox(0)">
-      <img src="<%= pImgs[0] %>" alt="<%= p.name %> Main Hero" loading="eager">
-    </div>
-
-    <% if (pImgs.length > 1) { %>
-    <div class="dt-gallery-side dt-side-count-<%= Math.min(pImgs.length - 1, 4) %>">
-      <% pImgs.slice(1, 5).forEach(function(imgUrl, idx) { %>
-      <div class="dt-gallery-tile" onclick="openLightbox(<%= idx + 1 %>)">
-        <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 2 %>" loading="lazy">
-        <% if (idx === 3 && pImgs.length > 5) { %>
-        <div class="dt-more-overlay">+<%= pImgs.length - 5 %> Photos</div>
-        <% } %>
-      </div>
-      <% }); %>
-    </div>
-    <% } %>
-    <button class="btn-all-photos" onclick="openLightbox(0)">
+  <div class="dt-hero-single-wrap" style="position:relative;margin-bottom:14px;border-radius:16px;overflow:hidden;border:1px solid var(--line-soft);cursor:pointer;background:var(--paper-2);" onclick="openLightbox(0)">
+    <img src="<%= pImgs[0] %>" alt="<%= p.name %> Main Hero" style="width:100%;height:auto;max-height:580px;object-fit:cover;display:block;">
+    <button class="btn-all-photos" onclick="event.stopPropagation();openLightbox(0)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       View All Photos (<%= pImgs.length %>)
     </button>
   </div>
+  
+  <% if (pImgs.length > 1) { %>
+  <div class="dt-horizontal-thumbs" style="display:flex;justify-content:center;gap:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:6px;">
+    <% pImgs.forEach(function(imgUrl, idx) { %>
+    <div class="dt-thumb-tile" onclick="openLightbox(<%= idx %>)" style="flex:0 0 160px;border-radius:10px;overflow:hidden;border:2px solid <%= idx === 0 ? 'var(--gold-deep)' : 'var(--line-soft)' %>;cursor:pointer;position:relative;">
+      <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 1 %>" style="width:100%;height:auto;object-fit:cover;display:block;">
+      <span style="position:absolute;bottom:6px;right:6px;font-family:var(--f-mono);font-size:9px;color:#FFF;background:rgba(10,9,6,0.65);padding:2px 6px;border-radius:4px;"><%= idx + 1 %></span>
+    </div>
+    <% }); %>
+  </div>
+  <% } %>
   <% } %>
 
 </section>
@@ -220,6 +215,50 @@ document.addEventListener('keydown', function(e) {
 
     <aside class="buy-card-wrap reveal">
       <div class="buy-card">
+        <!-- AGENT PROFILE CARD (MINIMAL) -->
+        <div class="agent-profile-card">
+          <div class="apc-header">
+            <div class="apc-avatar">
+              <%= (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.name) ? agentInfo.name.charAt(0).toUpperCase() : 'R' %>
+            </div>
+            <div class="apc-details">
+              <div class="apc-name">
+                <%= (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.name) ? agentInfo.name : 'RichManAssets Advisory' %>
+                <% if (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.is_verified) { %>
+                <span class="apc-badge" title="Verified Agent">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  Verified
+                </span>
+                <% } %>
+              </div>
+              <div class="apc-sub">
+                <%= (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.company_name) ? agentInfo.company_name : 'Licensed Real Estate Partner' %>
+              </div>
+              <% if (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.rera_number) { %>
+              <div class="apc-rera">RERA: <%= agentInfo.rera_number %></div>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="apc-posted">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span><%= (typeof postedAgo !== 'undefined' && postedAgo) ? postedAgo : 'Recently listed' %></span>
+          </div>
+
+          <div class="apc-actions">
+            <button type="button" class="btn btn-dark apc-contact-btn" onclick="openEnquiryModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span>Contact Agent</span>
+            </button>
+            <a class="btn apc-wa-btn" href="https://wa.me/91<%= (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.phone) ? agentInfo.phone.replace(/\D/g,'') : '9036001234' %>?text=<%= encodeURIComponent('Hi ' + ((typeof agentInfo !== 'undefined' && agentInfo && agentInfo.name) ? agentInfo.name : 'RichManAssets') + ', I am interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+              <span>WhatsApp</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="bc-divider" style="height:1px;background:var(--line-soft);margin:20px 0;"></div>
+
         <div class="bc-price"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
         <div class="bc-sub"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %> · <%= p.type %> · <%= p.loc %></div>
         <% if (p.emi_val && p.listing === 'sale') { %>
@@ -228,16 +267,7 @@ document.addEventListener('keydown', function(e) {
           <div style="text-align:right"><div class="v"><%= p.emi_val %><small style="font-size:12px;font-weight:400">/mo</small></div><a href="/loans">Calculate yours →</a></div>
         </div>
         <% } %>
-        <div class="bc-actions">
-          <a class="btn btn-dark" href="/contact?ref=<%= p.id %>"><span>Book a visit</span><span class="arr">→</span></a>
-          <div class="bc-row">
-            <a class="bc-wa btn" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I\'m interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener" style="gap:8px"><span>WhatsApp</span></a>
-            <a class="bc-call" href="tel:+919036001234" aria-label="Call">
-              <svg viewBox="0 0 32 32" fill="currentColor"><path d="M6 3h5l2 6-3 2c1 3 3 5 6 6l2-3 6 2v5c0 1-1 2-2 2C13 26 6 19 6 6c0-1 0-3 0-3z"/></svg>
-            </a>
-          </div>
-        </div>
-        <p class="bc-note">Talk to a real specialist for a same-day reply. No pressure, honest advice on price &amp; papers.</p>
+        <p class="bc-note">Verified title &amp; direct agent contact with same-day response.</p>
       </div>
     </aside>
   </div>
@@ -290,8 +320,9 @@ document.addEventListener('keydown', function(e) {
     <% similar.forEach(function(s) { %>
     <a class="plist" href="/property/<%= s.id %>" style="text-decoration:none">
       <div class="ph">
-        <% if (s.img_card) { %>
-        <img src="/<%= s.img_card %>" alt="<%= s.name %>, <%= s.loc %>" loading="lazy">
+        <% var simImg = s.img_card || s.img_hero; %>
+        <% if (simImg) { %>
+        <img src="<%= simImg.startsWith('http') ? simImg : '/' + simImg.replace(/^\//, '') %>" alt="<%= s.name %>, <%= s.loc %>" loading="lazy">
         <% } else { %><div class="ph-placeholder"><span>Photos on request</span></div><% } %>
         <span class="badge <%= s.listing %>"><%= s.listing === 'sale' ? 'For Sale' : s.listing === 'rent' ? 'For Rent' : 'For Lease' %></span>
       </div>
@@ -312,7 +343,8 @@ document.addEventListener('keydown', function(e) {
 
 <% if (next) { %>
 <a class="p-next" href="/property/<%= next.id %>">
-  <% if (next.img_card) { %><img src="/<%= next.img_card %>" alt="<%= next.name %>, <%= next.loc %>" loading="lazy"><% } %>
+  <% var nextImg = next.img_card || next.img_hero; %>
+  <% if (nextImg) { %><img src="<%= nextImg.startsWith('http') ? nextImg : '/' + nextImg.replace(/^\//, '') %>" alt="<%= next.name %>, <%= next.loc %>" loading="lazy"><% } %>
   <div class="scrim"></div>
   <div class="nx">
     <span class="k">Next listing</span>
@@ -326,6 +358,47 @@ document.addEventListener('keydown', function(e) {
   <%- include('partials/footer') %>
 </div>
 
+<!-- ENQUIRY MODAL -->
+<div class="apc-modal" id="enquiryModal" aria-hidden="true">
+  <div class="apc-modal-overlay" onclick="closeEnquiryModal()"></div>
+  <div class="apc-modal-card">
+    <button type="button" class="apc-modal-close" onclick="closeEnquiryModal()" aria-label="Close">✕</button>
+    <div class="apc-modal-header">
+      <div class="apc-modal-badge">Direct Property Enquiry</div>
+      <h3>Contact Listing Agent</h3>
+      <p style="font-size:13px;color:var(--muted);margin-top:2px;">Inquiring about <strong><%= p.name %></strong> (<%= p.price %>)</p>
+    </div>
+
+    <form id="propertyEnquiryForm" onsubmit="handleEnquirySubmit(event)">
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Your Name <span style="color:#D93838">*</span></label>
+        <input type="text" name="name" id="enqName" required placeholder="e.g. Rahul Sharma" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Phone Number <span style="color:#D93838">*</span></label>
+        <input type="tel" name="phone" id="enqPhone" required placeholder="e.g. +91 98765 43210" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Email Address (Optional)</label>
+        <input type="email" name="email" id="enqEmail" placeholder="rahul@example.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;">
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Message</label>
+        <textarea name="message" id="enqMsg" placeholder="Hi, I would like to schedule a site visit or ask about documentation for this property." style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;min-height:75px;outline:none;resize:vertical;"></textarea>
+      </div>
+
+      <div id="enqStatus" style="display:none;font-size:13px;font-weight:600;margin-bottom:14px;padding:10px 14px;border-radius:8px;"></div>
+
+      <button type="submit" id="enqBtn" class="btn btn-dark" style="width:100%;justify-content:center;height:46px;border-radius:999px;font-weight:700;font-size:14px;">
+        <span>Send &amp; Open WhatsApp</span> &rarr;
+      </button>
+    </form>
+  </div>
+</div>
+
 <script>
   const nav = document.getElementById('nav');
   const onScroll = () => nav.classList.toggle('solid', window.scrollY > window.innerHeight * .72);
@@ -334,6 +407,69 @@ document.addEventListener('keydown', function(e) {
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
   }), { threshold: .1, rootMargin: '0px 0px -6% 0px' });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  function openEnquiryModal() {
+    document.getElementById('enquiryModal').classList.add('open');
+    document.getElementById('enquiryModal').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeEnquiryModal() {
+    document.getElementById('enquiryModal').classList.remove('open');
+    document.getElementById('enquiryModal').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  async function handleEnquirySubmit(e) {
+    e.preventDefault();
+    var btn = document.getElementById('enqBtn');
+    var statusDiv = document.getElementById('enqStatus');
+    btn.disabled = true;
+    btn.innerText = 'Submitting...';
+
+    try {
+      var resp = await fetch('/property/<%= p.id %>/enquire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('enqName').value,
+          phone: document.getElementById('enqPhone').value,
+          email: document.getElementById('enqEmail').value,
+          message: document.getElementById('enqMsg').value,
+        })
+      });
+      var data = await resp.json();
+      if (data.ok) {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#F0FAF4';
+        statusDiv.style.color = '#166534';
+        statusDiv.style.border = '1px solid #BBF7D0';
+        statusDiv.innerText = '✓ Enquiry saved! Opening WhatsApp...';
+        setTimeout(function() {
+          closeEnquiryModal();
+          if (data.whatsappUrl) {
+            window.open(data.whatsappUrl, '_blank');
+          }
+        }, 800);
+      } else {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#FDF2F2';
+        statusDiv.style.color = '#991B1B';
+        statusDiv.style.border = '1px solid #FECACA';
+        statusDiv.innerText = data.error || 'Failed to send enquiry';
+        btn.disabled = false;
+        btn.innerHTML = '<span>Send &amp; Open WhatsApp</span> &rarr;';
+      }
+    } catch (err) {
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = '#FDF2F2';
+      statusDiv.style.color = '#991B1B';
+      statusDiv.style.border = '1px solid #FECACA';
+      statusDiv.innerText = 'Network error. Please try again.';
+      btn.disabled = false;
+      btn.innerHTML = '<span>Send &amp; Open WhatsApp</span> &rarr;';
+    }
+  }
 </script>
 </body>
 </html>

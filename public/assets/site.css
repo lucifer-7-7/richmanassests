@@ -320,3 +320,10 @@ body.has-prop-cta .tabbar{display:none}
   transition: transform .2s var(--ease), background .2s var(--ease);
 }
 .promo-ad-content .promo-cta-btn:hover { background: var(--gold); transform: translateY(-2px); }
+
+/* Fallback for motion reveals: default to visible if JS fails or reduced motion is enabled */
+.fx { opacity: 1; transform: none; }
+html.js-fx .fx { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  html.js-fx .fx { opacity: 1 !important; transform: none !important; }
+}

@@ -533,4 +533,47 @@ router.post('/profile', requireAgent, checkCsrf, async (req, res) => {
   res.redirect('/agent/profile');
 });
 
+// ────────────────────────── ENQUIRIES & LEADS ──────────────────────
+
+// GET /agent/enquiries
+router.get('/enquiries', requireAgent, async (req, res) => {
+  try {
+    const db = getDB();
+    const agentId = req.agent.id;
+
+    const { data: enquiriesData } = await db
+      .from('enquiries')
+      .select('*')
+      .eq('agent_id', agentId)
+      .order('created_at', { ascending: false });
+
+    const enquiries = enquiriesData || [];
+
+    res.render('agent/enquiries', {
+      title: 'Property Enquiries & Leads | RichManAssets Agent',
+      robots: 'noindex,nofollow',
+      agent: req.agent,
+      enquiries,
+      flash: req.session.agentFlash || null,
+      csrfToken: genCsrf(req),
+    });
+    delete req.session.agentFlash;
+  } catch (err) {
+    console.error('[/agent/enquiries] error:', err.message);
+    res.redirect('/agent/dashboard');
+  }
+});
+
+// POST /agent/enquiries/:id/read
+router.post('/enquiries/:id/read', requireAgent, checkCsrf, async (req, res) => {
+  try {
+    const db = getDB();
+    await db.from('enquiries').update({ is_read: true }).eq('id', req.params.id).eq('agent_id', req.agent.id);
+    req.session.agentFlash = { type: 'ok', msg: 'Lead marked as read.' };
+  } catch (err) {
+    req.session.agentFlash = { type: 'err', msg: err.message };
+  }
+  res.redirect('/agent/enquiries');
+});
+
 module.exports = router;

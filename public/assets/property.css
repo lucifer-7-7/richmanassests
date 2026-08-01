@@ -302,3 +302,86 @@ body.has-prop-cta .tabbar { display: none !important; }
 .p-next .nx h3 .arr{font-size:.7em;transition:transform .3s var(--ease)}
 .p-next:hover .nx h3 .arr{transform:translateX(6px)}
 .p-next .nx .loc{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:rgba(247,244,237,.76)}
+
+/* ── AGENT PROFILE CARD (MINIMAL) ────────────────────────────────── */
+.agent-profile-card {
+  margin-bottom: 20px;
+}
+.apc-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+.apc-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--ink); color: #FFFFFF;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-sans); font-size: 16px; font-weight: 800;
+  flex-shrink: 0; border: 2px solid var(--paper-2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.apc-details { flex: 1; min-width: 0; }
+.apc-name {
+  font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.25;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.apc-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #F0FAF4; color: #15803D; border: 1px solid #BBF7D0;
+  font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px;
+  letter-spacing: .02em; text-transform: uppercase;
+}
+.apc-sub { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+.apc-rera { font-family: var(--f-mono); font-size: 10px; color: var(--gold-deep); margin-top: 2px; letter-spacing: .04em; }
+
+.apc-posted {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  background: var(--paper-2); padding: 8px 12px; border-radius: 10px;
+  border: 1px solid var(--line-soft); margin-bottom: 16px;
+}
+
+.apc-actions { display: flex; gap: 8px; }
+.apc-contact-btn {
+  flex: 1; justify-content: center; height: 42px; font-size: 13px; font-weight: 700;
+  border-radius: 999px; background: var(--ink); color: #FFFFFF;
+}
+.apc-wa-btn {
+  flex: 1; justify-content: center; height: 42px; font-size: 13px; font-weight: 700;
+  border-radius: 999px; background: #25D366; color: #FFFFFF; border: none;
+}
+.apc-wa-btn:hover { background: #20BD5A; color: #FFFFFF; }
+
+/* ── ENQUIRY MODAL ───────────────────────────────────────────────── */
+.apc-modal {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.apc-modal.open { display: flex; }
+.apc-modal-overlay {
+  position: absolute; inset: 0; background: rgba(10,9,6,0.55);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.apc-modal-card {
+  position: relative; z-index: 2; width: 100%; max-width: 440px;
+  background: #FFFFFF; border-radius: 20px; padding: 28px 24px;
+  border: 1px solid var(--line); box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  animation: apcModalIn .25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes apcModalIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.apc-modal-close {
+  position: absolute; top: 20px; right: 20px; background: none; border: none;
+  font-size: 18px; color: var(--muted); cursor: pointer; padding: 4px; border-radius: 50%;
+  transition: color .15s;
+}
+.apc-modal-close:hover { color: var(--ink); }
+.apc-modal-badge {
+  display: inline-block; font-family: var(--f-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--gold-deep);
+  background: #FBF6EB; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px;
+}
+.apc-modal-header h3 {
+  font-family: var(--f-display); font-size: 22px; font-weight: 500; color: var(--ink);
+  letter-spacing: -.01em; margin-bottom: 2px;
+}

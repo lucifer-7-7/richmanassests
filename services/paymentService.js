@@ -242,7 +242,7 @@ async function getAllOrders(limit = 100) {
 
     // Ensure agent details and order IDs are populated on all items
     for (const o of allOrders) {
-      if (!o.internal_order_id) o.internal_order_id = o.razorpay_order_id || o.id;
+      if (!o.internal_order_id) o.internal_order_id = o.razorpay_order_id || o.cashfree_order_id || String(o.id);
       if (!o.agents && o.agent_id) {
         try {
           const { data: ag } = await db.from('agents').select('name, email, phone').eq('id', o.agent_id).maybeSingle();
@@ -253,6 +253,14 @@ async function getAllOrders(limit = 100) {
         try {
           const { data: prop } = await db.from('agent_properties').select('name, loc, type').eq('id', o.property_id).maybeSingle();
           if (prop) o.agent_properties = prop;
+        } catch (_) {}
+      }
+      if (!o.agent_properties && o.metadata) {
+        try {
+          const meta = typeof o.metadata === 'string' ? JSON.parse(o.metadata) : o.metadata;
+          if (meta && (meta.property_name || meta.name)) {
+            o.agent_properties = { name: meta.property_name || meta.name, loc: meta.loc || '' };
+          }
         } catch (_) {}
       }
     }

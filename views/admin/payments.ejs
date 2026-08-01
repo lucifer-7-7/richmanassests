@@ -38,7 +38,7 @@
     <td><span class="badge b-<%=o.status%>"><%=o.status.toUpperCase()%></span></td>
     <td style="font-size:12px;color:#888"><%=new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})%></td>
     <td>
-      <a href="/agent/invoices/<%= o.internal_order_id %>" target="_blank" style="display:inline-block;padding:4px 10px;border:1px solid #17150F;border-radius:6px;color:#17150F;text-decoration:none;font-size:11px;font-weight:600;">View Invoice</a>
+      <a href="/admin/invoices/<%= o.internal_order_id %>" target="_blank" style="display:inline-block;padding:4px 10px;border:1px solid #17150F;border-radius:6px;color:#17150F;text-decoration:none;font-size:11px;font-weight:600;">View Invoice</a>
     </td>
   </tr>
   <% }) %>

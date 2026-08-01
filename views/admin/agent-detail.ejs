@@ -218,7 +218,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--i
           <td><span class="badge <%= o.status === 'paid' || o.status === 'captured' ? 'active' : 'draft' %>"><%= o.status.toUpperCase() %></span></td>
           <td><%= new Date(o.created_at).toLocaleDateString('en-IN') %></td>
           <td>
-            <a href="/agent/invoices/<%= o.internal_order_id || o.razorpay_order_id || o.id %>" target="_blank" style="display:inline-block;padding:4px 10px;border:1px solid #17150F;border-radius:6px;color:#17150F;text-decoration:none;font-size:11px;font-weight:600;">View GST Invoice</a>
+            <a href="/admin/invoices/<%= o.internal_order_id || o.razorpay_order_id || o.id %>" target="_blank" style="display:inline-block;padding:4px 10px;border:1px solid #17150F;border-radius:6px;color:#17150F;text-decoration:none;font-size:11px;font-weight:600;">View GST Invoice</a>
           </td>
         </tr>
         <% }) %>

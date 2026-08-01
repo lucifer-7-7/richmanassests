@@ -174,25 +174,28 @@ body{font-family:'Inter','Plus Jakarta Sans',system-ui,sans-serif;background:var
 .list-controls input{flex:1;min-width:180px}
 
 /* ── ENQUIRY CARDS ── */
-.enq-list{display:flex;flex-direction:column;gap:14px}
-.enq-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:grid;gap:12px;position:relative;transition:border-color .18s}
-.enq-card.unread{border-left:5px solid var(--gold);background:#FFFCF5}
-.enq-card .enq-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.enq-card .enq-name{font-weight:800;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:10px}
-.enq-card .enq-date{font-size:12px;color:var(--muted);font-weight:500;flex:none}
-.enq-card .enq-contact{display:flex;gap:14px;flex-wrap:wrap;padding-bottom:2px}
-.enq-card .enq-contact a{font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:5px;background:var(--surface2);padding:5px 12px;border-radius:var(--r-pill)}
-.enq-card .enq-contact a:hover{background:var(--ink);color:#FFFFFF}
-.enq-card .enq-body{font-size:14px;color:var(--ink-2);line-height:1.6;background:var(--surface2);padding:12px 16px;border-radius:var(--r-sm);margin:2px 0;font-weight:500}
-.enq-card .enq-tags{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.enq-tag{font-size:11px;font-weight:700;padding:4px 12px;border-radius:var(--r-pill);background:var(--surface2);color:var(--ink-2);font-family:inherit}
-.enq-tag.prop{background:var(--gold-bg);color:var(--gold);font-weight:700;text-decoration:none}
-.enq-tag.unread-badge{background:var(--gold);color:#fff;font-weight:800}
-.enq-card .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;padding-top:12px;border-top:1px dashed var(--line)}
+.enq-list{display:flex;flex-direction:column;gap:12px}
+.enq-card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:16px 20px;display:grid;gap:10px;position:relative;}
+.enq-card.unread{border-left:4px solid var(--gold);background:#FAF9F6}
+.enq-card .enq-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.enq-card .enq-name{font-weight:700;font-size:14.5px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.enq-card .enq-date{font-size:12px;color:var(--muted);font-weight:500;}
+.enq-card .enq-contact{display:flex;gap:8px;flex-wrap:wrap;}
+.enq-card .enq-contact a{font-size:12.5px;font-weight:600;color:var(--ink-2);text-decoration:none;display:inline-flex;align-items:center;background:var(--surface2);padding:4px 10px;border-radius:6px;}
+.enq-card .enq-contact a:hover{background:var(--line);color:var(--ink)}
+.enq-card .enq-contact a.wa-btn{background:#EBF7EE;color:#206B36}
+.enq-card .enq-contact a.wa-btn:hover{background:#DCEFDE;color:#185329}
+.enq-card .enq-body{font-size:13.5px;color:var(--ink-2);line-height:1.5;background:var(--surface2);padding:10px 14px;border-radius:6px;margin:2px 0;font-weight:500;}
+.enq-card .enq-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.enq-tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:var(--surface2);color:var(--ink-2);font-family:inherit;text-transform:uppercase;letter-spacing:.02em}
+.enq-tag.prop{background:var(--gold-bg);color:var(--gold);font-weight:700;text-decoration:none;}
+.enq-tag.prop:hover{background:var(--gold);color:#FFF}
+.enq-tag.unread-badge{background:var(--gold);color:#fff;font-weight:800;font-size:9px;padding:2px 6px;letter-spacing:.04em}
+.enq-card .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:2px;padding-top:10px;border-top:1px solid var(--line2)}
 .enq-card .actions form{display:inline-flex}
-.enq-card .actions button{padding:8px 16px;border-radius:var(--r-pill);font-size:12.5px;font-weight:700;cursor:pointer;border:0;transition:.18s;display:inline-flex;align-items:center;gap:4px}
+.enq-card .actions button{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:0;display:inline-flex;align-items:center;}
 .enq-card .actions .btn-toggle{background:var(--surface2);color:var(--ink-2)}
-.enq-card .actions .btn-toggle:hover{background:var(--ink);color:#fff}
+.enq-card .actions .btn-toggle:hover{background:var(--line);color:var(--ink)}
 .enq-card .actions .btn-delete{background:var(--err-bg);color:var(--err)}
 .enq-card .actions .btn-delete:hover{background:var(--err);color:#fff}
 
@@ -292,6 +295,11 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
     <button onclick="showPanel('webhooks')" id="sb-webhooks">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 3a1 1 0 00-1.414-1.414l-3 3A1 1 0 0013 5.293V6H5a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-5a1 1 0 10-2 0v5H5V8h8v.707a1 1 0 001.707.707l3-3z" clip-rule="evenodd"/></svg>
       Webhook Logs
+    </button>
+    <button onclick="showPanel('analytics')" id="sb-analytics">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/></svg>
+      Analytics
+      <% if ((analytics.today||0) > 0) { %><span class="count-badge" style="background:#6366f1"><%= analytics.today %></span><% } %>
     </button>
     <button onclick="showPanel('settings')" id="sb-settings">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.532 1.532 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
@@ -523,16 +531,16 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             <div class="enq-date"><%= new Date(e.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) %></div>
           </div>
           <div class="enq-contact">
-            <% if (e.phone) { %><a href="tel:<%= e.phone %>">📞 <%= e.phone %></a><% } %>
-            <% if (e.email) { %><a href="mailto:<%= e.email %>">✉ <%= e.email %></a><% } %>
-            <% if (e.phone) { %><a href="https://wa.me/<%= e.phone.replace(/\D/g,'') %>" target="_blank" rel="noopener">💬 WhatsApp</a><% } %>
+            <% if (e.phone) { %><a href="tel:<%= e.phone %>">Phone: <%= e.phone %></a><% } %>
+            <% if (e.email) { %><a href="mailto:<%= e.email %>">Email: <%= e.email %></a><% } %>
+            <% if (e.phone) { %><a href="https://wa.me/<%= e.phone.replace(/\D/g,'') %>" class="wa-btn" target="_blank" rel="noopener">WhatsApp</a><% } %>
           </div>
           <% if (e.message || e.budget) { %>
           <div class="enq-body"><%= e.message || e.budget %></div>
           <% } %>
           <div class="enq-tags">
             <% if (e.service) { %><span class="enq-tag"><%= e.service %></span><% } %>
-            <% if (e.property_ref) { %><a class="enq-tag prop" href="/property/<%= e.property_ref %>" target="_blank">Ref: <%= e.property_ref %> ↗</a><% } %>
+            <% if (e.property_name || e.property_ref) { %><a class="enq-tag prop" href="/property/<%= e.property_id || e.property_ref %>" target="_blank">Property: <%= e.property_name || e.property_ref %> ↗</a><% } %>
             <% if (e.time_pref && e.time_pref !== 'Anytime') { %><span class="enq-tag">Call: <%= e.time_pref %></span><% } %>
           </div>
           <div class="actions">
@@ -676,8 +684,20 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
       <% if (!orders || orders.length === 0) { %>
       <div class="empty"><h3>No payments yet</h3><p>Payments will appear here once agents make transactions.</p></div>
       <% } else { %>
+      <div class="list-controls" style="margin-bottom:20px">
+        <input type="text" id="searchPayment" placeholder="Search by order ID, agent name, email or property…" oninput="filterPayments()">
+        <select id="filterPaymentStatus" onchange="filterPayments()">
+          <option value="">All statuses</option>
+          <option value="paid">Paid / Captured</option>
+          <option value="processing">Processing</option>
+          <option value="created">Created</option>
+          <option value="failed">Failed / Cancelled</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+
       <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)">
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)" id="paymentsGrid">
           <thead><tr style="background:var(--surface2)">
             <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Order ID</th>
             <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Agent</th>
@@ -689,26 +709,32 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Invoice</th>
           </tr></thead>
           <tbody>
-          <% orders.forEach(function(o) { %>
-          <tr style="border-bottom:1px solid var(--line2)">
+          <% orders.forEach(function(o) {
+               var agentName = o.agents ? o.agents.name : ('Agent #' + (o.agent_id||''));
+               var agentEmail = o.agents ? o.agents.email : '';
+               var propName = o.agent_properties ? o.agent_properties.name : 'Property Listing';
+               var searchStr = ((o.internal_order_id||'') + ' ' + agentName + ' ' + agentEmail + ' ' + propName).toLowerCase();
+               var st = (o.status || 'created').toLowerCase();
+          %>
+          <tr class="payment-row" style="border-bottom:1px solid var(--line2)" data-search="<%= searchStr %>" data-status="<%= st %>">
             <td style="padding:14px 18px;font-family:monospace;font-size:12px;font-weight:600"><%= o.internal_order_id %></td>
             <td style="padding:14px 18px">
-              <b><%= o.agents ? o.agents.name : ('Agent #' + o.agent_id) %></b>
-              <div style="font-size:11.5px;color:var(--muted)"><%= o.agents ? o.agents.email : '' %></div>
+              <b><%= agentName %></b>
+              <% if (agentEmail) { %><div style="font-size:11.5px;color:var(--muted)"><%= agentEmail %></div><% } %>
             </td>
-            <td style="padding:14px 18px;font-weight:600"><%= o.agent_properties ? o.agent_properties.name : 'Property Listing' %></td>
+            <td style="padding:14px 18px;font-weight:600"><%= propName %></td>
             <td style="padding:14px 18px;font-weight:800">₹<%= ((o.amount_paise||0)/100).toLocaleString('en-IN') %></td>
             <td style="padding:14px 18px"><%= o.payment_method || 'Online' %></td>
             <td style="padding:14px 18px">
-              <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;background:<%= o.status==='paid'?'#F0FAF4':o.status==='failed'?'#FDF2F2':'#FFF8EC' %>;color:<%= o.status==='paid'?'#2D8A56':o.status==='failed'?'#E03E3E':'#D97706' %>">
-                <%= o.status.toUpperCase() %>
+              <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;background:<%= (st==='paid'||st==='captured')?'#F0FAF4':(st==='failed'||st==='cancelled')?'#FDF2F2':(st==='processing'||st==='created')?'#FFF8EC':'#EFF6FF' %>;color:<%= (st==='paid'||st==='captured')?'#2D8A56':(st==='failed'||st==='cancelled')?'#E03E3E':(st==='processing'||st==='created')?'#D97706':'#1D4ED8' %>">
+                <%= st.toUpperCase() %>
               </span>
             </td>
             <td style="padding:14px 18px;font-size:12px;color:var(--muted);font-weight:500">
               <%= new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
             </td>
             <td style="padding:14px 18px;">
-              <a href="/agent/invoices/<%= o.internal_order_id %>" target="_blank" style="display:inline-flex;align-items:center;padding:4px 10px;border:1px solid var(--ink);border-radius:6px;color:var(--ink);text-decoration:none;font-size:11.5px;font-weight:600;">GST Invoice</a>
+              <a href="/admin/invoices/<%= o.internal_order_id %>" target="_blank" style="display:inline-flex;align-items:center;padding:4px 10px;border:1px solid var(--ink);border-radius:6px;color:var(--ink);text-decoration:none;font-size:11.5px;font-weight:600;">GST Invoice</a>
             </td>
           </tr>
           <% }) %>
@@ -836,6 +862,155 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
       <% } %>
     </div>
 
+    <!-- ANALYTICS PANEL -->
+    <div class="panel" id="panel-analytics">
+      <div class="page-head">
+        <h1>Traffic Analytics</h1>
+        <span style="font-size:13px;color:var(--muted);font-weight:500">Based on recent 2,000 page views</span>
+      </div>
+
+      <!-- Stat cards -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px">
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px">Today</div>
+          <div style="font-size:28px;font-weight:800;letter-spacing:-.02em"><%= analytics.today %></div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px">Last 7 Days</div>
+          <div style="font-size:28px;font-weight:800;letter-spacing:-.02em"><%= analytics.week %></div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px">Last 30 Days</div>
+          <div style="font-size:28px;font-weight:800;letter-spacing:-.02em"><%= analytics.month %></div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:6px">All Time</div>
+          <div style="font-size:28px;font-weight:800;letter-spacing:-.02em"><%= analytics.totalAll %></div>
+        </div>
+      </div>
+
+      <!-- Device + Browser + OS -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-bottom:28px">
+        <!-- Devices -->
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:14px">Device Type</div>
+          <% var devTotal = analytics.devices.reduce(function(s,d){return s+d.count},0) || 1; %>
+          <% analytics.devices.forEach(function(d) { var pct = Math.round(d.count/devTotal*100); %>
+          <div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:4px">
+              <span style="text-transform:capitalize"><%= d.label %></span>
+              <span style="color:var(--muted)"><%= pct %>% (<%= d.count %>)</span>
+            </div>
+            <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:<%= pct %>%;background:<%= d.label==='mobile'?'#6366f1':d.label==='desktop'?'#10b981':'#f59e0b' %>;border-radius:99px;transition:width .3s"></div>
+            </div>
+          </div>
+          <% }) %>
+          <% if (analytics.devices.length === 0) { %><div style="color:var(--muted);font-size:13px">No data yet</div><% } %>
+        </div>
+
+        <!-- Browsers -->
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:14px">Browser</div>
+          <% var brTotal = analytics.browsers.reduce(function(s,d){return s+d.count},0) || 1; %>
+          <% var brColors = ['#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#64748b']; %>
+          <% analytics.browsers.forEach(function(d,i) { var pct = Math.round(d.count/brTotal*100); %>
+          <div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:4px">
+              <span><%= d.label %></span>
+              <span style="color:var(--muted)"><%= pct %>% (<%= d.count %>)</span>
+            </div>
+            <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:<%= pct %>%;background:<%= brColors[i%brColors.length] %>;border-radius:99px;transition:width .3s"></div>
+            </div>
+          </div>
+          <% }) %>
+          <% if (analytics.browsers.length === 0) { %><div style="color:var(--muted);font-size:13px">No data yet</div><% } %>
+        </div>
+
+        <!-- OS -->
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:14px">Operating System</div>
+          <% var osTotal = analytics.oses.reduce(function(s,d){return s+d.count},0) || 1; %>
+          <% var osColors = ['#10b981','#6366f1','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#64748b']; %>
+          <% analytics.oses.forEach(function(d,i) { var pct = Math.round(d.count/osTotal*100); %>
+          <div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:4px">
+              <span><%= d.label %></span>
+              <span style="color:var(--muted)"><%= pct %>% (<%= d.count %>)</span>
+            </div>
+            <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:<%= pct %>%;background:<%= osColors[i%osColors.length] %>;border-radius:99px;transition:width .3s"></div>
+            </div>
+          </div>
+          <% }) %>
+          <% if (analytics.oses.length === 0) { %><div style="color:var(--muted);font-size:13px">No data yet</div><% } %>
+        </div>
+      </div>
+
+      <!-- Top Pages + Locations -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-bottom:28px">
+        <!-- Top Pages -->
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:14px">Top Pages</div>
+          <table style="width:100%;border-collapse:collapse">
+            <% analytics.topPages.forEach(function(pg) { %>
+            <tr style="border-bottom:1px solid var(--line2)">
+              <td style="padding:8px 4px;font-size:13px;font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= pg.label %>"><%= pg.label %></td>
+              <td style="padding:8px 4px;font-size:13px;font-weight:700;text-align:right;color:var(--ink-2)"><%= pg.count %></td>
+            </tr>
+            <% }) %>
+          </table>
+          <% if (analytics.topPages.length === 0) { %><div style="color:var(--muted);font-size:13px">No data yet</div><% } %>
+        </div>
+
+        <!-- Countries -->
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:14px">Top Countries</div>
+          <table style="width:100%;border-collapse:collapse">
+            <% analytics.countries.forEach(function(c) { %>
+            <tr style="border-bottom:1px solid var(--line2)">
+              <td style="padding:8px 4px;font-size:13px;font-weight:500"><%= c.label %></td>
+              <td style="padding:8px 4px;font-size:13px;font-weight:700;text-align:right;color:var(--ink-2)"><%= c.count %></td>
+            </tr>
+            <% }) %>
+          </table>
+          <% if (analytics.countries.length === 0) { %><div style="color:var(--muted);font-size:13px">No data yet</div><% } %>
+        </div>
+      </div>
+
+      <!-- Cities + Referrers -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-bottom:28px">
+        <!-- Cities -->
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:14px">Top Cities</div>
+          <table style="width:100%;border-collapse:collapse">
+            <% analytics.cities.forEach(function(c) { %>
+            <tr style="border-bottom:1px solid var(--line2)">
+              <td style="padding:8px 4px;font-size:13px;font-weight:500"><%= c.label %></td>
+              <td style="padding:8px 4px;font-size:13px;font-weight:700;text-align:right;color:var(--ink-2)"><%= c.count %></td>
+            </tr>
+            <% }) %>
+          </table>
+          <% if (analytics.cities.length === 0) { %><div style="color:var(--muted);font-size:13px">No data yet</div><% } %>
+        </div>
+
+        <!-- Referrers -->
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:14px">Top Referrers</div>
+          <table style="width:100%;border-collapse:collapse">
+            <% analytics.topReferrers.forEach(function(r) { %>
+            <tr style="border-bottom:1px solid var(--line2)">
+              <td style="padding:8px 4px;font-size:13px;font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= r.label %>"><%= r.label %></td>
+              <td style="padding:8px 4px;font-size:13px;font-weight:700;text-align:right;color:var(--ink-2)"><%= r.count %></td>
+            </tr>
+            <% }) %>
+          </table>
+          <% if (analytics.topReferrers.length === 0) { %><div style="color:var(--muted);font-size:13px">No external referrer data yet</div><% } %>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -913,6 +1088,27 @@ function filterEnquiries() {
     const textMatch = !q || textContent.includes(q);
     const statusMatch = !f || (f === 'unread' && card.dataset.read === '0') || (f === 'read' && card.dataset.read === '1');
     card.style.display = textMatch && statusMatch ? '' : 'none';
+  });
+}
+
+// filter payments
+function filterPayments() {
+  const searchInput = document.getElementById('searchPayment');
+  const statusSelect = document.getElementById('filterPaymentStatus');
+  if (!searchInput || !statusSelect) return;
+  const q = searchInput.value.toLowerCase().trim();
+  const st = statusSelect.value.toLowerCase().trim();
+  document.querySelectorAll('#paymentsGrid .payment-row').forEach(row => {
+    const textMatch = !q || (row.dataset.search || '').includes(q);
+    const rowStatus = row.dataset.status || '';
+    let statusMatch = !st;
+    if (st === 'paid') statusMatch = (rowStatus === 'paid' || rowStatus === 'captured');
+    else if (st === 'failed') statusMatch = (rowStatus === 'failed' || rowStatus === 'cancelled');
+    else if (st === 'processing') statusMatch = (rowStatus === 'processing');
+    else if (st === 'created') statusMatch = (rowStatus === 'created');
+    else if (st === 'refunded') statusMatch = (rowStatus === 'refunded' || rowStatus === 'refund_initiated');
+    
+    row.style.display = textMatch && statusMatch ? '' : 'none';
   });
 }
 

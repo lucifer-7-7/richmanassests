@@ -38,7 +38,7 @@
 <div style="margin-bottom:32px">
   <a href="/agent/listings/new" class="btn btn-primary btn-lg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-    Add New Listing — ₹<%= feeRs %>
+    Add New Listing
   </a>
 </div>
 
@@ -61,22 +61,40 @@
       <thead><tr><th>Property</th><th>Type</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
       <tbody>
       <% listings.forEach(function(l) { %>
-      <tr>
-        <td>
-          <div class="prop-name"><%= l.name.length > 35 ? l.name.slice(0,35)+'…' : l.name %></div>
-          <div class="prop-loc"><%= l.loc %></div>
+      <tr class="ap-listing-item">
+        <td class="td-prop">
+          <div class="prop-info">
+            <div class="prop-name"><%= l.name.length > 35 ? l.name.slice(0,35)+'…' : l.name %></div>
+            <div class="prop-loc">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span><%= l.loc || 'Location not specified' %></span>
+            </div>
+          </div>
+          <div class="prop-mobile-status">
+            <span class="status-badge status-<%= l.status %>"><%= l.status.toUpperCase().replace(/_/g,' ') %></span>
+          </div>
         </td>
-        <td><%= l.type %></td>
-        <td><%= l.price %></td>
-        <td><span class="status-badge status-<%= l.status %>"><%= l.status.replace(/_/g,' ') %></span></td>
-        <td>
-          <% if (['draft','payment_failed'].includes(l.status)) { %>
-          <a href="/agent/listings/<%= l.id %>/pay" class="btn btn-primary btn-sm">Pay to Publish</a>
-          <% } else if (l.status === 'published') { %>
-          <a href="/property/<%= l.id %>" class="btn btn-outline btn-sm" target="_blank">View Live</a>
-          <% } else { %>
-          <span style="color:var(--muted);font-size:13px">—</span>
-          <% } %>
+        <td class="td-type">
+          <span class="m-label">Type</span>
+          <span class="m-val"><%= l.type %></span>
+        </td>
+        <td class="td-price">
+          <span class="m-label">Price</span>
+          <span class="m-val price-highlight"><%= (l.price && l.price.toString().startsWith('₹')) ? l.price : ('₹' + (l.price || 0)) %></span>
+        </td>
+        <td class="td-status-desktop">
+          <span class="status-badge status-<%= l.status %>"><%= l.status.toUpperCase().replace(/_/g,' ') %></span>
+        </td>
+        <td class="td-actions">
+          <div class="action-buttons-wrap">
+            <% if (['draft','payment_failed'].includes(l.status)) { %>
+            <a href="/agent/listings/<%= l.id %>/pay" class="btn btn-primary btn-sm">Pay to Publish</a>
+            <% } else if (l.status === 'published') { %>
+            <a href="/property/<%= l.id %>" class="btn btn-outline btn-sm" target="_blank">View Live</a>
+            <% } else { %>
+            <span style="color:var(--muted);font-size:13px">—</span>
+            <% } %>
+          </div>
         </td>
       </tr>
       <% }) %>

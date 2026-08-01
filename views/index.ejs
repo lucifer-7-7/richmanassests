@@ -202,6 +202,9 @@
       </div>
       <form class="search-fields" action="/properties" method="get">
         <input type="hidden" name="listing" id="sListing" value="sale">
+        <label class="sf"><span>Keyword</span>
+          <input type="text" name="q" placeholder="e.g. Villa, Kapu, Sea view..." style="background:transparent;border:none;outline:none;font:inherit;font-size:13.5px;color:var(--ink);width:100%;">
+        </label>
         <label class="sf"><span>Location</span>
           <select name="area">
             <option value="">Any location</option>
@@ -249,6 +252,33 @@
       </a>
       <% }) %>
     </div>
+  </div>
+</section>
+
+<!-- NEW LISTINGS — shows latest from both admin + agent -->
+<section class="sec-tight intro" data-screen-label="New listings">
+  <div class="intro-head">
+    <h2 class="fx">New <span class="it">listings.</span></h2>
+    <p class="sub fx">The latest properties added by our team and verified agents. Fresh opportunities across Udupi &amp; Mangaluru.</p>
+  </div>
+  <div class="rma-scroll-outer" id="newOuter">
+    <div class="rma-scroll-row" id="newGrid">
+      <% var newIdx = 0;
+         var sortedNew = allListings.slice().sort(function(a,b){
+           return new Date(b.created_at||0) - new Date(a.created_at||0);
+         });
+         sortedNew.forEach(function(p) {
+           if (newIdx >= 8) return; newIdx++;
+      %>
+      <%- include('partials/property-card', { p: p, filterCat: '' }) %>
+      <% }) %>
+    </div>
+  </div>
+  <div class="rma-show-more-wrap">
+    <a class="rma-btn-show" href="/properties">
+      Browse all properties
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
   </div>
 </section>
 

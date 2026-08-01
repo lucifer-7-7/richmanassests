@@ -45,18 +45,21 @@ CREATE TABLE IF NOT EXISTS properties (
 );
 
 CREATE TABLE IF NOT EXISTS enquiries (
-  id           BIGSERIAL PRIMARY KEY,
-  name         TEXT,
-  phone        TEXT,
-  email        TEXT,
-  service      TEXT,
-  budget       TEXT,
-  time_pref    TEXT,
-  message      TEXT,
-  property_ref TEXT,
-  page         TEXT,
-  is_read      BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id            BIGSERIAL PRIMARY KEY,
+  agent_id      BIGINT REFERENCES agents(id) ON DELETE SET NULL,
+  property_id   TEXT,
+  property_name TEXT,
+  name          TEXT,
+  phone         TEXT,
+  email         TEXT,
+  service       TEXT,
+  budget        TEXT,
+  time_pref     TEXT,
+  message       TEXT,
+  property_ref  TEXT,
+  page          TEXT,
+  is_read       BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS testimonials (
@@ -206,3 +209,24 @@ CREATE TABLE IF NOT EXISTS agent_verifications (
   used       BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ── TRAFFIC ANALYTICS ─────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS page_views (
+  id          BIGSERIAL PRIMARY KEY,
+  path        TEXT NOT NULL,
+  referrer    TEXT,
+  user_agent  TEXT,
+  device_type TEXT,
+  browser     TEXT,
+  os          TEXT,
+  ip          TEXT,
+  country     TEXT,
+  city        TEXT,
+  region      TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_pv_path    ON page_views(path);
+CREATE INDEX IF NOT EXISTS idx_pv_created ON page_views(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pv_device  ON page_views(device_type);
+CREATE INDEX IF NOT EXISTS idx_pv_country ON page_views(country);

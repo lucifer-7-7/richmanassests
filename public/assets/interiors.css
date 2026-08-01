@@ -18,6 +18,10 @@
   font-size: clamp(15px, 1.4vw, 18px);
   line-height: 1.65; color: var(--ink-2);
   max-width: 58ch; margin: 0 auto 28px;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
 /* Stats Pill Row */

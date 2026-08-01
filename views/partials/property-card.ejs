@@ -1,7 +1,8 @@
-<article class="plist fx" data-filter-cat="<%= typeof filterCat !== 'undefined' ? filterCat : '' %>" onclick="if (!event.target.closest('a')) window.location.href='/property/<%= p.id %>';" style="cursor:pointer;">
+<article class="plist fx" data-filter-cat="<%= typeof filterCat !== 'undefined' ? filterCat : '' %>">
   <a href="/property/<%= p.id %>" class="ph" style="display:block;text-decoration:none;color:inherit;">
-    <% if (p.has_img && p.img_card) { %>
-    <img src="<%= p.img_card.startsWith('http') ? p.img_card : '/' + p.img_card %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
+    <% var cardImg = p.img_card || p.img_hero; %>
+    <% if (cardImg) { %>
+    <img src="<%= cardImg.startsWith('http') ? cardImg : '/' + cardImg %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
     <% } else { %>
     <div class="ph-placeholder"><span>Photos on request</span></div>
     <% } %>

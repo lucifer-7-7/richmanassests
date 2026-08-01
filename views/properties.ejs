@@ -61,32 +61,33 @@
 <div class="filter-bar">
   <div class="wrap">
     <form class="filter-form" action="/properties" method="get" id="filterForm">
+      <input type="text" name="q" placeholder="Search keyword, name, area..." value="<%= (typeof q !== 'undefined' && q && q.q) ? q.q : '' %>" style="min-width:180px;flex:1 1 180px;">
       <select name="listing">
-        <option value="" <%= !q.listing ? 'selected' : '' %>>All types</option>
-        <option value="sale" <%= q.listing === 'sale' ? 'selected' : '' %>>For Sale</option>
-        <option value="rent" <%= q.listing === 'rent' ? 'selected' : '' %>>For Rent</option>
-        <option value="lease" <%= q.listing === 'lease' ? 'selected' : '' %>>For Lease</option>
+        <option value="" <%= (!q || !q.listing) ? 'selected' : '' %>>All types</option>
+        <option value="sale" <%= (q && q.listing === 'sale') ? 'selected' : '' %>>For Sale</option>
+        <option value="rent" <%= (q && q.listing === 'rent') ? 'selected' : '' %>>For Rent</option>
+        <option value="lease" <%= (q && q.listing === 'lease') ? 'selected' : '' %>>For Lease</option>
       </select>
       <select name="area">
         <option value="">Any location</option>
         <% areas.forEach(function(a) { %>
-        <option <%= q.area === a ? 'selected' : '' %>><%= a %></option>
+        <option <%= (q && q.area === a) ? 'selected' : '' %>><%= a %></option>
         <% }) %>
       </select>
       <select name="type">
         <option value="">All property types</option>
         <% ['Villa','House','Estate','Apartment','Plot','Commercial','Agricultural'].forEach(function(t) { %>
-        <option <%= q.type === t ? 'selected' : '' %>><%= t %></option>
+        <option <%= (q && q.type === t) ? 'selected' : '' %>><%= t %></option>
         <% }) %>
       </select>
       <select name="budget">
         <option value="">Any budget</option>
-        <option value="u30" <%= q.budget === 'u30' ? 'selected' : '' %>>Under ₹30 L</option>
-        <option value="30-1c" <%= q.budget === '30-1c' ? 'selected' : '' %>>₹30 L – ₹1 Cr</option>
-        <option value="1-5c" <%= q.budget === '1-5c' ? 'selected' : '' %>>₹1 Cr – ₹5 Cr</option>
-        <option value="5c" <%= q.budget === '5c' ? 'selected' : '' %>>₹5 Cr+</option>
+        <option value="u30" <%= (q && q.budget === 'u30') ? 'selected' : '' %>>Under ₹30 L</option>
+        <option value="30-1c" <%= (q && q.budget === '30-1c') ? 'selected' : '' %>>₹30 L – ₹1 Cr</option>
+        <option value="1-5c" <%= (q && q.budget === '1-5c') ? 'selected' : '' %>>₹1 Cr – ₹5 Cr</option>
+        <option value="5c" <%= (q && q.budget === '5c') ? 'selected' : '' %>>₹5 Cr+</option>
       </select>
-      <button class="btn-apply" type="submit">Apply</button>
+      <button class="btn-apply" type="submit">Search</button>
       <a class="btn-reset" href="/properties">Reset</a>
     </form>
   </div>

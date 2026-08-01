@@ -27,7 +27,7 @@ app.use((req, res, next) => {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https://res.cloudinary.com https://upload.wikimedia.org blob:",
-    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://sdk.cashfree.com https://*.supabase.co",
+    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://sdk.cashfree.com https://*.supabase.co http://ip-api.com",
     "frame-src https://checkout.razorpay.com https://api.razorpay.com https://sdk.cashfree.com",
     "worker-src 'none'",
   ].join('; '));
@@ -79,6 +79,10 @@ app.use((req, res, next) => {
   delete req.session.flash;
   next();
 });
+
+// ── Page-view analytics (fire-and-forget, never blocks) ──────────
+const trackVisit = require('./middleware/trackVisit');
+app.use(trackVisit);
 
 // ── Routes ────────────────────────────────────────────────────────
 app.use('/',               require('./routes/public'));
