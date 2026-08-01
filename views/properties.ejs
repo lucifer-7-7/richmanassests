@@ -52,9 +52,9 @@
 
 <section class="mkt-hero">
   <div class="wrap">
-    <span class="kicker" style="color:var(--accent-soft);margin-bottom:16px;display:block"><span class="gold-line"></span>All listings</span>
-    <h1>Find your <span class="it">perfect</span><br>property.</h1>
-    <p>Villas, estates, plots and commercial across coastal Karnataka and the Western Ghats.</p>
+    <span class="kicker" style="color:var(--accent-soft);margin-bottom:16px;display:block"><span class="gold-line"></span><%= (typeof headerKicker !== 'undefined' && headerKicker) ? headerKicker : 'All Listings' %></span>
+    <h1><%- (typeof headerTitle !== 'undefined' && headerTitle) ? headerTitle : 'Find your <span class="it">property.</span>' %></h1>
+    <p><%= (typeof headerDesc !== 'undefined' && headerDesc) ? headerDesc : 'Explore verified villas, apartments, plots & commercial spaces.' %></p>
   </div>
 </section>
 

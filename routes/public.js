@@ -99,19 +99,19 @@ function applyBudgetFilter(q, budget) {
   return q;
 }
 
-function buildPropertiesSEO({ listing, area, type, budget, count = 0 }) {
+function buildPropertiesSEO({ listing, area, type, budget, q, count = 0 }) {
   const listingMap = {
     rent: { verb: 'for Rent', noun: 'Rentals' },
-    lease: { verb: 'for Lease', noun: 'Lease Listings' },
+    lease: { verb: 'for Lease', noun: 'Lease Properties' },
     sale: { verb: 'for Sale', noun: 'Properties for Sale' },
   };
   const typeMap = {
-    Apartment: { plural: 'Apartments & Flats', singular: 'Apartment', keyword: 'flats' },
-    Villa: { plural: 'Villas & Luxury Homes', singular: 'Villa', keyword: 'villas' },
-    Plot: { plural: 'Plots & Layout Sites', singular: 'Plot', keyword: 'plots' },
-    Commercial: { plural: 'Commercial Spaces & Offices', singular: 'Commercial Property', keyword: 'commercial spaces' },
-    Agricultural: { plural: 'Agricultural Land & Farms', singular: 'Agricultural Land', keyword: 'agricultural land' },
-    House: { plural: 'Independent Houses & Villas', singular: 'House', keyword: 'houses' },
+    Apartment: { plural: 'Apartments', singular: 'Apartment', keyword: 'flats' },
+    Villa: { plural: 'Villas', singular: 'Villa', keyword: 'villas' },
+    Plot: { plural: 'Plots', singular: 'Plot', keyword: 'plots' },
+    Commercial: { plural: 'Commercial Spaces', singular: 'Commercial Property', keyword: 'commercial spaces' },
+    Agricultural: { plural: 'Agricultural Land', singular: 'Agricultural Land', keyword: 'agricultural land' },
+    House: { plural: 'Houses', singular: 'House', keyword: 'houses' },
   };
   const budgetMap = {
     'u30': 'Under ₹30 Lakhs',
@@ -121,35 +121,67 @@ function buildPropertiesSEO({ listing, area, type, budget, count = 0 }) {
   };
 
   const lInfo = listingMap[listing] || { verb: 'for Sale & Rent', noun: 'Properties' };
-  const tInfo = typeMap[type] || { plural: 'Properties', singular: 'Property', keyword: 'property' };
+  const tInfo = typeMap[type] || (type ? { plural: `${type}s`, singular: type, keyword: String(type).toLowerCase() } : { plural: 'Properties', singular: 'Property', keyword: 'property' });
   const targetArea = area ? String(area).trim() : '';
+  const searchQ = q ? String(q).trim() : '';
+  const countText = count > 0 ? `${count} verified` : 'verified';
 
   let pageTitle = '';
-  if (targetArea && type && listing) {
+  let headerKicker = '';
+  let headerTitle = '';
+  let headerDesc = '';
+
+  if (searchQ) {
+    headerKicker = `Search · "${searchQ}"`;
+    headerTitle = `Properties for <span class="it">"${searchQ}".</span>`;
+    headerDesc = `Showing ${countText} properties matching "${searchQ}".`;
+    pageTitle = `Search: "${searchQ}" — Properties | RichManAssets`;
+  } else if (targetArea && type && listing) {
+    headerKicker = `${targetArea} · ${type} · ${lInfo.verb}`;
+    headerTitle = `${tInfo.plural} ${lInfo.verb} in <span class="it">${targetArea}.</span>`;
+    headerDesc = `Showing ${countText} ${tInfo.plural.toLowerCase()} ${lInfo.verb.toLowerCase()} in ${targetArea}.`;
     pageTitle = `${tInfo.plural} ${lInfo.verb} in ${targetArea} | RichManAssets`;
   } else if (targetArea && type) {
-    pageTitle = `${tInfo.plural} in ${targetArea} — Buy & Rent | RichManAssets`;
+    headerKicker = `${targetArea} · ${type}`;
+    headerTitle = `${tInfo.plural} in <span class="it">${targetArea}.</span>`;
+    headerDesc = `Showing ${countText} ${tInfo.plural.toLowerCase()} in ${targetArea}.`;
+    pageTitle = `${tInfo.plural} in ${targetArea} | RichManAssets`;
   } else if (targetArea && listing) {
+    headerKicker = `${targetArea} · ${lInfo.noun}`;
+    headerTitle = `Properties ${lInfo.verb} in <span class="it">${targetArea}.</span>`;
+    headerDesc = `Showing ${countText} properties ${lInfo.verb.toLowerCase()} in ${targetArea}.`;
     pageTitle = `Properties ${lInfo.verb} in ${targetArea} | RichManAssets`;
   } else if (targetArea) {
+    headerKicker = `${targetArea} · Real Estate`;
+    headerTitle = `Properties in <span class="it">${targetArea}.</span>`;
+    headerDesc = `Showing ${countText} properties available in ${targetArea}.`;
     pageTitle = `Real Estate & Property in ${targetArea} | RichManAssets`;
   } else if (type && listing) {
-    pageTitle = `${tInfo.plural} ${lInfo.verb} in Udupi & Mangaluru | RichManAssets`;
+    headerKicker = `${type} · ${lInfo.noun}`;
+    headerTitle = `${tInfo.plural} <span class="it">${lInfo.verb}.</span>`;
+    headerDesc = `Showing ${countText} ${tInfo.plural.toLowerCase()} ${lInfo.verb.toLowerCase()}.`;
+    pageTitle = `${tInfo.plural} ${lInfo.verb} | RichManAssets`;
   } else if (type) {
-    pageTitle = `${tInfo.plural} for Sale & Rent in Coastal Karnataka | RichManAssets`;
+    headerKicker = `${type} Listings`;
+    headerTitle = `${tInfo.plural} for <span class="it">Sale & Rent.</span>`;
+    headerDesc = `Showing ${countText} ${tInfo.plural.toLowerCase()} available.`;
+    pageTitle = `${tInfo.plural} for Sale & Rent | RichManAssets`;
   } else if (listing) {
-    pageTitle = `Properties ${lInfo.verb} in Udupi, Manipal & Mangaluru | RichManAssets`;
+    headerKicker = `${lInfo.noun}`;
+    headerTitle = `Properties <span class="it">${lInfo.verb}.</span>`;
+    headerDesc = `Showing ${countText} properties ${lInfo.verb.toLowerCase()}.`;
+    pageTitle = `Properties ${lInfo.verb} | RichManAssets`;
   } else {
-    pageTitle = `Properties for Sale & Rent in Udupi & Mangaluru | RichManAssets`;
+    headerKicker = `All Properties`;
+    headerTitle = `Find your <span class="it">property.</span>`;
+    headerDesc = `Explore verified villas, apartments, plots & commercial spaces.`;
+    pageTitle = `Properties for Sale & Rent in Udupi | RichManAssets`;
   }
 
   if (budgetMap[budget]) {
+    headerKicker += ` · ${budgetMap[budget]}`;
     pageTitle = `${pageTitle.replace(' | RichManAssets', '')} (${budgetMap[budget]}) | RichManAssets`;
   }
-
-  const locText = targetArea ? `in ${targetArea}` : 'in Udupi, Manipal, Mangaluru & coastal Karnataka';
-  const countText = count > 0 ? `${count} verified` : 'verified';
-  const pageDesc = `Browse ${countText} ${tInfo.plural.toLowerCase()} ${lInfo.verb.toLowerCase()} ${locText}. Title-checked properties with photos, pricing, direct enquiry & loan support.`;
 
   const locKw = targetArea ? targetArea.toLowerCase() : 'udupi';
   const typeKw = tInfo.keyword;
@@ -160,33 +192,25 @@ function buildPropertiesSEO({ listing, area, type, budget, count = 0 }) {
     `property in ${locKw}`,
     `${tInfo.singular.toLowerCase()} in ${locKw}`,
     `buy ${typeKw} ${locKw}`,
-    `rent ${typeKw} ${locKw}`,
     `${locKw} property portal`,
-    `verified ${typeKw} ${locKw}`,
-    `richman assets ${locKw}`,
-    `coastal karnataka real estate`,
   ]);
 
-  if (targetArea && targetArea.toLowerCase() !== 'udupi') {
-    kwSet.add(`property in udupi`);
-    kwSet.add(`real estate mangaluru`);
-  }
-  if (budgetMap[budget]) {
-    kwSet.add(`budget ${typeKw} ${locKw}`);
-    kwSet.add(`affordable property ${locKw}`);
+  if (searchQ) {
+    kwSet.add(`${searchQ.toLowerCase()} property`);
   }
 
   const keywords = Array.from(kwSet).join(', ');
   const geoPlace = targetArea ? `${targetArea}, Karnataka, India` : 'Udupi, Karnataka, India';
 
   let queryParams = [];
+  if (searchQ) queryParams.push(`q=${encodeURIComponent(searchQ)}`);
   if (listing) queryParams.push(`listing=${encodeURIComponent(listing)}`);
   if (targetArea) queryParams.push(`area=${encodeURIComponent(targetArea)}`);
   if (type) queryParams.push(`type=${encodeURIComponent(type)}`);
   if (budget) queryParams.push(`budget=${encodeURIComponent(budget)}`);
   const canonPath = '/properties' + (queryParams.length ? '?' + queryParams.join('&') : '');
 
-  return { pageTitle, pageDesc, keywords, geoPlace, canonPath };
+  return { pageTitle, pageDesc: headerDesc, keywords, geoPlace, canonPath, headerKicker, headerTitle, headerDesc };
 }
 
 // Helper to fetch all active admin properties AND published agent properties with error safety
@@ -325,7 +349,7 @@ router.get('/properties', async (req, res) => {
     const properties = searchAndSortProperties(allProps, { listing, area, type, budget, q });
     const areas = [...new Set(allProps.map(r => r.area || r.loc).filter(Boolean))].sort();
 
-    const seo = buildPropertiesSEO({ listing, area, type, budget, count: properties.length });
+    const seo = buildPropertiesSEO({ listing, area, type, budget, q, count: properties.length });
 
     const itemList = {
       '@context': 'https://schema.org', '@type': 'ItemList',
@@ -354,6 +378,9 @@ router.get('/properties', async (req, res) => {
       siteUrl: SITE,
       jsonld: JSON.stringify([itemList, breadcrumbLdList]),
       properties, areas, q: { listing, area, type, budget, q: q || '' },
+      headerKicker: seo.headerKicker,
+      headerTitle: seo.headerTitle,
+      headerDesc: seo.headerDesc,
       promoBanner: getPromoBanner(),
     });
   } catch (err) {
