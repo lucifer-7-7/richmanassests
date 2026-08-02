@@ -69,24 +69,24 @@
 
   <!-- SPECS -->
   <div class="form-section">
-    <div class="form-section-title">Specifications</div>
+    <div class="form-section-title">Specifications & Features</div>
     <div class="form-row">
-      <div class="form-group">
-        <label for="pbeds">Bedrooms</label>
-        <input type="text" id="pbeds" name="beds" placeholder="e.g. 3 BHK or —" value="<%= prop && prop.beds ? prop.beds : '' %>">
+      <div class="form-group" id="grp-beds">
+        <label for="pbeds" id="lbl-beds">Bedrooms / Key Feature</label>
+        <input type="text" id="pbeds" name="beds" placeholder="e.g. 3 BHK" value="<%= prop && prop.beds ? prop.beds : '' %>">
       </div>
-      <div class="form-group">
-        <label for="pbaths">Bathrooms</label>
-        <input type="text" id="pbaths" name="baths" placeholder="e.g. 2 or —" value="<%= prop && prop.baths ? prop.baths : '' %>">
+      <div class="form-group" id="grp-baths">
+        <label for="pbaths" id="lbl-baths">Bathrooms / Dimensions</label>
+        <input type="text" id="pbaths" name="baths" placeholder="e.g. 2" value="<%= prop && prop.baths ? prop.baths : '' %>">
       </div>
-      <div class="form-group">
-        <label for="psqft">Area (sqft / Acres)</label>
+      <div class="form-group" id="grp-sqft">
+        <label for="psqft" id="lbl-sqft">Area (sqft / Acres / Cents)</label>
         <input type="text" id="psqft" name="sqft" placeholder="e.g. 1,800 sqft" value="<%= prop && prop.sqft ? prop.sqft : '' %>">
       </div>
     </div>
     <div class="form-group">
-      <label for="psubtype">Sub-type</label>
-      <input type="text" id="psubtype" name="subtype" placeholder="e.g. Beachfront, Gated community" value="<%= prop && prop.subtype ? prop.subtype : '' %>">
+      <label for="psubtype">Sub-type / Key Highlight</label>
+      <input type="text" id="psubtype" name="subtype" placeholder="e.g. Beachfront, Gated community, Corner Plot, Main Road facing" value="<%= prop && prop.subtype ? prop.subtype : '' %>">
     </div>
   </div>
 
@@ -214,6 +214,53 @@
       } catch(_) {}
     }, 400);
   });
+
+  // Dynamic property type field adaptation
+  var ptype = document.getElementById('ptype');
+  var lblBeds = document.getElementById('lbl-beds');
+  var inputBeds = document.getElementById('pbeds');
+  var lblBaths = document.getElementById('lbl-baths');
+  var inputBaths = document.getElementById('pbaths');
+  var lblSqft = document.getElementById('lbl-sqft');
+  var inputSqft = document.getElementById('psqft');
+
+  function updateFieldLabels() {
+    if (!ptype) return;
+    var v = (ptype.value || '').toLowerCase();
+    if (v.includes('plot') || v.includes('land')) {
+      if (lblBeds) lblBeds.textContent = 'Road Width / Facing';
+      if (inputBeds) inputBeds.placeholder = 'e.g. 30 ft road · East facing';
+      if (lblBaths) lblBaths.textContent = 'Plot Dimensions';
+      if (inputBaths) inputBaths.placeholder = 'e.g. 40 x 60 ft';
+      if (lblSqft) lblSqft.textContent = 'Plot Area (sqft / Cents)';
+      if (inputSqft) inputSqft.placeholder = 'e.g. 10 Cents (4,356 sqft)';
+    } else if (v.includes('agricultural')) {
+      if (lblBeds) lblBeds.textContent = 'Irrigation Source';
+      if (inputBeds) inputBeds.placeholder = 'e.g. Borewell & River stream';
+      if (lblBaths) lblBaths.textContent = 'Soil Type / Crop';
+      if (inputBaths) inputBaths.placeholder = 'e.g. Red fertile soil · Coconut plantation';
+      if (lblSqft) lblSqft.textContent = 'Land Area (Acres)';
+      if (inputSqft) inputSqft.placeholder = 'e.g. 3.5 Acres';
+    } else if (v.includes('commercial') || v.includes('office') || v.includes('shop')) {
+      if (lblBeds) lblBeds.textContent = 'Floor Level / Lift';
+      if (inputBeds) inputBeds.placeholder = 'e.g. 2nd Floor (Lift available)';
+      if (lblBaths) lblBaths.textContent = 'Washrooms / Parking';
+      if (inputBaths) inputBaths.placeholder = 'e.g. 2 Washrooms · 4 Car parking';
+      if (lblSqft) lblSqft.textContent = 'Carpet Area (sqft)';
+      if (inputSqft) inputSqft.placeholder = 'e.g. 2,200 sqft';
+    } else {
+      if (lblBeds) lblBeds.textContent = 'Bedrooms';
+      if (inputBeds) inputBeds.placeholder = 'e.g. 3 BHK';
+      if (lblBaths) lblBaths.textContent = 'Bathrooms';
+      if (inputBaths) inputBaths.placeholder = 'e.g. 3';
+      if (lblSqft) lblSqft.textContent = 'Built-up Area (sqft)';
+      if (inputSqft) inputSqft.placeholder = 'e.g. 2,400 sqft';
+    }
+  }
+  if (ptype) {
+    ptype.addEventListener('change', updateFieldLabels);
+    updateFieldLabels();
+  }
 
   // Clear local draft cache on form submission
   form.addEventListener('submit', function() {

@@ -38,8 +38,9 @@ router.use((req, res, next) => {
         return res.status(403).render('404', { title: '403 Forbidden — RichManAssets' });
       }
     } else {
-      console.warn('[CSRF Blocked] Missing Origin and Referer headers');
-      return res.status(403).render('404', { title: '403 Forbidden — RichManAssets' });
+      // Both Origin and Referer absent — allow through.
+      // SameSite=lax cookie policy already prevents cross-site form POSTs.
+      // Blocking here causes false logouts on same-origin admin forms.
     }
   }
   next();
@@ -92,10 +93,12 @@ router.post('/login', (req, res) => {
   const { password } = req.body;
   if (bcrypt.compareSync(password || '', getHash())) {
     req.session.admin = true;
-    return res.redirect('/admin');
+    return req.session.save((err) => {
+      res.redirect('/admin');
+    });
   }
   req.session.flash = 'Incorrect password.';
-  res.redirect('/admin/login');
+  req.session.save(() => res.redirect('/admin/login'));
 });
 router.get('/logout', (req, res) => { req.session.destroy(() => res.redirect('/admin/login')); });
 
@@ -103,13 +106,14 @@ router.get('/logout', (req, res) => { req.session.destroy(() => res.redirect('/a
 router.get('/', requireAdmin, async (req, res) => {
   try {
     const db = getDB();
-    const [propsRes, enquiriesRes, agentPropsRes, agentsRes, orders, logsRes] = await Promise.all([
+    const [propsRes, enquiriesRes, agentPropsRes, agentsRes, orders, logsRes, auditRes] = await Promise.all([
       db.from('properties').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
       db.from('enquiries').select('*').order('created_at', { ascending: false }).limit(100),
       db.from('agent_properties').select('*, agents(name, email, phone)').neq('status', 'deleted').order('created_at', { ascending: false }).limit(50),
       db.from('agents').select('id, name, email, is_active, created_at').order('created_at', { ascending: false }).limit(20),
-      getAllOrders(200),
+      getAllOrders(500),
       db.from('webhook_logs').select('*').order('received_at', { ascending: false }).limit(100),
+      db.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100),
     ]);
 
     const properties  = propsRes.data  || [];
@@ -117,6 +121,7 @@ router.get('/', requireAdmin, async (req, res) => {
     const agentProps  = agentPropsRes.data || [];
     const agents      = agentsRes.data || [];
     const logs        = logsRes.data || [];
+    const auditLogs   = auditRes.data || [];
 
     const { count: totalProps }   = await db.from('properties').select('*', { count: 'exact', head: true });
     const { count: activeProps }  = await db.from('properties').select('*', { count: 'exact', head: true }).eq('active', true);
@@ -179,13 +184,13 @@ router.get('/', requireAdmin, async (req, res) => {
 
     res.render('admin/dashboard', {
       flash: req.session.flash || null,
-      properties, enquiries, agentProps, agents, orders, logs, stats, analytics,
+      properties, enquiries, agentProps, agents, orders, logs, auditLogs, stats, analytics,
       promoBanner: getPromoBanner(),
     });
     delete req.session.flash;
   } catch (err) {
     console.error('[admin/dashboard]', err.message);
-    res.render('admin/dashboard', { flash: { type:'err', msg: err.message }, properties:[], enquiries:[], agentProps:[], agents:[], orders:[], logs:[], stats:{}, analytics:{ totalAll:0, today:0, week:0, month:0, devices:[], browsers:[], oses:[], countries:[], cities:[], topPages:[], topReferrers:[] } });
+    res.render('admin/dashboard', { flash: { type:'err', msg: err.message }, properties:[], enquiries:[], agentProps:[], agents:[], orders:[], logs:[], auditLogs:[], stats:{}, analytics:{ totalAll:0, today:0, week:0, month:0, devices:[], browsers:[], oses:[], countries:[], cities:[], topPages:[], topReferrers:[] } });
   }
 });
 
@@ -212,7 +217,8 @@ router.post('/property', requireAdmin, upload.fields([
       type: body.type, listing: body.listing, price: body.price,
       price_val: parseFloat(body.price_val) || 0, price_note: body.price_note || null,
       beds: body.beds || null, baths: body.baths || null, sqft: body.sqft || null,
-      subtype: body.subtype || null, featured: body.featured === '1',
+      subtype: body.subtype || null, details: body.details ? (typeof body.details === 'object' ? JSON.stringify(body.details) : body.details) : null,
+      featured: body.featured === '1',
       has_img: !!(imgCard || imgHero), img_card: imgCard, img_hero: imgHero, gallery: galleryUrls,
       story_kicker: body.story_kicker || null, story_heading: body.story_heading || null, story_body: body.story_body || null,
       amenities: body.amenities || null, setting_heading: body.setting_heading || null,
@@ -265,6 +271,7 @@ router.post('/property/:id/edit', requireAdmin, upload.fields([
       name: body.name, loc: body.loc, area: body.area || '', type: body.type, listing: body.listing,
       price: body.price, price_val: parseFloat(body.price_val) || 0, price_note: body.price_note || null,
       beds: body.beds || null, baths: body.baths || null, sqft: body.sqft || null, subtype: body.subtype || null,
+      details: body.details !== undefined ? (typeof body.details === 'object' ? JSON.stringify(body.details) : body.details) : existing.details,
       featured: body.featured === '1', has_img: !!(imgCard || imgHero), img_card: imgCard, img_hero: imgHero,
       gallery: existingGallery.length ? JSON.stringify(existingGallery) : null,
       story_kicker: body.story_kicker || null, story_heading: body.story_heading || null, story_body: body.story_body || null,
@@ -299,18 +306,18 @@ router.post('/enquiries/:id/toggle-read', requireAdmin, async (req, res) => {
   const db = getDB();
   const { data: e } = await db.from('enquiries').select('is_read').eq('id', req.params.id).maybeSingle();
   if (e) await db.from('enquiries').update({ is_read: !e.is_read }).eq('id', req.params.id);
-  res.redirect('/admin?tab=enquiries');
+  req.session.save(() => res.redirect('/admin?tab=enquiries'));
 });
 router.post('/enquiries/mark-all-read', requireAdmin, async (req, res) => {
   const db = getDB();
-  await db.from('enquiries').update({ is_read: true });
-  res.redirect('/admin?tab=enquiries');
+  await db.from('enquiries').update({ is_read: true }).eq('is_read', false);
+  req.session.save(() => res.redirect('/admin?tab=enquiries'));
 });
 router.post('/enquiries/:id/delete', requireAdmin, async (req, res) => {
   const db = getDB();
   await db.from('enquiries').delete().eq('id', req.params.id);
   req.session.flash = { type:'ok', msg: 'Enquiry deleted successfully.' };
-  res.redirect('/admin?tab=enquiries');
+  req.session.save(() => res.redirect('/admin?tab=enquiries'));
 });
 
 // ── AGENT LISTINGS (Admin actions) ───────────────────────────────

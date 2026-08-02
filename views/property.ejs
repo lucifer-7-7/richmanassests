@@ -161,9 +161,27 @@ document.addEventListener('keydown', function(e) {
     <div class="spec"><h6>Price</h6><div class="v" style="font-size:clamp(20px,2vw,26px)"><%= p.price %></div></div>
     <div class="spec"><h6>Listing</h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></div></div>
     <div class="spec"><h6>Type</h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.type %></div></div>
-    <% if (p.beds && p.beds !== '—') { %><div class="spec"><h6>Bedrooms</h6><div class="v"><%= p.beds %></div></div><% } %>
-    <% if (p.baths && p.baths !== '—') { %><div class="spec"><h6>Bathrooms</h6><div class="v"><%= p.baths %></div></div><% } %>
-    <% if (p.sqft) { %><div class="spec"><h6>Area</h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.sqft %> sq ft</div></div><% } %>
+    <% 
+      var pTypeLower = (p.type || '').toLowerCase();
+      var isLandOrPlot = pTypeLower.includes('plot') || pTypeLower.includes('land') || pTypeLower.includes('agricultural');
+    %>
+    <% if (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A') { %><div class="spec"><h6>Bedrooms</h6><div class="v"><%= p.beds %></div></div><% } %>
+    <% if (!isLandOrPlot && p.baths && p.baths !== '—' && p.baths !== 'N/A') { %><div class="spec"><h6>Bathrooms</h6><div class="v"><%= p.baths %></div></div><% } %>
+    <% if (p.sqft) { %><div class="spec"><h6><%= isLandOrPlot ? 'Land Area' : 'Area' %></h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.sqft %><% if (!p.sqft.toLowerCase().includes('sq') && !p.sqft.toLowerCase().includes('acre') && !p.sqft.toLowerCase().includes('cent')) { %> sq ft<% } %></div></div><% } %>
+    <% if (p.subtype) { %><div class="spec"><h6>Sub-type</h6><div class="v" style="font-size:clamp(15px,1.5vw,20px)"><%= p.subtype %></div></div><% } %>
+    <% 
+      if (p.details) {
+        var parsedDet = {};
+        try { parsedDet = typeof p.details === 'string' ? JSON.parse(p.details) : p.details; } catch(_) {}
+        Object.keys(parsedDet).forEach(function(key) {
+          if (parsedDet[key] && parsedDet[key] !== '—') {
+    %>
+    <div class="spec"><h6><%= key %></h6><div class="v" style="font-size:clamp(15px,1.5vw,20px)"><%= parsedDet[key] %></div></div>
+    <% 
+          }
+        });
+      } 
+    %>
   </div></div>
 </section>
 
@@ -333,7 +351,7 @@ document.addEventListener('keydown', function(e) {
           <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
           <%= s.loc %> · <%= s.type %>
         </div>
-        <div class="cta"><span class="v" style="display:block">View home</span></div>
+        <div class="cta"><span class="v">View home &rarr;</span></div>
       </div>
     </a>
     <% }) %>

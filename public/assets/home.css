@@ -322,8 +322,8 @@ html.loading,html.loading body{overflow:hidden}
 .feat-grid .plist:hover{transform:translateY(-5px);box-shadow:0 16px 36px -8px rgba(10,9,6,0.1)}
 .feat-grid .plist .body{padding:16px 4px 4px}
 .feat-grid .plist .cta{padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.feat-grid .plist .cta a.v{border-radius:100px;background:var(--ink);color:#FFFFFF;font-size:12.5px;font-weight:600;padding:10px 20px;transition:background .18s;}
-.feat-grid .plist .cta a.v:hover{background:var(--gold-deep)}
+.feat-grid .plist .cta .v{border-radius:100px;background:var(--ink);color:#FFFFFF !important;font-size:12.5px;font-weight:600;padding:10px 20px;transition:background .18s;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;flex:1;}
+.feat-grid .plist .cta .v:hover{background:var(--gold-deep);color:#FFFFFF !important;}
 
 /* ════════════════════════════════════════════
    IMAGE-DRIVEN WIDE LISTINGS

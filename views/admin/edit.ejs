@@ -69,7 +69,7 @@
         <div class="field"><label>Location *</label><input name="loc" required value="<%= p.loc %>"></div>
         <div class="field"><label>Area</label><input name="area" value="<%= p.area || '' %>"></div>
         <div class="field"><label>Type *</label>
-          <select name="type" required>
+          <select name="type" id="admin-ptype" required>
             <% ['Villa','House','Estate','Apartment','Plot','Commercial','Agricultural'].forEach(function(t) { %>
             <option <%= p.type === t ? 'selected' : '' %>><%= t %></option>
             <% }) %>
@@ -88,9 +88,9 @@
         <div class="field"><label>Price suffix</label><input name="price_note" value="<%= p.price_note || '' %>"></div>
       </div>
       <div class="fg cols3">
-        <div class="field"><label>Bedrooms</label><input name="beds" value="<%= p.beds || '' %>"></div>
-        <div class="field"><label>Bathrooms</label><input name="baths" value="<%= p.baths || '' %>"></div>
-        <div class="field"><label>Area / sqft</label><input name="sqft" value="<%= p.sqft || '' %>"></div>
+        <div class="field"><label id="lbl-admin-beds">Bedrooms</label><input name="beds" id="admin-beds" value="<%= p.beds || '' %>"></div>
+        <div class="field"><label id="lbl-admin-baths">Bathrooms</label><input name="baths" id="admin-baths" value="<%= p.baths || '' %>"></div>
+        <div class="field"><label id="lbl-admin-sqft">Area / sqft</label><input name="sqft" id="admin-sqft" value="<%= p.sqft || '' %>"></div>
       </div>
       <div class="fg">
         <div class="field"><label>Subtype</label><input name="subtype" value="<%= p.subtype || '' %>"></div>
@@ -250,6 +250,53 @@ function initTagInput(containerEl, hiddenEl) {
 
 initTagInput(document.getElementById('amen-tags'), document.getElementById('amenities-hidden'));
 initTagInput(document.getElementById('pills-tags'), document.getElementById('setting_pills-hidden'));
+
+// Dynamic property type field adaptation
+var ptype = document.getElementById('admin-ptype');
+var lblBeds = document.getElementById('lbl-admin-beds');
+var inputBeds = document.getElementById('admin-beds');
+var lblBaths = document.getElementById('lbl-admin-baths');
+var inputBaths = document.getElementById('admin-baths');
+var lblSqft = document.getElementById('lbl-admin-sqft');
+var inputSqft = document.getElementById('admin-sqft');
+
+function updateFieldLabels() {
+  if (!ptype) return;
+  var v = (ptype.value || '').toLowerCase();
+  if (v.includes('plot') || v.includes('land')) {
+    if (lblBeds) lblBeds.textContent = 'Road Width / Facing';
+    if (inputBeds) inputBeds.placeholder = 'e.g. 30 ft road · East facing';
+    if (lblBaths) lblBaths.textContent = 'Plot Dimensions';
+    if (inputBaths) inputBaths.placeholder = 'e.g. 40 x 60 ft';
+    if (lblSqft) lblSqft.textContent = 'Plot Area (sqft / Cents)';
+    if (inputSqft) inputSqft.placeholder = 'e.g. 10 Cents (4,356 sqft)';
+  } else if (v.includes('agricultural')) {
+    if (lblBeds) lblBeds.textContent = 'Irrigation Source';
+    if (inputBeds) inputBeds.placeholder = 'e.g. Borewell & River stream';
+    if (lblBaths) lblBaths.textContent = 'Soil Type / Crop';
+    if (inputBaths) inputBaths.placeholder = 'e.g. Red fertile soil · Coconut plantation';
+    if (lblSqft) lblSqft.textContent = 'Land Area (Acres)';
+    if (inputSqft) inputSqft.placeholder = 'e.g. 3.5 Acres';
+  } else if (v.includes('commercial') || v.includes('office') || v.includes('shop')) {
+    if (lblBeds) lblBeds.textContent = 'Floor Level / Lift';
+    if (inputBeds) inputBeds.placeholder = 'e.g. 2nd Floor (Lift available)';
+    if (lblBaths) lblBaths.textContent = 'Washrooms / Parking';
+    if (inputBaths) inputBaths.placeholder = 'e.g. 2 Washrooms · 4 Car parking';
+    if (lblSqft) lblSqft.textContent = 'Carpet Area (sqft)';
+    if (inputSqft) inputSqft.placeholder = 'e.g. 2,200 sqft';
+  } else {
+    if (lblBeds) lblBeds.textContent = 'Bedrooms';
+    if (inputBeds) inputBeds.placeholder = 'e.g. 3 BHK';
+    if (lblBaths) lblBaths.textContent = 'Bathrooms';
+    if (inputBaths) inputBaths.placeholder = 'e.g. 3';
+    if (lblSqft) lblSqft.textContent = 'Built-up Area (sqft)';
+    if (inputSqft) inputSqft.placeholder = 'e.g. 2,400 sqft';
+  }
+}
+if (ptype) {
+  ptype.addEventListener('change', updateFieldLabels);
+  updateFieldLabels();
+}
 </script>
 </body>
 </html>

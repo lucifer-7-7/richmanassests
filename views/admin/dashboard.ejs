@@ -296,6 +296,10 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 3a1 1 0 00-1.414-1.414l-3 3A1 1 0 0013 5.293V6H5a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-5a1 1 0 10-2 0v5H5V8h8v.707a1 1 0 001.707.707l3-3z" clip-rule="evenodd"/></svg>
       Webhook Logs
     </button>
+    <button onclick="showPanel('audit')" id="sb-audit">
+      <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h8a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+      Account Logs
+    </button>
     <button onclick="showPanel('analytics')" id="sb-analytics">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/></svg>
       Analytics
@@ -399,7 +403,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
               <div class="field"><label>Location *</label><input name="loc" required placeholder="e.g. Mulki Backwaters"></div>
               <div class="field"><label>Area</label><input name="area" placeholder="e.g. Mulki"></div>
               <div class="field"><label>Property type *</label>
-                <select name="type" required>
+                <select name="type" id="add-ptype" required>
                   <option value="">Select…</option>
                   <option>Villa</option><option>House</option><option>Estate</option>
                   <option>Apartment</option><option>Plot</option><option>Commercial</option><option>Agricultural</option>
@@ -419,9 +423,9 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
               <div class="field"><label>Price suffix</label><input name="price_note" placeholder="e.g. /month"></div>
             </div>
             <div class="fg cols3">
-              <div class="field"><label>Beds</label><input name="beds" placeholder="e.g. 4"></div>
-              <div class="field"><label>Baths</label><input name="baths" placeholder="e.g. 4"></div>
-              <div class="field"><label>Area / sqft</label><input name="sqft" placeholder="e.g. 4,200 or 3 acres"></div>
+              <div class="field"><label id="lbl-add-beds">Beds</label><input name="beds" id="add-beds" placeholder="e.g. 4"></div>
+              <div class="field"><label id="lbl-add-baths">Baths</label><input name="baths" id="add-baths" placeholder="e.g. 4"></div>
+              <div class="field"><label id="lbl-add-sqft">Area / sqft</label><input name="sqft" id="add-sqft" placeholder="e.g. 4,200 or 3 acres"></div>
             </div>
             <div class="fg">
               <div class="field"><label>Subtype</label><input name="subtype" placeholder="e.g. Event venue, Builder project"></div>
@@ -682,10 +686,10 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
     <div class="panel" id="panel-payments">
       <div class="page-head"><h1>Payment Orders</h1></div>
       <% if (!orders || orders.length === 0) { %>
-      <div class="empty"><h3>No payments yet</h3><p>Payments will appear here once agents make transactions.</p></div>
+      <div class="empty"><h3>No payments yet</h3><p>All attempted payments (created, processing, paid, failed, refunded) will appear here.</p></div>
       <% } else { %>
       <div class="list-controls" style="margin-bottom:20px">
-        <input type="text" id="searchPayment" placeholder="Search by order ID, agent name, email or property…" oninput="filterPayments()">
+        <input type="text" id="searchPayment" placeholder="Search by order ID, agent, property…" oninput="filterPayments()">
         <select id="filterPaymentStatus" onchange="filterPayments()">
           <option value="">All statuses</option>
           <option value="paid">Paid / Captured</option>
@@ -696,52 +700,103 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
         </select>
       </div>
 
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)" id="paymentsGrid">
-          <thead><tr style="background:var(--surface2)">
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Order ID</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Agent</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Property</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Amount</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Method</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Status</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Date</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Invoice</th>
-          </tr></thead>
-          <tbody>
-          <% orders.forEach(function(o) {
-               var agentName = o.agents ? o.agents.name : ('Agent #' + (o.agent_id||''));
-               var agentEmail = o.agents ? o.agents.email : '';
-               var propName = o.agent_properties ? o.agent_properties.name : 'Property Listing';
-               var searchStr = ((o.internal_order_id||'') + ' ' + agentName + ' ' + agentEmail + ' ' + propName).toLowerCase();
-               var st = (o.status || 'created').toLowerCase();
-          %>
-          <tr class="payment-row" style="border-bottom:1px solid var(--line2)" data-search="<%= searchStr %>" data-status="<%= st %>">
-            <td style="padding:14px 18px;font-family:monospace;font-size:12px;font-weight:600"><%= o.internal_order_id %></td>
-            <td style="padding:14px 18px">
-              <b><%= agentName %></b>
-              <% if (agentEmail) { %><div style="font-size:11.5px;color:var(--muted)"><%= agentEmail %></div><% } %>
-            </td>
-            <td style="padding:14px 18px;font-weight:600"><%= propName %></td>
-            <td style="padding:14px 18px;font-weight:800">₹<%= ((o.amount_paise||0)/100).toLocaleString('en-IN') %></td>
-            <td style="padding:14px 18px"><%= o.payment_method || 'Online' %></td>
-            <td style="padding:14px 18px">
-              <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;background:<%= (st==='paid'||st==='captured')?'#F0FAF4':(st==='failed'||st==='cancelled')?'#FDF2F2':(st==='processing'||st==='created')?'#FFF8EC':'#EFF6FF' %>;color:<%= (st==='paid'||st==='captured')?'#2D8A56':(st==='failed'||st==='cancelled')?'#E03E3E':(st==='processing'||st==='created')?'#D97706':'#1D4ED8' %>">
-                <%= st.toUpperCase() %>
-              </span>
-            </td>
-            <td style="padding:14px 18px;font-size:12px;color:var(--muted);font-weight:500">
-              <%= new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
-            </td>
-            <td style="padding:14px 18px;">
-              <a href="/admin/invoices/<%= o.internal_order_id %>" target="_blank" style="display:inline-flex;align-items:center;padding:4px 10px;border:1px solid var(--ink);border-radius:6px;color:var(--ink);text-decoration:none;font-size:11.5px;font-weight:600;">GST Invoice</a>
-            </td>
-          </tr>
-          <% }) %>
-          </tbody>
-        </table>
+      <!-- MOBILE CARD LIST -->
+      <div class="mobile-card-list" id="paymentsGridMobile">
+        <% orders.forEach(function(o) {
+             var agentName = o.agents ? o.agents.name : ('Agent #' + (o.agent_id||''));
+             var agentEmail = o.agents ? o.agents.email : '';
+             var propName = o.agent_properties ? o.agent_properties.name : (o.property_name || 'Property Listing');
+             var searchStr = ((o.internal_order_id||'') + ' ' + agentName + ' ' + agentEmail + ' ' + propName).toLowerCase();
+             var st = (o.status || 'created').toLowerCase();
+             var stBg = (st==='paid'||st==='captured')?'#F0FAF4':(st==='failed'||st==='cancelled')?'#FDF2F2':(st==='processing'||st==='created')?'#FFF8EC':'#EFF6FF';
+             var stColor = (st==='paid'||st==='captured')?'#2D8A56':(st==='failed'||st==='cancelled')?'#E03E3E':(st==='processing'||st==='created')?'#D97706':'#1D4ED8';
+        %>
+        <div class="payment-row" data-search="<%= searchStr %>" data-status="<%= st %>" style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="display:inline-flex;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;background:<%= stBg %>;color:<%= stColor %>"><%= st.toUpperCase() %></span>
+            <span style="font-size:12px;color:var(--muted);font-weight:500"><%= new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></span>
+          </div>
+          <div style="font-weight:800;font-size:18px">₹<%= ((o.amount_paise||0)/100).toLocaleString('en-IN') %></div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:13px;font-weight:700"><%= agentName %></div>
+            <% if (agentEmail) { %><div style="font-size:12px;color:var(--muted)"><%= agentEmail %></div><% } %>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--ink-2)"><%= propName %></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)">
+            <span style="font-family:monospace;font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:6px"><%= o.internal_order_id %></span>
+            <span><%= o.payment_method || 'Online' %></span>
+          </div>
+          <% if (o.cashfree_order_id || o.cashfree_payment_id) { %>
+          <div style="font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line2);padding-top:8px">
+            <% if (o.cashfree_order_id) { %><span>CF Order: <b style="font-family:monospace"><%= o.cashfree_order_id %></b></span><% } %>
+            <% if (o.cashfree_payment_id) { %><span>Payment ID: <b style="font-family:monospace"><%= o.cashfree_payment_id %></b></span><% } %>
+            <% if (o.refund_id) { %><span>Refund: <b style="font-family:monospace"><%= o.refund_id %></b> (<%= o.refund_status || 'pending' %>)</span><% } %>
+          </div>
+          <% } %>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <a href="/admin/invoices/<%= o.internal_order_id %>" target="_blank" style="flex:1;text-align:center;padding:8px;border:1px solid var(--ink);border-radius:8px;color:var(--ink);text-decoration:none;font-size:12px;font-weight:700">Invoice</a>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- DESKTOP TABLE -->
+      <div class="desktop-table-wrap">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line)" id="paymentsGrid">
+            <thead><tr style="background:var(--surface2)">
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Order ID</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Agent</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Property</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Amount</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Method</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Status</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Date</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)"></th>
+            </tr></thead>
+            <tbody>
+            <% orders.forEach(function(o, idx) {
+                 var agentName = o.agents ? o.agents.name : ('Agent #' + (o.agent_id||''));
+                 var agentEmail = o.agents ? o.agents.email : '';
+                 var propName = o.agent_properties ? o.agent_properties.name : (o.property_name || 'Property Listing');
+                 var searchStr = ((o.internal_order_id||'') + ' ' + agentName + ' ' + agentEmail + ' ' + propName).toLowerCase();
+                 var st = (o.status || 'created').toLowerCase();
+                 var stBg = (st==='paid'||st==='captured')?'#F0FAF4':(st==='failed'||st==='cancelled')?'#FDF2F2':(st==='processing'||st==='created')?'#FFF8EC':'#EFF6FF';
+                 var stColor = (st==='paid'||st==='captured')?'#2D8A56':(st==='failed'||st==='cancelled')?'#E03E3E':(st==='processing'||st==='created')?'#D97706':'#1D4ED8';
+            %>
+            <tr class="payment-row" style="border-bottom:1px solid var(--line2);cursor:pointer" data-search="<%= searchStr %>" data-status="<%= st %>" onclick="togglePayDetail('pd<%= idx %>')">
+              <td style="padding:12px 14px;font-family:monospace;font-size:11px;font-weight:600"><%= o.internal_order_id %></td>
+              <td style="padding:12px 14px"><b><%= agentName %></b><% if (agentEmail) { %><div style="font-size:11px;color:var(--muted)"><%= agentEmail %></div><% } %></td>
+              <td style="padding:12px 14px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= propName %>"><%= propName %></td>
+              <td style="padding:12px 14px;font-weight:800">₹<%= ((o.amount_paise||0)/100).toLocaleString('en-IN') %></td>
+              <td style="padding:12px 14px;font-size:12px"><%= o.payment_method || 'Online' %></td>
+              <td style="padding:12px 14px"><span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;background:<%= stBg %>;color:<%= stColor %>"><%= st.toUpperCase() %></span></td>
+              <td style="padding:12px 14px;font-size:11.5px;color:var(--muted);white-space:nowrap"><%= new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></td>
+              <td style="padding:12px 14px"><a href="/admin/invoices/<%= o.internal_order_id %>" target="_blank" onclick="event.stopPropagation()" style="padding:4px 10px;border:1px solid var(--ink);border-radius:6px;color:var(--ink);text-decoration:none;font-size:11px;font-weight:600">Invoice</a></td>
+            </tr>
+            <tr id="pd<%= idx %>" style="display:none;background:var(--surface2)">
+              <td colspan="8" style="padding:12px 18px;font-size:12px">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px 20px">
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">CF Order ID</span><div style="font-family:monospace;font-weight:600"><%= o.cashfree_order_id || '—' %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Payment ID</span><div style="font-family:monospace;font-weight:600"><%= o.cashfree_payment_id || '—' %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Session ID</span><div style="font-family:monospace;font-weight:600;word-break:break-all"><%= o.payment_session_id ? o.payment_session_id.slice(0,30) + '…' : '—' %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Idempotency Key</span><div style="font-family:monospace;font-weight:600"><%= o.idempotency_key || '—' %></div></div>
+                  <% if (o.refund_id) { %>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Refund ID</span><div style="font-family:monospace;font-weight:600"><%= o.refund_id %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Refund Amount</span><div style="font-weight:700">₹<%= o.refund_amount_paise ? ((o.refund_amount_paise)/100).toLocaleString('en-IN') : '—' %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Refund Status</span><div style="font-weight:600"><%= o.refund_status || '—' %></div></div>
+                  <% } %>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Updated</span><div style="font-weight:500"><%= o.updated_at ? new Date(o.updated_at).toLocaleString('en-IN',{hour12:false}) : '—' %></div></div>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+            </tbody>
+          </table>
+        </div>
       </div>
       <% } %>
+
     <!-- PROMO AD BANNER SETTINGS PANEL -->
     <div class="panel" id="panel-settings">
       <div class="page-head">
@@ -820,44 +875,117 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
     <div class="panel" id="panel-webhooks">
       <div class="page-head"><h1>Webhook Logs</h1></div>
       <% if (!logs || logs.length === 0) { %>
-      <div class="empty"><h3>No webhook logs yet</h3><p>Incoming logs appear here.</p></div>
+      <div class="empty"><h3>No webhook logs yet</h3><p>Incoming payment provider webhooks (Cashfree/Razorpay) will appear here automatically.</p></div>
       <% } else { %>
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)">
-          <thead><tr style="background:var(--surface2)">
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Time</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Event</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">CF Order</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Sig Valid</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Processed</th>
-            <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Payload</th>
-          </tr></thead>
-          <tbody>
-          <% logs.forEach(function(l) { %>
-          <tr style="border-bottom:1px solid var(--line2)">
-            <td style="padding:14px 18px;white-space:nowrap;color:var(--muted);font-weight:500"><%= new Date(l.received_at).toLocaleString('en-IN',{hour12:false}) %></td>
-            <td style="padding:14px 18px;font-weight:700"><%= l.event_type || '—' %></td>
-            <td style="padding:14px 18px;font-family:monospace"><%= l.cashfree_order_id || '—' %></td>
-            <td style="padding:14px 18px">
-              <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:<%= l.sig_valid?'#F0FAF4':'#FDF2F2' %>;color:<%= l.sig_valid?'#2D8A56':'#E03E3E' %>">
-                <%= l.sig_valid ? '✓' : '✗' %>
-              </span>
-            </td>
-            <td style="padding:14px 18px">
-              <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:<%= l.processed?'#F0FAF4':'#FDF2F2' %>;color:<%= l.processed?'#2D8A56':'#E03E3E' %>">
-                <%= l.processed ? 'Yes' : 'No' %>
-              </span>
-              <% if (l.processing_error) { %>
-              <div style="font-size:11px;color:#E03E3E;margin-top:2px"><%= l.processing_error %></div>
-              <% } %>
-            </td>
-            <td style="padding:14px 18px;font-family:monospace;font-size:11px;color:#555;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= l.payload %>">
-              <%= l.payload.slice(0, 80) %>…
-            </td>
-          </tr>
-          <% }) %>
-          </tbody>
-        </table>
+      <!-- Mobile card view -->
+      <div class="mobile-card-list">
+        <% logs.forEach(function(l) { %>
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:700;font-size:13px"><%= l.event_type || 'WEBHOOK_EVENT' %></span>
+            <span style="font-size:11px;color:var(--muted)"><%= new Date(l.received_at).toLocaleString('en-IN',{hour12:false}) %></span>
+          </div>
+          <div style="font-size:12px;font-family:monospace;color:var(--ink-2)">Order: <%= l.cashfree_order_id || '—' %></div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:11px">
+            <span>Sig: <b style="color:<%= l.sig_valid?'#2D8A56':'#E03E3E' %>"><%= l.sig_valid ? 'Valid ✓' : 'Invalid ✗' %></b></span>
+            <span>Processed: <b style="color:<%= l.processed?'#2D8A56':'#E03E3E' %>"><%= l.processed ? 'Yes ✓' : 'No ✗' %></b></span>
+          </div>
+          <% if (l.processing_error) { %><div style="font-size:11px;color:#E03E3E;background:#FDF2F2;padding:6px;border-radius:6px"><%= l.processing_error %></div><% } %>
+          <div style="font-family:monospace;font-size:10.5px;color:var(--muted);background:var(--surface2);padding:8px;border-radius:6px;word-break:break-all"><%= (l.payload || '').slice(0, 150) %>…</div>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Desktop table view -->
+      <div class="desktop-table-wrap">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line)">
+            <thead><tr style="background:var(--surface2)">
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Time</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Event</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">CF Order</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Sig Valid</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Processed</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Payload</th>
+            </tr></thead>
+            <tbody>
+            <% logs.forEach(function(l) { %>
+            <tr style="border-bottom:1px solid var(--line2)">
+              <td style="padding:12px 14px;white-space:nowrap;color:var(--muted);font-weight:500;font-size:12px"><%= new Date(l.received_at).toLocaleString('en-IN',{hour12:false}) %></td>
+              <td style="padding:12px 14px;font-weight:700"><%= l.event_type || '—' %></td>
+              <td style="padding:12px 14px;font-family:monospace;font-size:11.5px"><%= l.cashfree_order_id || '—' %></td>
+              <td style="padding:12px 14px">
+                <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:10.5px;font-weight:700;background:<%= l.sig_valid?'#F0FAF4':'#FDF2F2' %>;color:<%= l.sig_valid?'#2D8A56':'#E03E3E' %>">
+                  <%= l.sig_valid ? '✓' : '✗' %>
+                </span>
+              </td>
+              <td style="padding:12px 14px">
+                <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:10.5px;font-weight:700;background:<%= l.processed?'#F0FAF4':'#FDF2F2' %>;color:<%= l.processed?'#2D8A56':'#E03E3E' %>">
+                  <%= l.processed ? 'Yes' : 'No' %>
+                </span>
+                <% if (l.processing_error) { %>
+                <div style="font-size:11px;color:#E03E3E;margin-top:2px"><%= l.processing_error %></div>
+                <% } %>
+              </td>
+              <td style="padding:12px 14px;font-family:monospace;font-size:11px;color:#555;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= l.payload %>">
+                <%= (l.payload || '').slice(0, 80) %>…
+              </td>
+            </tr>
+            <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- ACCOUNT / AUDIT LOGS PANEL -->
+    <div class="panel" id="panel-audit">
+      <div class="page-head"><h1>Account & System Audit Logs</h1></div>
+      <% if (!auditLogs || auditLogs.length === 0) { %>
+      <div class="empty"><h3>No audit logs yet</h3><p>Security and account actions (logins, status updates, password resets) will appear here.</p></div>
+      <% } else { %>
+      <!-- Mobile card view -->
+      <div class="mobile-card-list">
+        <% auditLogs.forEach(function(a) { %>
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:700;font-size:13px;color:var(--ink)"><%= a.action %></span>
+            <span style="font-size:11px;color:var(--muted)"><%= new Date(a.created_at).toLocaleString('en-IN',{hour12:false}) %></span>
+          </div>
+          <div style="font-size:12px;color:var(--ink-2)">Actor: <b><%= a.actor_type %></b> (<%= a.actor_id || 'system' %>)</div>
+          <% if (a.target_type || a.target_id) { %><div style="font-size:12px;color:var(--muted)">Target: <%= a.target_type %> #<%= a.target_id %></div><% } %>
+          <% if (a.detail) { %><div style="font-size:11.5px;background:var(--surface2);padding:6px 10px;border-radius:6px;color:var(--ink-2)"><%= a.detail %></div><% } %>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Desktop table view -->
+      <div class="desktop-table-wrap">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line)">
+            <thead><tr style="background:var(--surface2)">
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Time</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Action</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Actor</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Target</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Detail</th>
+              <th style="text-align:left;padding:12px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">IP</th>
+            </tr></thead>
+            <tbody>
+            <% auditLogs.forEach(function(a) { %>
+            <tr style="border-bottom:1px solid var(--line2)">
+              <td style="padding:12px 14px;white-space:nowrap;color:var(--muted);font-size:12px"><%= new Date(a.created_at).toLocaleString('en-IN',{hour12:false}) %></td>
+              <td style="padding:12px 14px;font-weight:700"><%= a.action %></td>
+              <td style="padding:12px 14px"><%= a.actor_type %> (<%= a.actor_id || 'system' %>)</td>
+              <td style="padding:12px 14px;color:var(--muted)"><%= a.target_type || '—' %> <%= a.target_id || '' %></td>
+              <td style="padding:12px 14px;color:var(--ink-2)"><%= a.detail || '—' %></td>
+              <td style="padding:12px 14px;font-family:monospace;font-size:11px;color:var(--muted)"><%= a.ip || '—' %></td>
+            </tr>
+            <% }) %>
+            </tbody>
+          </table>
+        </div>
       </div>
       <% } %>
     </div>
@@ -1078,6 +1206,8 @@ if (location.search.includes('tab=agent-listings')) showPanel('agent-listings');
 if (location.search.includes('tab=agents')) showPanel('agents');
 if (location.search.includes('tab=payments')) showPanel('payments');
 if (location.search.includes('tab=webhooks')) showPanel('webhooks');
+if (location.search.includes('tab=audit')) showPanel('audit');
+if (location.search.includes('tab=analytics')) showPanel('analytics');
 
 // filter enquiries
 function filterEnquiries() {
@@ -1091,14 +1221,14 @@ function filterEnquiries() {
   });
 }
 
-// filter payments
+// filter payments (mobile & desktop)
 function filterPayments() {
   const searchInput = document.getElementById('searchPayment');
   const statusSelect = document.getElementById('filterPaymentStatus');
   if (!searchInput || !statusSelect) return;
   const q = searchInput.value.toLowerCase().trim();
   const st = statusSelect.value.toLowerCase().trim();
-  document.querySelectorAll('#paymentsGrid .payment-row').forEach(row => {
+  document.querySelectorAll('.payment-row').forEach(row => {
     const textMatch = !q || (row.dataset.search || '').includes(q);
     const rowStatus = row.dataset.status || '';
     let statusMatch = !st;
@@ -1110,6 +1240,11 @@ function filterPayments() {
     
     row.style.display = textMatch && statusMatch ? '' : 'none';
   });
+}
+
+function togglePayDetail(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'table-row' : 'none';
 }
 
 // ── gallery multi-preview ──
@@ -1195,6 +1330,53 @@ function previewGallery(input, containerId) {
 
   initTagInput(document.getElementById('amen-tags-add'), 'amenities-add');
   initTagInput(document.getElementById('pills-tags-add'), 'setting_pills-add');
+
+  // Dynamic property type field adaptation for Admin Add Property form
+  var addPtype = document.getElementById('add-ptype');
+  var lblAddBeds = document.getElementById('lbl-add-beds');
+  var inputAddBeds = document.getElementById('add-beds');
+  var lblAddBaths = document.getElementById('lbl-add-baths');
+  var inputAddBaths = document.getElementById('add-baths');
+  var lblAddSqft = document.getElementById('lbl-add-sqft');
+  var inputAddSqft = document.getElementById('add-sqft');
+
+  function updateAddPropFieldLabels() {
+    if (!addPtype) return;
+    var v = (addPtype.value || '').toLowerCase();
+    if (v.includes('plot') || v.includes('land')) {
+      if (lblAddBeds) lblAddBeds.textContent = 'Road Width / Facing';
+      if (inputAddBeds) inputAddBeds.placeholder = 'e.g. 30 ft road · East facing';
+      if (lblAddBaths) lblAddBaths.textContent = 'Plot Dimensions';
+      if (inputAddBaths) inputAddBaths.placeholder = 'e.g. 40 x 60 ft';
+      if (lblAddSqft) lblAddSqft.textContent = 'Plot Area (sqft / Cents)';
+      if (inputAddSqft) inputAddSqft.placeholder = 'e.g. 10 Cents (4,356 sqft)';
+    } else if (v.includes('agricultural')) {
+      if (lblAddBeds) lblAddBeds.textContent = 'Irrigation Source';
+      if (inputAddBeds) inputAddBeds.placeholder = 'e.g. Borewell & River stream';
+      if (lblAddBaths) lblAddBaths.textContent = 'Soil Type / Crop';
+      if (inputAddBaths) inputAddBaths.placeholder = 'e.g. Red fertile soil · Coconut plantation';
+      if (lblAddSqft) lblAddSqft.textContent = 'Land Area (Acres)';
+      if (inputAddSqft) inputAddSqft.placeholder = 'e.g. 3.5 Acres';
+    } else if (v.includes('commercial') || v.includes('office') || v.includes('shop')) {
+      if (lblAddBeds) lblAddBeds.textContent = 'Floor Level / Lift';
+      if (inputAddBeds) inputAddBeds.placeholder = 'e.g. 2nd Floor (Lift available)';
+      if (lblAddBaths) lblAddBaths.textContent = 'Washrooms / Parking';
+      if (inputAddBaths) inputAddBaths.placeholder = 'e.g. 2 Washrooms · 4 Car parking';
+      if (lblAddSqft) lblAddSqft.textContent = 'Carpet Area (sqft)';
+      if (inputAddSqft) inputAddSqft.placeholder = 'e.g. 2,200 sqft';
+    } else {
+      if (lblAddBeds) lblAddBeds.textContent = 'Bedrooms';
+      if (inputAddBeds) inputAddBeds.placeholder = 'e.g. 4';
+      if (lblAddBaths) lblAddBaths.textContent = 'Bathrooms';
+      if (inputAddBaths) inputAddBaths.placeholder = 'e.g. 4';
+      if (lblAddSqft) lblAddSqft.textContent = 'Built-up Area (sqft)';
+      if (inputAddSqft) inputAddSqft.placeholder = 'e.g. 4,200 sqft';
+    }
+  }
+  if (addPtype) {
+    addPtype.addEventListener('change', updateAddPropFieldLabels);
+    updateAddPropFieldLabels();
+  }
 })();
 </script>
 </body>
