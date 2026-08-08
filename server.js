@@ -1,11 +1,18 @@
 'use strict';
 require('dotenv').config();
 
+// Validate required environment variables
+const requiredEnvVars = ['SUPABASE_SERVICE_KEY', 'SESSION_SECRET'];
+const missing = requiredEnvVars.filter(v => !process.env[v]);
+if (missing.length) {
+  console.error('[FATAL] Missing required env vars:', missing.join(', '));
+  process.exit(1);
+}
+
 const express     = require('express');
 const session     = require('express-session');
 const compression = require('compression');
 const path        = require('path');
-const crypto      = require('crypto');
 const rawBodyCapture = require('./middleware/rawBodyCapture');
 const { initDB }  = require('./db/db');
 
@@ -20,14 +27,14 @@ app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  // CSP: allow Razorpay + Cashfree SDK + Cloudinary images + Google Fonts
+  // CSP: allow Razorpay + Cashfree SDK + Cloudinary images + Google Fonts (no unsafe-inline)
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://sdk.cashfree.com https://unpkg.com https://cdnjs.cloudflare.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
+    "script-src 'self' https://checkout.razorpay.com https://sdk.cashfree.com https://cdnjs.cloudflare.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https://res.cloudinary.com https://upload.wikimedia.org blob:",
-    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://sdk.cashfree.com https://*.supabase.co http://ip-api.com",
+    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://sdk.cashfree.com https://*.supabase.co https://ip-api.com",
     "frame-src https://checkout.razorpay.com https://api.razorpay.com https://sdk.cashfree.com",
     "worker-src 'none'",
   ].join('; '));
@@ -54,7 +61,7 @@ app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
 
 // ── Session ───────────────────────────────────────────────────────
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev-secret-change-me-in-production',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   name: 'rma.sid',
@@ -239,12 +246,12 @@ app.get('/llms.txt', (req, res) => {
 app.get('/sitemap.xml', require('./routes/sitemap'));
 
 // ── Error pages ───────────────────────────────────────────────────
-app.use((req, res) => res.status(404).render('404', { title: 'Page not found — RichManAssets' }));
-
 app.use((err, req, res, next) => {
   console.error('[server error]', err.message);
-  res.status(500).render('404', { title: 'Server Error — RichManAssets' });
+  res.status(500).render('500', { title: 'Server Error — RichManAssets' });
 });
+
+app.use((req, res) => res.status(404).render('404', { title: 'Page not found — RichManAssets' }));
 
 // ── Boot ──────────────────────────────────────────────────────────
 initDB();

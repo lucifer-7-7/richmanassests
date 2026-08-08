@@ -2,7 +2,11 @@
 const { createClient } = require('@supabase/supabase-js');
 const WebSocket = require('ws');
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://odgvwtwjpircuxcfxleb.supabase.co';
+if (!process.env.SUPABASE_URL) {
+  throw new Error('SUPABASE_URL must be set in .env');
+}
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
 let _client;

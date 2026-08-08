@@ -64,10 +64,10 @@
 .plist .ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--paper-2)}
 .plist .ph img{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
 .plist:hover .ph img{transform:scale(1.05)}
-.plist .badge{position:absolute;top:12px;left:12px;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:var(--r-pill);color:var(--paper);background:rgba(20,18,12,.6);backdrop-filter:blur(5px)}
-.plist .badge.sale{background:var(--gold-deep)}
-.plist .badge.rent{background:#2F6F8A}
-.plist .badge.lease{background:#6A5B8A}
+.plist .badge{position:absolute;top:12px;left:12px;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:6px 12px;border-radius:var(--r-pill);color:#FFFFFF;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.plist .badge.sale{background:#B5934C}
+.plist .badge.rent{background:#4B7BA7}
+.plist .badge.lease{background:#6B5B7F}
 .plist .fav{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;background:rgba(247,244,237,.88);display:grid;place-items:center;color:var(--ink-2);transition:.3s}
 .plist .fav:hover{background:var(--ink);color:var(--paper)}
 .plist .fav svg{width:14px;height:14px}
@@ -87,24 +87,28 @@
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding:10px 18px;
-  border-radius:100px;
+  padding:12px 16px;
+  min-height:44px;
+  border-radius:10px;
   font-family:var(--f-sans);
-  font-size:12.5px;
-  font-weight:600;
+  font-size:13px;
+  font-weight:700;
   letter-spacing:.02em;
   background:var(--ink);
   color:#FFFFFF !important;
   text-decoration:none;
-  transition:all .2s var(--ease);
+  transition:all 0.2s var(--ease);
   box-sizing:border-box;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 .plist .cta a:hover, .plist .cta .v:hover{background:var(--gold-deep);color:#FFFFFF !important}
-.plist .cta .w{flex:none;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;padding:0;background:transparent;border:1px solid var(--line);color:var(--ink)}
+.plist .cta .w{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;padding:0;background:transparent;border:1px solid var(--line);color:var(--ink);transition:all 0.2s var(--ease)}
 .plist .cta .w:hover{background:#25D366;border-color:#25D366;color:#fff}
 .plist .cta .w svg{width:16px;height:16px}
-.ph-placeholder{position:absolute;inset:0;background:repeating-linear-gradient(135deg,var(--paper-2),var(--paper-2) 10px,var(--paper-3) 10px,var(--paper-3) 20px);display:grid;place-items:center}
-.ph-placeholder span{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);background:var(--paper);padding:6px 12px;border-radius:var(--r-pill);border:1px solid var(--line-soft)}
+.ph-placeholder{position:absolute;inset:0;background:linear-gradient(135deg, var(--paper-2) 0%, var(--paper-3) 100%);display:grid;place-items:center;backdrop-filter:blur(2px)}
+.ph-placeholder span{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);background:rgba(247,244,237,0.92);padding:8px 14px;border-radius:8px;border:none;font-weight:600}
 
 /* featured grid: horizontal scroll on mobile */
 .feat-grid{
@@ -124,6 +128,7 @@
 .feat-grid .plist:hover{transform:translateY(-4px);box-shadow:none}
 .feat-grid .plist .body{padding:14px 2px 2px}
 .feat-grid .plist .cta{padding-top:12px}
+.feat-grid .plist .cta a, .feat-grid .plist .cta .v{min-height:44px;padding:12px 14px}
 .feat-grid .plist .cta a{border-radius:var(--r-sm)}
 @media(min-width:900px){
   .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);overflow:visible;padding-bottom:0}

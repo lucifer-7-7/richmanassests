@@ -399,7 +399,7 @@ module.exports = async function seed(db) {
       badge_txt: null, story_kicker: null, story_heading: null,
       story_body: null, amenities: null, setting_heading: null,
       setting_body: null, setting_pills: null, emi_label: null,
-      emi_val: null, next_id: null,
+      emi_val: null, next_id: null, is_dummy: true,
       ...p,
       featured: p.featured === 1,
       has_img: p.has_img === 1

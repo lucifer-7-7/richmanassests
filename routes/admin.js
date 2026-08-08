@@ -47,7 +47,7 @@ router.use((req, res, next) => {
 });
 
 // ── upload ────────────────────────────────────────────────────────
-const uploadDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../public/assets/img/uploads');
+const uploadDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../uploads');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/[^a-z0-9.]/gi, '-').toLowerCase()),

@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDB } = require('../db/db');
-const { getPromoBanner } = require('../lib/settings');
+const { getPromoBanner, getUseDummyData, getHeroPropertyIds } = require('../lib/settings');
 
 // canonical site origin (production domain) for SEO tags
 const SITE = process.env.SITE_URL || 'https://richmanassets.com';
@@ -222,6 +222,12 @@ async function getAllPublicProperties(db) {
     try {
       const { data } = await db.from('properties').select('*').eq('active', true);
       adminProps = data || [];
+
+      // Filter out dummy properties if setting is off
+      const useDummy = await getUseDummyData();
+      if (!useDummy) {
+        adminProps = adminProps.filter(p => !p.is_dummy);
+      }
     } catch (e1) {
       console.error('[getAllPublicProperties] properties err:', e1.message);
     }
@@ -300,21 +306,25 @@ function searchAndSortProperties(allProps, { listing, area, type, budget, q }) {
 router.get('/', async (req, res) => {
   try {
     const db = getDB();
-    const heroIds = ['mermaid', 'kopparige', 'samudra', 'tara', 'honeyvale', 'ikigai'];
 
-    const [allProps, testimonialsRes] = await Promise.all([
+    const [allProps, testimonialsRes, configuredHeroIds, promoBanner] = await Promise.all([
       getAllPublicProperties(db),
       db.from('testimonials').select('*').eq('active', true),
+      getHeroPropertyIds(),
+      getPromoBanner(),
     ]);
 
     const testimonials = testimonialsRes.data || [];
     const areas = [...new Set(allProps.map(r => r.area || r.loc).filter(Boolean))].sort();
 
-    // hero slides: prioritise named IDs, fall back to featured or top active
-    const heroSlides = heroIds
-      .map(id => allProps.find(p => p.id === id))
-      .filter(Boolean)
-      .slice(0, 6);
+    // hero slides: prioritise configured IDs, fall back to featured or top active
+    let heroSlides = [];
+    if (configuredHeroIds && Array.isArray(configuredHeroIds) && configuredHeroIds.length) {
+      heroSlides = configuredHeroIds
+        .map(id => allProps.find(p => p.id === id))
+        .filter(Boolean)
+        .slice(0, 6);
+    }
     const finalHero = heroSlides.length ? heroSlides : allProps.filter(p => p.featured || p.img_hero).slice(0, 6);
 
     res.render('index', {
@@ -331,7 +341,7 @@ router.get('/', async (req, res) => {
       services: withIcons(SERVICES),
       testimonials,
       areas,
-      promoBanner: getPromoBanner(),
+      promoBanner,
     });
   } catch (err) {
     console.error('[/] error:', err.message);
@@ -369,6 +379,7 @@ router.get('/properties', async (req, res) => {
       ],
     };
 
+    const promoBanner = await getPromoBanner();
     res.render('properties', {
       title: seo.pageTitle,
       description: seo.pageDesc,
@@ -381,7 +392,7 @@ router.get('/properties', async (req, res) => {
       headerKicker: seo.headerKicker,
       headerTitle: seo.headerTitle,
       headerDesc: seo.headerDesc,
-      promoBanner: getPromoBanner(),
+      promoBanner,
     });
   } catch (err) {
     console.error('[/properties] error:', err.message);
@@ -487,6 +498,7 @@ router.get('/property/:id', async (req, res) => {
       ],
     };
 
+    const promoBanner = await getPromoBanner();
     res.render('property', {
       title: pageTitle,
       description: pageDesc,
@@ -497,7 +509,7 @@ router.get('/property/:id', async (req, res) => {
       jsonld: JSON.stringify([productLd, breadcrumbLd]),
       p, similar, next, allImages,
       agentInfo, postedDate, postedAgo,
-      promoBanner: getPromoBanner(),
+      promoBanner,
     });
   } catch (err) {
     console.error('[/property/:id] error:', err.message);

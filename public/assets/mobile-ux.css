@@ -1,0 +1,245 @@
+/* Mobile UX Enhancements — Touch-friendly, Smooth Interactions */
+
+@media (max-width: 768px) {
+  /* ── TOUCH TARGETS: Minimum 44px (Apple HIG standard) ── */
+  button, a.btn, input[type="submit"], input[type="button"],
+  .filter-tab, .ap-nav a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── FORM SPACING: Better vertical rhythm on mobile ── */
+  .form-group {
+    margin-bottom: 18px !important;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px; /* Prevents zoom-on-focus on iOS */
+    line-height: 1.5;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--ink);
+    background-color: #FAFAF8;
+  }
+
+  /* ── BUTTON IMPROVEMENTS ── */
+  .btn {
+    min-height: 48px;
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 12px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn.btn-primary {
+    background: var(--ink);
+    color: white;
+  }
+  .btn.btn-primary:active {
+    background: var(--accent-hover, #2a2520);
+  }
+
+  /* ── CARD PADDING: Better breathing room ── */
+  .form-card, .ap-card {
+    padding: 20px 16px !important;
+  }
+  .ap-content {
+    padding: 16px 14px 100px !important;
+  }
+
+  /* ── TAP HIGHLIGHT: Smooth, subtle ── */
+  button, a, input[type="button"], input[type="submit"] {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+  }
+
+  /* ── INPUT FOCUS FEEDBACK ── */
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  /* ── SELECT DROPDOWN SIZE ── */
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231c1917' d='M1 3l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  /* ── TEXTAREA MIN HEIGHT ── */
+  textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  /* ── FLASH MESSAGES: Better visibility ── */
+  .flash {
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    border-left: 4px solid;
+    animation: slideDown 0.3s ease-out;
+  }
+  .flash.ok {
+    background: #F0FAF4;
+    border-color: #27694A;
+    color: #1B4332;
+  }
+  .flash.err {
+    background: #FDF2F2;
+    border-color: #D93838;
+    color: #991B1B;
+  }
+
+  /* ── SMOOTH ANIMATIONS ── */
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── BOTTOM TABBAR SAFE AREA ── */
+  .ap-mobile-tabbar {
+    padding: 6px 12px max(6px, env(safe-area-inset-bottom));
+    height: max(62px, calc(56px + env(safe-area-inset-bottom)));
+  }
+
+  /* ── TABLE MOBILE CARDS ── */
+  .ap-listing-item {
+    padding: 16px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--border2);
+    background: white;
+    gap: 12px;
+  }
+
+  /* ── STAT CARDS MOBILE ── */
+  .stat-card {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+  .stat-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-card .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+  }
+
+  /* ── MOBILE KEYBOARD HANDLING ── */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  textarea {
+    -webkit-appearance: none;
+    -webkit-border-radius: 0; /* iOS removes default border-radius */
+  }
+
+  /* ── SMOOTH SCROLLING ── */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* ── LINK ACTIVE STATE ── */
+  a {
+    transition: color 0.15s, background-color 0.15s;
+  }
+
+  /* ── EMPTY STATE ICON SIZE ── */
+  .empty-state svg {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+  }
+
+  /* ── FORM HINT TEXT ── */
+  .form-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* ── LOADING STATE ── */
+  button:disabled,
+  input:disabled,
+  select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* ── FILE INPUT STYLING ── */
+  input[type="file"] {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* ── BADGE/STATUS CHIP ── */
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}
+
+/* ── PREVENT TEXT ZOOM ON ORIENTATION CHANGE ── */
+input, select, textarea {
+  font-size: 16px;
+}
+
+/* ── SMOOTH TRANSITIONS FOR ALL INTERACTIVE ELEMENTS ── */
+* {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── REDUCE MOTION FOR USERS WHO PREFER IT ── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
