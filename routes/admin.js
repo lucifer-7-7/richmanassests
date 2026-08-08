@@ -235,7 +235,7 @@ router.post('/property', requireAdmin, upload.fields([
       amenities: body.amenities || null, setting_heading: body.setting_heading || null,
       setting_body: body.setting_body || null, setting_pills: body.setting_pills || null,
       emi_label: body.emi_label || null, emi_val: body.emi_val || null,
-      sort_order: parseInt(body.sort_order) || 99, active: true,
+      sort_order: parseInt(body.sort_order) || 99, active: true, is_dummy: false,
     });
     req.session.flash = { type:'ok', msg: `Property "${body.name}" added successfully.` };
   } catch (e) {

@@ -8,7 +8,11 @@
       "Bash(node data/seed.js)",
       "Bash(xargs ls -la)",
       "Bash(curl -s \"http://localhost:3000/api/properties?format=json\")",
-      "Bash(curl -s http://localhost:3000)"
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(git commit -m ' *)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s \"http://localhost:3000/properties\")",
+      "Bash(git commit -m 'Fix dummy data filter: admin-uploaded properties now show when toggle OFF *)"
     ]
   }
 }
