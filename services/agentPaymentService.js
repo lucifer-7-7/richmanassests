@@ -88,7 +88,8 @@ async function createPaymentOrder({ agentId, planId, purpose = 'signup' }) {
     },
   });
 
-  // 5. Store payment_orders row
+  // 5. Store payment_orders row (agent-membership orders have no property_id —
+  // column is nullable for this purpose; see db/migrations/002_razorpay_payment_schema.sql)
   const orderRow = {
     agent_id: agentId,
     plan_id: plan.id,
@@ -97,39 +98,24 @@ async function createPaymentOrder({ agentId, planId, purpose = 'signup' }) {
     currency: plan.currency,
     purpose,
     status: 'created',
-    attempt_count: (existingOrder?.attempt_count || 0) + 1,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
 
-  let createdPaymentOrder = null;
+  let createdPaymentOrder;
   try {
     const insertRes = await db.from('payment_orders').insert(orderRow).select('*').single();
     createdPaymentOrder = check(insertRes, 'createPaymentOrder.insert');
   } catch (err) {
-    if (err.code === 'PGRST204' || err.message?.includes('schema cache')) {
-      const fallbackRow = {
-        internal_order_id: `rma_${rzpOrder.id}`,
-        agent_id: typeof agentId === 'number' ? agentId : 1,
-        property_id: 'agent_membership_plan',
-        amount_paise: plan.amount_paise,
-        currency: plan.currency,
-        status: 'created',
-        idempotency_key: `key_${rzpOrder.id}`,
-      };
-      try {
-        const fbRes = await db.from('payment_orders').insert(fallbackRow).select('*').single();
-        createdPaymentOrder = fbRes.data;
-      } catch (_) {}
-    }
-    if (!createdPaymentOrder) {
-      createdPaymentOrder = {
-        id: `ord_${rzpOrder.id}`,
-        razorpay_order_id: rzpOrder.id,
-        amount_paise: plan.amount_paise,
-        currency: plan.currency,
-      };
-    }
+    console.error('[createPaymentOrder] payment_orders insert failed:', err.message);
+    // Payment can still proceed (Razorpay order already created above), but without
+    // a persisted row /payments/verify will not be able to find it later — surface loudly.
+    createdPaymentOrder = {
+      id: null,
+      razorpay_order_id: rzpOrder.id,
+      amount_paise: plan.amount_paise,
+      currency: plan.currency,
+    };
   }
 
 
@@ -244,17 +230,26 @@ async function processRazorpayWebhook({ eventId, eventType, payload }) {
       const razorpayPaymentId = paymentEntity?.id;
       const amountPaise = paymentEntity?.amount || orderEntity?.amount;
       const method = paymentEntity?.method || 'unknown';
-      const agentIdFromNotes = paymentEntity?.notes?.agent_id || orderEntity?.notes?.agent_id;
+      const notesAgentId = paymentEntity?.notes?.agent_id || orderEntity?.notes?.agent_id;
+      const notesPurpose = paymentEntity?.notes?.purpose || orderEntity?.notes?.purpose;
+      const notesPropertyId = paymentEntity?.notes?.property_id || orderEntity?.notes?.property_id;
 
       let order = null;
       if (razorpayOrderId) {
         try {
-          const { data } = await db.from('payment_orders').select('*, agent_plans(*)').eq('razorpay_order_id', razorpayOrderId).maybeSingle();
+          const { data, error } = await db.from('payment_orders').select('*').eq('razorpay_order_id', razorpayOrderId).maybeSingle();
+          if (error) console.error('[processRazorpayWebhook] order lookup error:', error.message);
           order = data;
-        } catch (_) {}
+        } catch (err) {
+          console.error('[processRazorpayWebhook] order lookup threw:', err.message);
+        }
       }
 
-      const targetAgentId = order?.agent_id || agentIdFromNotes;
+      // Notes on the Razorpay order itself are the ground truth — always present
+      // regardless of whether our own payment_orders row persisted correctly.
+      const purpose = order?.purpose || notesPurpose;
+      const targetAgentId = order?.agent_id || notesAgentId;
+      const targetPropertyId = order?.property_id || notesPropertyId;
 
       if (order) {
         try {
@@ -277,7 +272,19 @@ async function processRazorpayWebhook({ eventId, eventType, payload }) {
         } catch (_) {}
       }
 
-      if (targetAgentId) {
+      // Property listing purchase — webhook is the canonical publisher.
+      // Client-side verify (verifyPropertyPayment) is optimistic/fast-path only;
+      // this path guarantees publish even if the browser closes before the checkout handler fires.
+      if (purpose === 'property_listing' && targetPropertyId) {
+        try {
+          const propSvc = require('./propertyService');
+          await propSvc.publishProperty(targetPropertyId, razorpayOrderId, amountPaise || order?.amount_paise || 0);
+        } catch (err) {
+          console.error('[processRazorpayWebhook] publishProperty failed:', err.message);
+        }
+      }
+
+      if (targetAgentId && purpose !== 'property_listing') {
         let agent = null;
         try {
           const { data } = await db.from('agents').select('*').eq('id', targetAgentId).maybeSingle();
@@ -339,8 +346,20 @@ async function processRazorpayWebhook({ eventId, eventType, payload }) {
             created_at: new Date().toISOString(),
           }, { onConflict: 'razorpay_payment_id' });
 
-          // Keep agent in pending_payment or payment_failed
-          await db.from('agents').update({ status: 'payment_failed', updated_at: new Date().toISOString() }).eq('id', order.agent_id);
+          // Only an agent-membership order failure should affect the agent's account
+          // status — a property-listing fee failure just leaves the listing in draft.
+          if (order.purpose !== 'property_listing' && order.agent_id) {
+            await db.from('agents').update({ status: 'payment_failed', updated_at: new Date().toISOString() }).eq('id', order.agent_id);
+          }
+
+          if (order.purpose === 'property_listing' && order.property_id) {
+            try {
+              const propSvc = require('./propertyService');
+              await propSvc.markPaymentFailed(order.property_id);
+            } catch (err) {
+              console.error('[processRazorpayWebhook] markPaymentFailed failed:', err.message);
+            }
+          }
         }
       }
     } else if (eventType === 'refund.processed') {

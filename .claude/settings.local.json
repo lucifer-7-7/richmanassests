@@ -12,7 +12,15 @@
       "Bash(git commit -m ' *)",
       "Bash(node -e ' *)",
       "Bash(curl -s \"http://localhost:3000/properties\")",
-      "Bash(git commit -m 'Fix dummy data filter: admin-uploaded properties now show when toggle OFF *)"
+      "Bash(git commit -m 'Fix dummy data filter: admin-uploaded properties now show when toggle OFF *)",
+      "Bash(pkill -f \"npm start\\\\|node.*server\")",
+      "PowerShell(Get-Process *)",
+      "Bash(npm start *)",
+      "Bash(curl -s http://localhost:3000/properties)",
+      "Bash(node scripts/fix-admin-properties.js)",
+      "Bash(git commit -m 'Add migration script to fix existing admin properties *)",
+      "Bash(node -e \"require\\('./services/agentPaymentService.js'\\); console.log\\('syntax ok'\\)\")",
+      "Bash(node --check services/agentPaymentService.js)"
     ]
   }
 }
