@@ -409,6 +409,14 @@ router.get('/property/:id', async (req, res) => {
     const { data: adminProp } = await db.from('properties').select('*').eq('id', req.params.id).eq('active', true).maybeSingle();
     p = adminProp;
 
+    // Filter out dummy properties if setting is off
+    if (p) {
+      const useDummy = await getUseDummyData();
+      if (!useDummy && p.is_dummy) {
+        p = null;
+      }
+    }
+
     if (!p) {
       const { data: agentProp } = await db.from('agent_properties').select('*').eq('id', req.params.id).maybeSingle();
       if (agentProp && (agentProp.status === 'published' || (req.session?.agent?.id && String(req.session.agent.id) === String(agentProp.agent_id)))) {

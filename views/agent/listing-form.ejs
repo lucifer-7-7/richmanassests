@@ -160,12 +160,17 @@
   </div>
 
   <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px;">
+    <button type="button" class="btn btn-outline" onclick="RMAPreview.open(document.getElementById('listingForm'))" style="order:-1;">
+      👁️ Preview Listing
+    </button>
     <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
       <%= isEdit ? 'Save & Proceed to Payment →' : 'Proceed to Payment →' %>
     </button>
     <a href="/agent/listings" class="btn btn-outline">Cancel</a>
   </div>
 </form>
+
+<div id="rmaPreviewContainer"></div>
 
 <script>
 (function() {
@@ -270,5 +275,7 @@
   });
 })();
 </script>
+
+<script src="/assets/agent-preview.js" defer></script>
 
 <%- include('../partials/agent-layout-end') %>

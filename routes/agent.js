@@ -434,7 +434,6 @@ router.get('/listings/:id/pay', requireAgent, requirePropertyOwner, async (req, 
       prop,
       fee,
       feeRs: (fee.amount_paise / 100).toLocaleString('en-IN'),
-      cashfreeEnv: process.env.CASHFREE_ENV === 'PRODUCTION' ? 'production' : 'sandbox',
       flash: req.session.agentFlash || null,
     });
     delete req.session.agentFlash;

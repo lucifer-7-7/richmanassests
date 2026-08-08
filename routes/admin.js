@@ -8,7 +8,7 @@ const { getDB, check } = require('../db/db');
 const propSvc  = require('../services/propertyService');
 const agentSvc = require('../services/agentService');
 const { getAllOrders, initiateRefund } = require('../services/paymentService');
-const { getPromoBanner, updatePromoBanner } = require('../lib/settings');
+const { getPromoBanner, updatePromoBanner, getUseDummyData, setUseDummyData, getHeroPropertyIds, setHeroPropertyIds } = require('../lib/settings');
 
 // ── CSRF Protection: Verify Host Origin for all POST/PUT/DELETE requests ──
 router.use((req, res, next) => {
@@ -182,10 +182,21 @@ router.get('/', requireAdmin, async (req, res) => {
       console.error('[admin/analytics]', aErr.message);
     }
 
+    const [promoBanner, useDummyData, heroIds] = await Promise.all([
+      getPromoBanner(),
+      getUseDummyData(),
+      getHeroPropertyIds(),
+    ]);
+
+    const allPropsForHero = [
+      ...properties.map(p => ({ id: p.id, name: p.name, img_card: p.img_card })),
+      ...agentProps.map(p => ({ id: p.id, name: p.name, img_card: p.img_card })),
+    ];
+
     res.render('admin/dashboard', {
       flash: req.session.flash || null,
       properties, enquiries, agentProps, agents, orders, logs, auditLogs, stats, analytics,
-      promoBanner: getPromoBanner(),
+      promoBanner, useDummyData, heroIds, allPropsForHero,
     });
     delete req.session.flash;
   } catch (err) {
@@ -627,7 +638,7 @@ router.post('/settings/promo-banner', requireAdmin, upload.single('banner_photo'
     if (uploadedUrl) bannerImg = uploadedUrl;
   }
 
-  updatePromoBanner({
+  await updatePromoBanner({
     active: active === 'on' || active === 'true' || active === true,
     placement: placement || 'all',
     kicker, title, subtitle,
@@ -636,6 +647,32 @@ router.post('/settings/promo-banner', requireAdmin, upload.single('banner_photo'
   });
 
   req.session.flash = { type: 'ok', msg: 'Promotional Ad Banner updated successfully!' };
+  res.redirect('/admin');
+});
+
+// ── TOGGLE DUMMY DATA ────────────────────────────────────────────
+router.post('/settings/toggle-dummy-data', requireAdmin, async (req, res) => {
+  try {
+    const current = await getUseDummyData();
+    await setUseDummyData(!current);
+    req.session.flash = { type: 'ok', msg: `Dummy data turned ${!current ? 'ON' : 'OFF'}.` };
+  } catch (err) {
+    console.error('[toggle-dummy-data]', err.message);
+    req.session.flash = { type: 'err', msg: err.message };
+  }
+  res.redirect('/admin');
+});
+
+// ── SET HERO PROPERTIES ──────────────────────────────────────────
+router.post('/settings/hero', requireAdmin, async (req, res) => {
+  try {
+    const ids = [].concat(req.body.hero_ids || []).filter(Boolean).slice(0, 6);
+    await setHeroPropertyIds(ids);
+    req.session.flash = { type: 'ok', msg: 'Hero section updated.' };
+  } catch (err) {
+    console.error('[set-hero]', err.message);
+    req.session.flash = { type: 'err', msg: err.message };
+  }
   res.redirect('/admin');
 });
 

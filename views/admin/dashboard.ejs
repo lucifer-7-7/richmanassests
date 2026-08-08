@@ -256,6 +256,11 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
     <span class="badge">Admin</span>
   </div>
   <div class="nav-links">
+    <form method="post" action="/admin/settings/toggle-dummy-data" style="display:inline">
+      <button type="submit" style="border:none;cursor:pointer;background:<%= useDummyData ? '#F0FAF4' : '#FDF2F2' %>;color:<%= useDummyData ? '#27694A' : '#D93838' %>;font-weight:700;padding:8px 16px;border-radius:999px;font-size:13px;font-family:inherit">
+        Dummy Data: <%= useDummyData ? 'ON' : 'OFF' %>
+      </button>
+    </form>
     <a href="/" target="_blank">View site ↗</a>
     <a href="/admin/logout" class="sign-out">Sign out</a>
   </div>
@@ -870,6 +875,54 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
           </div>
         </form>
       </div>
+
+      <!-- HERO SECTION PICKER -->
+      <div class="form-card" style="margin-top:32px;border-top:1px solid var(--line);padding-top:32px;">
+        <form method="post" action="/admin/settings/hero" id="heroForm">
+          <div class="page-head">
+            <h2 style="margin:0 0 8px;">Homepage Hero Section</h2>
+            <p style="font-size:13px;color:var(--muted);margin:0;">Select up to 6 properties to feature. They'll cycle in order on the homepage.</p>
+          </div>
+
+          <!-- Live preview strip -->
+          <div style="margin:24px 0;padding:16px;background:var(--surface2);border-radius:10px;">
+            <div style="font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em;">Preview (in order)</div>
+            <div id="heroPreviewStrip" style="display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;">
+              <div style="font-size:13px;color:var(--muted);flex:0 0 auto;">None selected yet</div>
+            </div>
+          </div>
+
+          <!-- Property grid -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px;margin:24px 0;">
+            <% allPropsForHero.forEach(function(prop, idx) {
+              var isChecked = heroIds && heroIds.includes(prop.id);
+            %>
+            <div style="position:relative;">
+              <label style="display:block;cursor:pointer;border:2px solid var(--line);border-radius:10px;overflow:hidden;transition:0.2s;position:relative;">
+                <input type="checkbox" name="hero_ids" value="<%=prop.id%>" <%= isChecked ? 'checked' : '' %> data-prop-id="<%=prop.id%>" data-prop-name="<%=prop.name%>" data-prop-img="<%=prop.img_card || '/assets/img/site-hero.jpg'%>"
+                  style="position:absolute;left:-9999px;"
+                  onchange="window.HeroPicker.updateSelection()">
+                <div style="aspect-ratio:1;background:#f5f5f5;position:relative;overflow:hidden;">
+                  <img src="<%=prop.img_card || '/assets/img/site-hero.jpg'%>" alt="<%=prop.name%>" style="width:100%;height:100%;object-fit:cover;display:block;">
+                  <div style="position:absolute;inset:0;background:rgba(0,0,0,0);transition:0.2s;pointer-events:none;" class="hero-thumb-overlay"></div>
+                </div>
+                <div style="padding:10px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-2);"><%=prop.name%></div>
+              </label>
+              <div style="position:absolute;top:6px;right:6px;width:24px;height:24px;background:white;border:2px solid white;border-radius:50%;display:none;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#1a1a1a;box-shadow:0 2px 6px rgba(0,0,0,0.1);" class="hero-order-badge"></div>
+            </div>
+            <% }); %>
+          </div>
+
+          <!-- Cap message -->
+          <div style="padding:12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;font-size:12px;color:#92400e;margin:16px 0;">
+            ⚠️ Maximum 6 properties. <span id="heroCapMessage" style="font-weight:600;"><%= heroIds && heroIds.length > 0 ? heroIds.length + ' selected' : 'None selected' %></span>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save">Save Hero Selection →</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- WEBHOOKS PANEL -->
@@ -1378,6 +1431,117 @@ function previewGallery(input, containerId) {
     addPtype.addEventListener('change', updateAddPropFieldLabels);
     updateAddPropFieldLabels();
   }
+})();
+
+// ── Hero Picker Logic ──
+window.HeroPicker = (function() {
+  var selectedOrder = [];
+  var maxItems = 6;
+
+  function getSelectedCheckboxes() {
+    return Array.from(document.querySelectorAll('input[name="hero_ids"]:checked'));
+  }
+
+  function updateSelection() {
+    var checkboxes = getSelectedCheckboxes();
+
+    // Enforce 6-item cap
+    if (checkboxes.length > maxItems) {
+      checkboxes[checkboxes.length - 1].checked = false;
+      checkboxes = getSelectedCheckboxes();
+    }
+
+    // Build selection order from checked state
+    selectedOrder = checkboxes.map(cb => cb.value);
+
+    // Update preview strip
+    var strip = document.getElementById('heroPreviewStrip');
+    if (selectedOrder.length === 0) {
+      strip.innerHTML = '<div style="font-size:13px;color:var(--muted);flex:0 0 auto;">None selected yet</div>';
+    } else {
+      strip.innerHTML = selectedOrder.map(function(propId) {
+        var checkbox = document.querySelector('input[value="' + propId + '"]');
+        if (!checkbox) return '';
+        var name = checkbox.getAttribute('data-prop-name') || 'Unknown';
+        var img = checkbox.getAttribute('data-prop-img') || '/assets/img/site-hero.jpg';
+        return '<div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;">' +
+          '<img src="' + img + '" alt="' + name + '" style="width:80px;height:60px;object-fit:cover;border-radius:8px;border:2px solid #0F0F12;">' +
+          '<span style="font-size:11px;color:var(--ink-2);text-align:center;max-width:80px;white-space:normal;line-height:1.2;">' + name + '</span>' +
+          '</div>';
+      }).join('');
+    }
+
+    // Update cap message
+    var capMsg = document.getElementById('heroCapMessage');
+    if (capMsg) capMsg.textContent = selectedOrder.length + ' selected' + (selectedOrder.length === maxItems ? ' (max reached)' : '');
+
+    // Update order badges and overlay highlighting
+    Array.from(document.querySelectorAll('input[name="hero_ids"]')).forEach(function(cb) {
+      var wrapper = cb.closest('div[style*="position:relative"]');
+      if (!wrapper) return;
+
+      var badge = wrapper.querySelector('.hero-order-badge');
+      var overlay = wrapper.querySelector('.hero-thumb-overlay');
+      var label = cb.closest('label');
+
+      if (cb.checked) {
+        var position = selectedOrder.indexOf(cb.value) + 1;
+        if (badge) {
+          badge.style.display = 'flex';
+          badge.textContent = position;
+        }
+        if (overlay) overlay.style.background = 'rgba(0,0,0,0.3)';
+        if (label) label.style.borderColor = '#0F0F12';
+      } else {
+        if (badge) badge.style.display = 'none';
+        if (overlay) overlay.style.background = 'rgba(0,0,0,0)';
+        if (label) label.style.borderColor = 'var(--line)';
+      }
+    });
+
+    // Disable remaining checkboxes if at max
+    var allCheckboxes = Array.from(document.querySelectorAll('input[name="hero_ids"]'));
+    var atMax = selectedOrder.length >= maxItems;
+    allCheckboxes.forEach(function(cb) {
+      if (!cb.checked) {
+        cb.disabled = atMax;
+      } else {
+        cb.disabled = false;
+      }
+      var label = cb.closest('label');
+      if (label) label.style.opacity = cb.disabled ? '0.5' : '1';
+      if (label) label.style.pointerEvents = cb.disabled ? 'none' : 'auto';
+    });
+  }
+
+  // Form submission: build ordered hidden inputs
+  var heroForm = document.getElementById('heroForm');
+  if (heroForm) {
+    heroForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Remove old hidden inputs
+      Array.from(heroForm.querySelectorAll('input[type="hidden"][name="hero_ids[]"]')).forEach(el => el.remove());
+
+      // Add ordered hidden inputs
+      selectedOrder.forEach(function(propId) {
+        var hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'hero_ids[]';
+        hidden.value = propId;
+        heroForm.appendChild(hidden);
+      });
+
+      heroForm.submit();
+    });
+  }
+
+  // Initial update on page load
+  updateSelection();
+
+  return {
+    updateSelection: updateSelection,
+  };
 })();
 </script>
 </body>
