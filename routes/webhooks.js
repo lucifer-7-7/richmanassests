@@ -50,9 +50,4 @@ router.post('/razorpay', async (req, res) => {
   }
 });
 
-// Legacy Cashfree webhook compatibility wrapper
-router.post('/cashfree', async (req, res) => {
-  return res.status(200).json({ status: 'OK' });
-});
-
 module.exports = router;

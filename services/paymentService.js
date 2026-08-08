@@ -1,25 +1,13 @@
 'use strict';
 /**
  * services/paymentService.js
- * Cashfree Payments integration — order creation, status polling, refunds.
+ * Razorpay order/status/refund helpers shared by admin + agent invoice routes.
+ * Order creation and client-side verification live in agentPaymentService.js;
+ * this module handles fee lookup, status polling, and admin refunds.
  * All amounts are in PAISE (integer). ₹999 = 99900 paise.
  */
-const crypto = require('crypto');
-const { getDB, check } = require('../db/db');
-
-const CF_BASE = process.env.CASHFREE_ENV === 'PRODUCTION'
-  ? 'https://api.cashfree.com'
-  : 'https://sandbox.cashfree.com';
-
-const CF_HEADERS = () => ({
-  'Content-Type': 'application/json',
-  'x-client-id': process.env.CASHFREE_APP_ID || '',
-  'x-client-secret': process.env.CASHFREE_SECRET_KEY || '',
-  'x-api-version': '2023-08-01',
-});
-
-/** Convert paise to rupees string for Cashfree API */
-const paiseToRs = (p) => (p / 100).toFixed(2);
+const { getDB } = require('../db/db');
+const razorpayService = require('./razorpayService');
 
 /** Fetch current active listing fee from DB. */
 async function getListingFee() {
@@ -35,168 +23,47 @@ async function getListingFee() {
   return result.data;
 }
 
-/** Create a Cashfree payment order for a property listing. Idempotent. */
-async function createOrder({ agent, propertyId, propertyName }) {
-  const db = getDB();
-
-  // Security: fetch amount from DB, never trust frontend
-  const fee = await getListingFee();
-
-  // Check if a live, non-expired order already exists for this property
-  const { data: existing } = await db
-    .from('payment_orders')
-    .select('*')
-    .eq('property_id', propertyId)
-    .eq('agent_id', agent.id)
-    .in('status', ['created', 'processing'])
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  // Reuse if session not yet expired
-  if (existing && existing.payment_session_id && existing.session_expires_at) {
-    if (new Date(existing.session_expires_at) > new Date()) {
-      return existing;
-    }
-  }
-
-  // Generate idempotency key: unique per (agent, property, attempt)
-  const idempotencyKey = `${agent.id}-${propertyId}-${Date.now()}`;
-  const internalOrderId = `rma-${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
-
-  // Insert order record BEFORE calling Cashfree (prevents duplication on timeout)
-  const orderRow = {
-    internal_order_id: internalOrderId,
-    agent_id: agent.id,
-    property_id: propertyId,
-    amount_paise: fee.amount_paise,
-    currency: fee.currency,
-    status: 'created',
-    idempotency_key: idempotencyKey,
-    metadata: JSON.stringify({ property_name: propertyName }),
-  };
-  const insertResult = await db.from('payment_orders').insert(orderRow).select('*').single();
-  const order = check(insertResult, 'createOrder.insert');
-
-  // Call Cashfree API to create the order session
-  const cashfreePayload = {
-    order_id: internalOrderId,
-    order_amount: parseFloat(paiseToRs(fee.amount_paise)),
-    order_currency: fee.currency,
-    customer_details: {
-      customer_id: String(agent.id),
-      customer_name: agent.name,
-      customer_email: agent.email,
-      customer_phone: agent.phone || '9999999999',
-    },
-    order_meta: {
-      return_url: `${process.env.SITE_URL || ''}/agent/payment/status/${internalOrderId}`,
-      notify_url: `${process.env.SITE_URL || ''}/webhooks/cashfree`,
-    },
-    order_note: `Listing fee for: ${propertyName}`,
-  };
-
-  let sessionId = null;
-  let cfOrderId = null;
-  let sessionExpiry = null;
-
-  try {
-    const resp = await fetch(`${CF_BASE}/pg/orders`, {
-      method: 'POST',
-      headers: CF_HEADERS(),
-      body: JSON.stringify(cashfreePayload),
-    });
-    const json = await resp.json();
-
-    if (!resp.ok) {
-      throw new Error(`Cashfree API error: ${json.message || resp.statusText}`);
-    }
-
-    sessionId  = json.payment_session_id;
-    cfOrderId  = json.cf_order_id || json.order_id;
-    // Session expires in 15 minutes typically
-    sessionExpiry = new Date(Date.now() + 14 * 60 * 1000).toISOString();
-  } catch (err) {
-    // Mark order as failed if Cashfree call fails
-    await db.from('payment_orders').update({ status: 'failed', updated_at: new Date().toISOString() }).eq('internal_order_id', internalOrderId);
-    throw err;
-  }
-
-  // Update with Cashfree session details
-  const updateResult = await db.from('payment_orders')
-    .update({
-      cashfree_order_id: String(cfOrderId),
-      payment_session_id: sessionId,
-      session_expires_at: sessionExpiry,
-      status: 'processing',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('internal_order_id', internalOrderId)
-    .select('*')
-    .single();
-
-  return check(updateResult, 'createOrder.update');
-}
-
-/** Poll status of an order by internal_order_id. */
-async function getOrderStatus(internalOrderId, agentId) {
+/** Poll status of an order by Razorpay order id, scoped to the requesting agent. */
+async function getOrderStatus(razorpayOrderId, agentId) {
   const db = getDB();
   const result = await db
     .from('payment_orders')
-    .select('internal_order_id, status, amount_paise, currency, payment_method, created_at, property_id')
-    .eq('internal_order_id', internalOrderId)
+    .select('razorpay_order_id, status, amount_paise, currency, payment_method, created_at, property_id')
+    .eq('razorpay_order_id', razorpayOrderId)
     .eq('agent_id', agentId)
-    .single();
-  if (result.error) return null;
+    .maybeSingle();
+  if (result.error || !result.data) return null;
   return result.data;
 }
 
-/** Verify payment status directly from Cashfree API (for reconciliation). */
-async function verifyWithCashfree(internalOrderId) {
-  try {
-    const resp = await fetch(`${CF_BASE}/pg/orders/${internalOrderId}/payments`, {
-      headers: CF_HEADERS(),
-    });
-    if (!resp.ok) return null;
-    const json = await resp.json();
-    return Array.isArray(json) ? json[0] : json;
-  } catch (_) {
-    return null;
-  }
-}
-
-/** Initiate a Cashfree refund. */
-async function initiateRefund(internalOrderId, reason = 'Admin initiated refund') {
+/** Admin: refund a paid property-listing order via Razorpay. */
+async function initiateRefund(razorpayOrderId, reason = 'Admin initiated refund') {
   const db = getDB();
 
-  const { data: order } = await db.from('payment_orders').select('*').eq('internal_order_id', internalOrderId).single();
+  const { data: order } = await db.from('payment_orders').select('*').eq('razorpay_order_id', razorpayOrderId).maybeSingle();
   if (!order) throw new Error('Order not found.');
   if (order.status !== 'paid') throw new Error('Only paid orders can be refunded.');
 
-  const refundId = `refund-${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  const { data: payment } = await db.from('payments').select('razorpay_payment_id').eq('razorpay_order_id', razorpayOrderId).eq('status', 'captured').maybeSingle();
+  if (!payment?.razorpay_payment_id) throw new Error('No captured payment found for this order.');
 
-  const resp = await fetch(`${CF_BASE}/pg/orders/${internalOrderId}/refunds`, {
-    method: 'POST',
-    headers: CF_HEADERS(),
-    body: JSON.stringify({
-      refund_id: refundId,
-      refund_amount: parseFloat(paiseToRs(order.amount_paise)),
-      refund_note: reason,
-    }),
+  const refund = await razorpayService.initiateRazorpayRefund({
+    razorpay_payment_id: payment.razorpay_payment_id,
+    amount_paise: order.amount_paise,
+    notes: { reason },
   });
-  const json = await resp.json();
-  if (!resp.ok) throw new Error(`Cashfree refund error: ${json.message || resp.statusText}`);
 
-  // Update order record
   await db.from('payment_orders').update({
     status: 'refund_initiated',
-    refund_id: refundId,
+    refund_id: refund.id,
     refund_amount_paise: order.amount_paise,
-    refund_status: json.refund_status || 'PENDING',
+    refund_status: refund.status || 'processed',
     updated_at: new Date().toISOString(),
-  }).eq('internal_order_id', internalOrderId);
+  }).eq('razorpay_order_id', razorpayOrderId);
 
-  return { refund_id: refundId, status: json.refund_status };
+  await db.from('payments').update({ status: 'refunded' }).eq('razorpay_payment_id', payment.razorpay_payment_id);
+
+  return { refund_id: refund.id, status: refund.status };
 }
 
 /** Admin: get paginated payment orders & generated invoices. */
@@ -240,9 +107,29 @@ async function getAllOrders(limit = 100) {
       }
     }
 
+    // Enrich with the actual captured payment record (method, razorpay_payment_id) —
+    // this lives in `payments`, not `payment_orders`, so the list is inaccurate without it.
+    const orderIdsForLookup = allOrders.map(o => o.razorpay_order_id).filter(Boolean);
+    let paymentsByOrderId = {};
+    if (orderIdsForLookup.length) {
+      try {
+        const { data: capturedPayments } = await db
+          .from('payments')
+          .select('razorpay_order_id, razorpay_payment_id, method, status, captured_at')
+          .in('razorpay_order_id', orderIdsForLookup)
+          .eq('status', 'captured');
+        (capturedPayments || []).forEach(p => { paymentsByOrderId[p.razorpay_order_id] = p; });
+      } catch (_) {}
+    }
+
     // Ensure agent details and order IDs are populated on all items
     for (const o of allOrders) {
       if (!o.internal_order_id) o.internal_order_id = o.razorpay_order_id || o.cashfree_order_id || String(o.id);
+      const capturedPayment = paymentsByOrderId[o.razorpay_order_id];
+      if (capturedPayment) {
+        o.payment_method = capturedPayment.method;
+        o.razorpay_payment_id = capturedPayment.razorpay_payment_id;
+      }
       if (!o.agents && o.agent_id) {
         try {
           const { data: ag } = await db.from('agents').select('name, email, phone').eq('id', o.agent_id).maybeSingle();
@@ -312,8 +199,26 @@ async function getAgentOrders(agentId) {
       }
     }
 
+    const orderIdsForLookup = invoiceList.map(o => o.razorpay_order_id).filter(Boolean);
+    let paymentsByOrderId = {};
+    if (orderIdsForLookup.length) {
+      try {
+        const { data: capturedPayments } = await db
+          .from('payments')
+          .select('razorpay_order_id, razorpay_payment_id, method, status')
+          .in('razorpay_order_id', orderIdsForLookup)
+          .eq('status', 'captured');
+        (capturedPayments || []).forEach(p => { paymentsByOrderId[p.razorpay_order_id] = p; });
+      } catch (_) {}
+    }
+
     for (const o of invoiceList) {
       if (!o.internal_order_id) o.internal_order_id = o.razorpay_order_id || o.id;
+      const capturedPayment = paymentsByOrderId[o.razorpay_order_id];
+      if (capturedPayment) {
+        o.payment_method = capturedPayment.method;
+        o.razorpay_payment_id = capturedPayment.razorpay_payment_id;
+      }
       if (o.property_id && !o.agent_properties) {
         try {
           const { data: prop } = await db.from('agent_properties').select('name, loc, type').eq('id', o.property_id).maybeSingle();
@@ -331,4 +236,4 @@ async function getAgentOrders(agentId) {
 
 
 
-module.exports = { getListingFee, createOrder, getOrderStatus, verifyWithCashfree, initiateRefund, getAllOrders, getAgentOrders };
+module.exports = { getListingFee, getOrderStatus, initiateRefund, getAllOrders, getAgentOrders };

@@ -112,7 +112,7 @@ router.get('/', requireAdmin, async (req, res) => {
       db.from('agent_properties').select('*, agents(name, email, phone)').neq('status', 'deleted').order('created_at', { ascending: false }).limit(50),
       db.from('agents').select('id, name, email, is_active, created_at').order('created_at', { ascending: false }).limit(20),
       getAllOrders(500),
-      db.from('webhook_logs').select('*').order('received_at', { ascending: false }).limit(100),
+      db.from('webhook_events').select('*').order('received_at', { ascending: false }).limit(100),
       db.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100),
     ]);
 
@@ -425,14 +425,18 @@ router.get('/invoices/:orderId', requireAdmin, async (req, res) => {
 
     if (!order) {
       const db = getDB();
+      // id is BIGINT — only include it in the OR filter when orderId actually looks numeric,
+      // otherwise Postgres rejects the whole filter with a type-cast error (e.g. Razorpay's "order_xxx" ids).
+      const orFilters = [`internal_order_id.eq.${orderId}`, `cashfree_order_id.eq.${orderId}`, `razorpay_order_id.eq.${orderId}`];
+      if (/^\d+$/.test(orderId)) orFilters.push(`id.eq.${orderId}`);
       const { data: dbOrder } = await db
         .from('payment_orders')
         .select('*, agents(*), agent_properties(*)')
-        .or(`internal_order_id.eq.${orderId},cashfree_order_id.eq.${orderId},id.eq.${orderId}`)
+        .or(orFilters.join(','))
         .maybeSingle();
       if (dbOrder) {
         order = dbOrder;
-        if (!order.internal_order_id) order.internal_order_id = order.cashfree_order_id || String(order.id);
+        if (!order.internal_order_id) order.internal_order_id = order.razorpay_order_id || order.cashfree_order_id || String(order.id);
       }
     }
 
@@ -463,7 +467,7 @@ router.get('/invoices/:orderId', requireAdmin, async (req, res) => {
 router.get('/webhook-logs', requireAdmin, async (req, res) => {
   try {
     const db = getDB();
-    const { data: logs } = await db.from('webhook_logs').select('*').order('received_at', { ascending: false }).limit(100);
+    const { data: logs } = await db.from('webhook_events').select('*').order('received_at', { ascending: false }).limit(100);
     res.render('admin/webhook-logs', { title: 'Webhook Logs | Admin', flash: null, logs: logs || [] });
   } catch (err) {
     res.render('admin/webhook-logs', { title: 'Webhook Logs | Admin', flash: { type:'err', msg: err.message }, logs: [] });
