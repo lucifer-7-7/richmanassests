@@ -117,6 +117,15 @@
 </div>
 
 <script>
+// Format raw numeric price as Indian currency if needed (fallback for old/malformed listings)
+function formatPrice(priceStr) {
+  if (!priceStr) return priceStr;
+  if (/^[₹\s,a-z.A-Z]/.test(priceStr)) return priceStr; // already formatted
+  var num = parseInt(priceStr.replace(/\D/g, ''), 10);
+  if (isNaN(num)) return priceStr;
+  return '₹' + num.toString().replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+}
+
 var lbImages = <%- JSON.stringify(typeof allImages !== 'undefined' ? allImages : [p.img_hero, p.img_card].filter(Boolean)) %>;
 var lbIndex = 0;
 
@@ -161,10 +170,7 @@ document.addEventListener('keydown', function(e) {
     <div class="spec"><h6>Price</h6><div class="v" style="font-size:clamp(20px,2vw,26px)"><%= p.price %></div></div>
     <div class="spec"><h6>Listing</h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></div></div>
     <div class="spec"><h6>Type</h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.type %></div></div>
-    <% 
-      var pTypeLower = (p.type || '').toLowerCase();
-      var isLandOrPlot = pTypeLower.includes('plot') || pTypeLower.includes('land') || pTypeLower.includes('agricultural');
-    %>
+    <% // isLandOrPlot is passed from route %>
     <% if (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A') { %><div class="spec"><h6>Bedrooms</h6><div class="v"><%= p.beds %></div></div><% } %>
     <% if (!isLandOrPlot && p.baths && p.baths !== '—' && p.baths !== 'N/A') { %><div class="spec"><h6>Bathrooms</h6><div class="v"><%= p.baths %></div></div><% } %>
     <% if (p.sqft) { %><div class="spec"><h6><%= isLandOrPlot ? 'Land Area' : 'Area' %></h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.sqft %><% if (!p.sqft.toLowerCase().includes('sq') && !p.sqft.toLowerCase().includes('acre') && !p.sqft.toLowerCase().includes('cent')) { %> sq ft<% } %></div></div><% } %>

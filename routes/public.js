@@ -507,6 +507,8 @@ router.get('/property/:id', async (req, res) => {
     };
 
     const promoBanner = await getPromoBanner();
+    const pTypeLower = (p.type || '').toLowerCase();
+    const isLandOrPlot = pTypeLower.includes('plot') || pTypeLower.includes('land') || pTypeLower.includes('agricultural');
     res.render('property', {
       title: pageTitle,
       description: pageDesc,
@@ -517,7 +519,7 @@ router.get('/property/:id', async (req, res) => {
       jsonld: JSON.stringify([productLd, breadcrumbLd]),
       p, similar, next, allImages,
       agentInfo, postedDate, postedAgo,
-      promoBanner,
+      promoBanner, isLandOrPlot,
     });
   } catch (err) {
     console.error('[/property/:id] error:', err.message);

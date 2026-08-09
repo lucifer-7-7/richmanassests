@@ -44,7 +44,9 @@
       "Bash(sed -n 1460,1465p __TRACKED_VAR__/d2.html)",
       "Skill(update-config)",
       "mcp__plugin_supabase_supabase__execute_sql",
-      "mcp__headroom__headroom_retrieve"
+      "mcp__headroom__headroom_retrieve",
+      "Bash(git log *)",
+      "mcp__plugin_supabase_supabase__list_tables"
     ]
   },
   "hooks": {

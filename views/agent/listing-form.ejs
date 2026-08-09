@@ -53,7 +53,7 @@
       <div class="form-group">
         <label for="pprice">Price Display <span style="color:#D93838;font-weight:700">*</span></label>
         <input type="text" id="pprice" name="price" required placeholder="e.g. ₹85 Lakhs or ₹25,000/mo" value="<%= prop && prop.price ? prop.price : '' %>">
-        <div class="form-hint">Text shown on the listing card.</div>
+        <div class="form-hint">Always include ₹ symbol. Text shown on the listing card.</div>
       </div>
       <div class="form-group">
         <label for="pprice_val">Price Value (₹ numeric) <span style="color:#D93838;font-weight:700">*</span></label>
@@ -72,16 +72,16 @@
     <div class="form-section-title">Specifications & Features</div>
     <div class="form-row">
       <div class="form-group" id="grp-beds">
-        <label for="pbeds" id="lbl-beds">Bedrooms / Key Feature</label>
-        <input type="text" id="pbeds" name="beds" placeholder="e.g. 3 BHK" value="<%= prop && prop.beds ? prop.beds : '' %>">
+        <label for="pbeds" id="lbl-beds">Bedrooms / Key Feature <span style="color:#D93838">*</span></label>
+        <input type="text" id="pbeds" name="beds" required placeholder="e.g. 3 BHK" value="<%= prop && prop.beds ? prop.beds : '' %>">
       </div>
       <div class="form-group" id="grp-baths">
-        <label for="pbaths" id="lbl-baths">Bathrooms / Dimensions</label>
-        <input type="text" id="pbaths" name="baths" placeholder="e.g. 2" value="<%= prop && prop.baths ? prop.baths : '' %>">
+        <label for="pbaths" id="lbl-baths">Bathrooms / Dimensions <span style="color:#D93838">*</span></label>
+        <input type="text" id="pbaths" name="baths" required placeholder="e.g. 2" value="<%= prop && prop.baths ? prop.baths : '' %>">
       </div>
       <div class="form-group" id="grp-sqft">
-        <label for="psqft" id="lbl-sqft">Area (sqft / Acres / Cents)</label>
-        <input type="text" id="psqft" name="sqft" placeholder="e.g. 1,800 sqft" value="<%= prop && prop.sqft ? prop.sqft : '' %>">
+        <label for="psqft" id="lbl-sqft">Area (sqft / Acres / Cents) <span style="color:#D93838">*</span></label>
+        <input type="text" id="psqft" name="sqft" required placeholder="e.g. 1,800 sqft" value="<%= prop && prop.sqft ? prop.sqft : '' %>">
       </div>
     </div>
     <div class="form-group">
@@ -94,13 +94,14 @@
   <div class="form-section">
     <div class="form-section-title">Description & Amenities</div>
     <div class="form-group">
-      <label for="pdesc">Property Description</label>
-      <textarea id="pdesc" name="description" rows="5" placeholder="Describe the property in detail — location highlights, views, condition, neighbourhood…"><%= prop && prop.description ? prop.description : '' %></textarea>
+      <label for="pdesc">Property Description <span style="color:#D93838">*</span></label>
+      <textarea id="pdesc" name="description" rows="5" required placeholder="Describe the property in detail — location highlights, views, condition, neighbourhood…"><%= prop && prop.description ? prop.description : '' %></textarea>
+      <div class="form-hint">Minimum 40 characters.</div>
     </div>
     <div class="form-group">
-      <label for="pamen">Amenities</label>
-      <textarea id="pamen" name="amenities" rows="3" placeholder="e.g. Swimming Pool · Gym · 24/7 Security · Parking · Backup Power"><%= prop && prop.amenities ? prop.amenities : '' %></textarea>
-      <div class="form-hint">Separate with · (bullet) or new lines.</div>
+      <label for="pamen">Amenities <span style="color:#D93838">*</span></label>
+      <textarea id="pamen" name="amenities" rows="3" required placeholder="e.g. Swimming Pool · Gym · 24/7 Security · Parking · Backup Power"><%= prop && prop.amenities ? prop.amenities : '' %></textarea>
+      <div class="form-hint">List at least one. Separate with · (bullet) or new lines.</div>
     </div>
   </div>
 
@@ -267,8 +268,20 @@
     updateFieldLabels();
   }
 
-  // Clear local draft cache on form submission
-  form.addEventListener('submit', function() {
+  // Validate images on form submission
+  form.addEventListener('submit', function(e) {
+    var heroInput = document.getElementById('img_hero');
+    var cardInput = document.getElementById('img_card');
+    var galleryInput = document.getElementById('gallery');
+    var heroHasFile = heroInput && heroInput.files && heroInput.files.length > 0;
+    var cardHasFile = cardInput && cardInput.files && cardInput.files.length > 0;
+    var galleryHasFile = galleryInput && galleryInput.files && galleryInput.files.length > 0;
+    var existingImages = <%- JSON.stringify((prop && (prop.img_hero || prop.img_card || (prop.gallery && JSON.parse(prop.gallery || '[]').length > 0))) ? true : false) %>;
+    if (!heroHasFile && !cardHasFile && !galleryHasFile && !existingImages) {
+      e.preventDefault();
+      alert('Please upload at least one property image before proceeding.');
+      return;
+    }
     btn.disabled = true;
     btn.textContent = 'Saving & Processing…';
     try { localStorage.removeItem(draftKey); } catch(_) {}

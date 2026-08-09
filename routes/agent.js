@@ -320,6 +320,17 @@ router.post('/listings', requireAgent, upload.fields([
   }
   try {
     const files = req.files || {};
+    if (!files.img_card && !files.img_hero && !files.gallery) {
+      return res.render('agent/listing-form', {
+        title: 'Add New Listing | RichManAssets Agent',
+        robots: 'noindex,nofollow',
+        agent: req.agent,
+        prop: req.body,
+        isEdit: false,
+        flash: { type: 'err', msg: 'Please upload at least one property image.' },
+        csrfToken: genCsrf(req),
+      });
+    }
     const propId = req.body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30) + '-' + Date.now().toString(36);
     const imgCard = files.img_card ? await resolveImg(files.img_card[0], `agent-${req.agent.id}-${propId}-card`) : null;
     const imgHero = files.img_hero ? await resolveImg(files.img_hero[0], `agent-${req.agent.id}-${propId}-hero`) : null;

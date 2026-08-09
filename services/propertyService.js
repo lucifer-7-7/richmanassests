@@ -32,6 +32,16 @@ const LISTING_DURATION_DAYS = 365; // 1 year active on payment
 // ── Helpers ───────────────────────────────────────────────────────
 
 /**
+ * Check if property type is a land/plot/agricultural listing.
+ * Beds and baths are exempt for these types.
+ */
+function isLandOrPlot(type) {
+  if (!type) return false;
+  const lowerType = type.toLowerCase();
+  return lowerType.includes('plot') || lowerType.includes('land') || lowerType.includes('agricultural');
+}
+
+/**
  * Generate a clean property ID slug from a name + timestamp.
  */
 function makeId(name) {
@@ -95,6 +105,18 @@ function validateProperty(body) {
     errs.push('Price display text is required (e.g. ₹85 Lakhs).');
   if (body.price_val === undefined || body.price_val === '' || isNaN(Number(body.price_val)))
     errs.push('Numeric price value is required for filtering.');
+  if (!body.sqft || body.sqft.trim().length < 1)
+    errs.push('Property area/size is required.');
+  if (!isLandOrPlot(body.type)) {
+    if (!body.beds || body.beds.trim().length < 1)
+      errs.push('Number of bedrooms is required.');
+    if (!body.baths || body.baths.trim().length < 1)
+      errs.push('Number of bathrooms is required.');
+  }
+  if (!body.description || body.description.trim().length < 40)
+    errs.push('Property description must be at least 40 characters.');
+  if (!body.amenities || body.amenities.trim().split(/\||·|\n/).filter(a => a.trim()).length < 1)
+    errs.push('List at least one amenity (separate with | or ·).');
   return errs;
 }
 
@@ -457,6 +479,7 @@ async function updatePublishedListing(propId, agentId, body, { img_card, img_her
 }
 
 module.exports = {
+  isLandOrPlot,
   // Agent CRUD
   getAgentListings,
   getAgentProperty,
