@@ -34,7 +34,7 @@ router.get('/:orderId', requireAgent, async (req, res) => {
       String(o.internal_order_id) === String(orderId) || 
       String(o.id) === String(orderId) || 
       String(o.razorpay_order_id) === String(orderId) || 
-      String(o.cashfree_order_id) === String(orderId) ||
+
       String(o.property_id) === String(orderId)
     );
     if (!order) return res.status(404).send('Invoice not found');

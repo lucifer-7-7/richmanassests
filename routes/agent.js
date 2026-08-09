@@ -16,6 +16,7 @@ const { authLimiter }     = require('../middleware/rateLimiter');
 const agentSvc  = require('../services/agentService');
 const propSvc   = require('../services/propertyService');
 const { getListingFee } = require('../services/paymentService');
+const { logSecurityEvent } = require('../lib/securityLog');
 
 // ── multer setup ─────────────────────────────────────────────────
 const uploadDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../uploads');
@@ -92,11 +93,11 @@ router.get('/register', (req, res) => {
 
 // POST /agent/register
 router.post('/register', authLimiter, checkCsrf, async (req, res) => {
-  const { name, email, phone, password, company_name, city, rera_number, gst_number, plan_id } = req.body;
+  const { name, email, phone, password, company_name, city, rera_number, gst_number } = req.body;
   try {
     const agentAuthSvc = require('../services/agentAuthService');
     const agent = await agentAuthSvc.registerAgent({
-      name, email, phone, password, company_name, city, rera_number, gst_number, plan_id
+      name, email, phone, password, company_name, city, rera_number, gst_number
     });
     req.session.agent = { id: agent.id, name: agent.name, email: agent.email, status: agent.status };
     res.redirect('/agent/verify-otp');
@@ -127,7 +128,9 @@ router.post('/verify-otp', requireAgent, checkCsrf, async (req, res) => {
     const agentAuthSvc = require('../services/agentAuthService');
     const updatedAgent = await agentAuthSvc.verifyAgentAccount(req.agent.id);
     req.session.agent.status = updatedAgent.status;
-    res.redirect('/agent/checkout');
+    // Onboarding is free — a verified agent goes straight to work. Payment happens
+    // per listing at publish time.
+    res.redirect('/agent/listings');
   } catch (err) {
     res.render('agent/verify-otp', {
       title: 'Verify Account | RichManAssets Agent',
@@ -139,38 +142,9 @@ router.post('/verify-otp', requireAgent, checkCsrf, async (req, res) => {
   }
 });
 
-// GET /agent/checkout
-router.get('/checkout', requireAgent, async (req, res) => {
-  try {
-    const agentAuthSvc = require('../services/agentAuthService');
-    const agentPaymentSvc = require('../services/agentPaymentService');
-
-    const agent = await agentAuthSvc.getAgentById(req.agent.id);
-    if (!agent) return res.redirect('/agent/login');
-
-    if (agent.status === 'active') {
-      return res.redirect('/agent/dashboard?status=active');
-    }
-
-    const orderData = await agentPaymentSvc.createPaymentOrder({
-      agentId: agent.id,
-      planId: agent.plan_id,
-      purpose: 'signup',
-    });
-
-    res.render('agent/checkout', {
-      title: 'Agent Membership Payment | RichManAssets',
-      robots: 'noindex,nofollow',
-      agent,
-      orderData,
-      flash: null,
-      csrfToken: genCsrf(req),
-    });
-  } catch (err) {
-    console.error('[GET /agent/checkout Error]:', err.message);
-    res.status(500).send('Server Error creating payment checkout session');
-  }
-});
+// The former GET /agent/checkout (annual membership) is gone — onboarding is free.
+// Anyone with a bookmark lands on their listings, where the per-listing fee is paid.
+router.get('/checkout', requireAgent, (req, res) => res.redirect('/agent/listings'));
 
 
 // GET /agent/login
@@ -195,6 +169,11 @@ router.post('/login', authLimiter, checkCsrf, async (req, res) => {
     const agentAuthSvc = require('../services/agentAuthService');
     const agent = await agentAuthSvc.authenticateAgent(email, password);
     if (!agent) {
+      await logSecurityEvent('agent_login_failed', { email }, {
+        actorType: 'agent',
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+      });
       return res.render('agent/login', {
         title: 'Agent Login | RichManAssets',
         robots: 'noindex,nofollow',
@@ -230,7 +209,6 @@ router.post('/login', authLimiter, checkCsrf, async (req, res) => {
       });
 
       if (agent.status === 'draft') return res.redirect('/agent/verify-otp');
-      if (['pending_payment', 'payment_failed'].includes(agent.status)) return res.redirect('/agent/checkout');
 
       res.redirect(nextUrl.startsWith('/agent') ? nextUrl : '/agent/dashboard');
     });

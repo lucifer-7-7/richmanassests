@@ -11,200 +11,22 @@ const { getDB, check } = require('../db/db');
 const razorpayService = require('./razorpayService');
 const { logStatusChange } = require('./agentAuthService');
 const { getListingFee } = require('./paymentService');
+const { logSecurityEvent } = require('../lib/securityLog');
+
 
 /**
- * Create or reuse Razorpay Payment Order for an Agent
- */
-async function createPaymentOrder({ agentId, planId, purpose = 'signup' }) {
-  const db = getDB();
-
-  // 1. Fetch Agent
-  let agent = null;
-  try {
-    const { data } = await db.from('agents').select('*').eq('id', agentId).single();
-    agent = data;
-  } catch (_) {}
-
-  if (!agent) {
-    const agentAuthSvc = require('./agentAuthService');
-    agent = await agentAuthSvc.getAgentById(agentId);
-  }
-  if (!agent) throw new Error('Agent not found.');
-
-  // 2. SERVER-SIDE AMOUNT COMPUTATION: Fetch plan directly from database
-  const targetPlanId = planId || agent.plan_id || 'a0000000-0000-0000-0000-000000000001';
-  let plan = null;
-  try {
-    const { data } = await db.from('agent_plans').select('*').eq('id', targetPlanId).maybeSingle();
-    plan = data;
-  } catch (_) {}
-
-  if (!plan) {
-    plan = { id: targetPlanId, name: 'Annual Agent Membership', amount_paise: 199900, currency: 'INR', is_active: true, validity_days: 365 };
-  }
-
-
-  // 3. Reuse unexpired open order if exists (prevents duplicate order spam)
-  const { data: existingOrder } = await db
-    .from('payment_orders')
-    .select('*')
-    .eq('agent_id', agentId)
-    .eq('plan_id', plan.id)
-    .in('status', ['created', 'attempted'])
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (existingOrder) {
-    // Check if created within last 24 hours
-    const createdAt = new Date(existingOrder.created_at).getTime();
-    if (Date.now() - createdAt < 24 * 60 * 60 * 1000) {
-      return {
-        payment_order_id: existingOrder.id,
-        razorpay_order_id: existingOrder.razorpay_order_id,
-        amount_paise: existingOrder.amount_paise,
-        currency: existingOrder.currency,
-        key_id: razorpayService.KEY_ID,
-        agent: {
-          name: agent.name,
-          email: agent.email,
-          phone: agent.phone,
-        },
-        reused: true,
-      };
-    }
-  }
-
-  // 4. Create new Razorpay Order via SDK
-  const receipt = `rcpt_${agentId.toString().substring(0, 8)}_${Date.now()}`;
-  const rzpOrder = await razorpayService.createRazorpayOrder({
-    amount_paise: plan.amount_paise,
-    currency: plan.currency,
-    receipt,
-    notes: {
-      agent_id: agentId,
-      plan_id: plan.id,
-      purpose,
-    },
-  });
-
-  // 5. Store payment_orders row (agent-membership orders have no property_id —
-  // column is nullable for this purpose; see db/migrations/002_razorpay_payment_schema.sql)
-  const orderRow = {
-    agent_id: agentId,
-    plan_id: plan.id,
-    razorpay_order_id: rzpOrder.id,
-    amount_paise: plan.amount_paise,
-    currency: plan.currency,
-    purpose,
-    status: 'created',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
-
-  let createdPaymentOrder;
-  try {
-    const insertRes = await db.from('payment_orders').insert(orderRow).select('*').single();
-    createdPaymentOrder = check(insertRes, 'createPaymentOrder.insert');
-  } catch (err) {
-    console.error('[createPaymentOrder] payment_orders insert failed:', err.message);
-    // Payment can still proceed (Razorpay order already created above), but without
-    // a persisted row /payments/verify will not be able to find it later — surface loudly.
-    createdPaymentOrder = {
-      id: null,
-      razorpay_order_id: rzpOrder.id,
-      amount_paise: plan.amount_paise,
-      currency: plan.currency,
-    };
-  }
-
-
-  return {
-    payment_order_id: createdPaymentOrder.id,
-    razorpay_order_id: createdPaymentOrder.razorpay_order_id,
-    amount_paise: createdPaymentOrder.amount_paise,
-    currency: createdPaymentOrder.currency,
-    key_id: razorpayService.KEY_ID,
-    agent: {
-      name: agent.name,
-      email: agent.email,
-      phone: agent.phone,
-    },
-    reused: false,
-  };
-}
-
-/**
- * Client-Side Verification (Fast-path UX only)
- * HMAC-SHA256 signature verification.
- * Note: Marks payments row 'authorized' optimistically, but DOES NOT activate agent.
- * Activation is owned EXCLUSIVELY by the webhook handler / reconciliation cron.
- */
-async function verifyClientPayment({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) {
-  const db = getDB();
-
-  const isValid = razorpayService.verifyCheckoutSignature({
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature,
-  });
-
-  if (!isValid) {
-    console.warn(`[Tamper Attempt] Invalid signature for order ${razorpay_order_id}`);
-    return { success: false, reason: 'INVALID_SIGNATURE' };
-  }
-
-  // Find order record
-  const { data: order } = await db.from('payment_orders').select('*').eq('razorpay_order_id', razorpay_order_id).maybeSingle();
-  if (!order) return { success: false, reason: 'ORDER_NOT_FOUND' };
-
-  // Update order status to attempted
-  await db.from('payment_orders').update({ status: 'attempted', updated_at: new Date().toISOString() }).eq('id', order.id);
-
-  // Insert/upsert optimistic payments row as 'authorized'
-  const paymentPayload = {
-    payment_order_id: order.id,
-    razorpay_payment_id,
-    status: 'authorized',
-    amount_paise: order.amount_paise,
-    currency: order.currency,
-    created_at: new Date().toISOString(),
-  };
-
-  try {
-    await db.from('payments').upsert(paymentPayload, { onConflict: 'razorpay_payment_id' });
-  } catch (err) {
-    console.error('[verifyClientPayment] Upsert error:', err.message);
-  }
-
-  return { success: true, order_id: order.id };
-}
-
-const processedEventIds = new Set();
-
-/**
- * WEBHOOK EVENT HANDLER (Source of Truth — Owns Account Activation)
- * Enforces Idempotency via webhook_events(razorpay_event_id) and in-memory ledger.
+ * WEBHOOK EVENT HANDLER (Source of Truth — owns listing publication)
+ *
+ * Idempotency is enforced by the UNIQUE constraint on webhook_events.razorpay_event_id.
+ * The insert itself is the lock: a read-then-write check loses the race when Razorpay
+ * delivers the same event twice concurrently, which it does on retries. The previous
+ * in-memory Set was worse still — it grew without bound, reset on restart, and was
+ * per-instance, so it never actually prevented anything in a multi-instance deploy.
  */
 async function processRazorpayWebhook({ eventId, eventType, payload }) {
   const db = getDB();
 
-  // 1. Idempotency Check
-  if (processedEventIds.has(eventId)) {
-    return { ok: true, duplicate: true, processed: true };
-  }
-
-  try {
-    const { data: existingEvent } = await db.from('webhook_events').select('id, processed').eq('razorpay_event_id', eventId).maybeSingle();
-    if (existingEvent) {
-      processedEventIds.add(eventId);
-      return { ok: true, duplicate: true, processed: existingEvent.processed };
-    }
-  } catch (_) {}
-
-  processedEventIds.add(eventId);
-
-  // 2. Save Event to Ledger
+  // 1. Claim the event. A duplicate key here means another delivery already owns it.
   const eventRow = {
     razorpay_event_id: eventId,
     event_type: eventType,
@@ -213,11 +35,23 @@ async function processRazorpayWebhook({ eventId, eventType, payload }) {
     received_at: new Date().toISOString(),
   };
 
-  let webhookRecordId = null;
-  try {
-    const insertEvent = await db.from('webhook_events').insert(eventRow).select('id').maybeSingle();
-    webhookRecordId = insertEvent.data?.id;
-  } catch (_) {}
+  const insertEvent = await db.from('webhook_events').insert(eventRow).select('id').maybeSingle();
+
+  if (insertEvent.error) {
+    // 23505 = unique_violation → this event was already claimed.
+    if (insertEvent.error.code === '23505') {
+      const { data: existing } = await db
+        .from('webhook_events')
+        .select('processed')
+        .eq('razorpay_event_id', eventId)
+        .maybeSingle();
+      return { ok: true, duplicate: true, processed: !!existing?.processed };
+    }
+    // Anything else is a real failure — throw so the route returns 500 and Razorpay retries.
+    throw new Error(`webhook_events insert failed: ${insertEvent.error.message}`);
+  }
+
+  const webhookRecordId = insertEvent.data?.id;
 
 
   // 3. Process by Event Type
@@ -252,76 +86,59 @@ async function processRazorpayWebhook({ eventId, eventType, payload }) {
       const targetPropertyId = order?.property_id || notesPropertyId;
 
       if (order) {
-        try {
-          await db.from('payment_orders').update({ status: 'paid', updated_at: new Date().toISOString() }).eq('id', order.id);
-        } catch (_) {}
+        await db
+          .from('payment_orders')
+          .update({ status: 'paid', razorpay_payment_id: razorpayPaymentId, updated_at: new Date().toISOString() })
+          .eq('id', order.id);
 
-        try {
-          const paymentData = {
-            payment_order_id: order.id,
-            razorpay_payment_id: razorpayPaymentId || `pay_synced_${Date.now()}`,
-            status: 'captured',
-            method,
-            amount_paise: amountPaise || order.amount_paise || 199900,
-            currency: order.currency || 'INR',
-            captured_at: new Date().toISOString(),
-            raw_payload: payload,
-            created_at: new Date().toISOString(),
-          };
-          await db.from('payments').upsert(paymentData, { onConflict: 'razorpay_payment_id' });
-        } catch (_) {}
+        const paymentData = {
+          payment_order_id: order.id,
+          razorpay_payment_id: razorpayPaymentId || `pay_synced_${Date.now()}`,
+          // getAllOrders/getAgentOrders join payments on this column. Omitting it left
+          // every webhook-captured payment invisible to the admin payments list.
+          razorpay_order_id: razorpayOrderId,
+          agent_id: order.agent_id,
+          property_id: order.property_id,
+          status: 'captured',
+          method,
+          amount_paise: amountPaise || order.amount_paise,
+          currency: order.currency || 'INR',
+          captured_at: new Date().toISOString(),
+          raw_payload: payload,
+          created_at: new Date().toISOString(),
+        };
+        const upsertRes = await db.from('payments').upsert(paymentData, { onConflict: 'razorpay_payment_id' });
+        if (upsertRes.error) {
+          // Throwing gets us a Razorpay retry. Swallowing lost the capture record for good.
+          throw new Error(`payments upsert failed: ${upsertRes.error.message}`);
+        }
       }
 
       // Property listing purchase — webhook is the canonical publisher.
       // Client-side verify (verifyPropertyPayment) is optimistic/fast-path only;
       // this path guarantees publish even if the browser closes before the checkout handler fires.
-      if (purpose === 'property_listing' && targetPropertyId) {
+      if (purpose === 'property_listing' && targetPropertyId && targetAgentId) {
         try {
           const propSvc = require('./propertyService');
-          await propSvc.publishProperty(targetPropertyId, razorpayOrderId, amountPaise || order?.amount_paise || 0);
+          await propSvc.publishProperty({
+            propertyId:  targetPropertyId,
+            agentId:     targetAgentId,
+            paidOrderId: razorpayOrderId,
+            amountPaise: amountPaise || order?.amount_paise || 0,
+          });
         } catch (err) {
           console.error('[processRazorpayWebhook] publishProperty failed:', err.message);
         }
+      } else if (purpose === 'property_listing' && targetPropertyId && !targetAgentId) {
+        // publishProperty now scopes by agent, so an order that carries a property but no
+        // agent cannot be published safely. Surface it rather than guessing an owner.
+        console.error('[processRazorpayWebhook] listing order missing agent_id, cannot publish:', {
+          razorpayOrderId, targetPropertyId,
+        });
       }
 
-      if (targetAgentId && purpose !== 'property_listing') {
-        let agent = null;
-        try {
-          const { data } = await db.from('agents').select('*').eq('id', targetAgentId).maybeSingle();
-          agent = data;
-        } catch (_) {}
-
-        if (!agent) {
-          const agentAuthSvc = require('./agentAuthService');
-          agent = await agentAuthSvc.getAgentById(targetAgentId);
-        }
-
-        if (agent) {
-          const oldStatus = agent.status || 'pending_payment';
-          const expiresAt = new Date();
-          expiresAt.setDate(expiresAt.getDate() + 365);
-
-          try {
-            await db
-              .from('agents')
-              .update({
-                status: 'active',
-                activated_at: new Date().toISOString(),
-                expires_at: expiresAt.toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', agent.id);
-          } catch (_) {}
-
-          await logStatusChange({
-            agentId: agent.id,
-            fromStatus: oldStatus,
-            toStatus: 'active',
-            reason: `Payment captured (${razorpayPaymentId || razorpayOrderId})`,
-            changedBy: 'webhook_system',
-          });
-        }
-      }
+      // No agent-activation branch: accounts are free and already active by the time any
+      // payment happens. The only thing a captured payment buys is a published listing.
 
     } else if (eventType === 'payment.failed') {
       const paymentEntity = payload.payment?.entity || payload.payload?.payment?.entity;
@@ -346,13 +163,9 @@ async function processRazorpayWebhook({ eventId, eventType, payload }) {
             created_at: new Date().toISOString(),
           }, { onConflict: 'razorpay_payment_id' });
 
-          // Only an agent-membership order failure should affect the agent's account
-          // status — a property-listing fee failure just leaves the listing in draft.
-          if (order.purpose !== 'property_listing' && order.agent_id) {
-            await db.from('agents').update({ status: 'payment_failed', updated_at: new Date().toISOString() }).eq('id', order.agent_id);
-          }
-
-          if (order.purpose === 'property_listing' && order.property_id) {
+          // A failed listing fee never touches the account — onboarding is free, so there is
+          // no account state a payment can invalidate. Only the listing goes back for retry.
+          if (order.property_id) {
             try {
               const propSvc = require('./propertyService');
               await propSvc.markPaymentFailed(order.property_id);
@@ -372,23 +185,25 @@ async function processRazorpayWebhook({ eventId, eventType, payload }) {
       }
 
       if (rzpPaymentId) {
-        const { data: payment } = await db.from('payments').select('*, payment_orders(agent_id)').eq('razorpay_payment_id', rzpPaymentId).maybeSingle();
+        const { data: payment } = await db
+          .from('payments')
+          .select('*, payment_orders(agent_id, property_id)')
+          .eq('razorpay_payment_id', rzpPaymentId)
+          .maybeSingle();
+
         if (payment) {
           await db.from('payments').update({ status: 'refunded' }).eq('id', payment.id);
 
-          // Transition agent to suspended if fully refunded
-          const agentId = payment.payment_orders?.agent_id;
-          if (agentId) {
-            const { data: agent } = await db.from('agents').select('*').eq('id', agentId).single();
-            if (agent) {
-              await db.from('agents').update({ status: 'suspended', updated_at: new Date().toISOString() }).eq('id', agentId);
-              await logStatusChange({
-                agentId,
-                fromStatus: agent.status,
-                toStatus: 'suspended',
-                reason: 'Full refund processed',
-                changedBy: 'webhook_system',
-              });
+          // Refund policy: unwind exactly what the fee bought — the listing slot.
+          // The account is free, so it was never the thing purchased and is left alone.
+          // (The old behaviour was the reverse: suspend the agent, leave the listing live.)
+          const propertyId = payment.property_id || payment.payment_orders?.property_id;
+          if (propertyId) {
+            try {
+              const propSvc = require('./propertyService');
+              await propSvc.markRefunded(propertyId);
+            } catch (err) {
+              console.error('[processRazorpayWebhook] markRefunded failed:', err.message);
             }
           }
         }
@@ -440,22 +255,27 @@ async function createPropertyPaymentOrder({ agentId, propertyId }) {
     },
   });
 
-  // Store order with property_id so webhook can resolve which listing to publish
-  try {
-    await db.from('payment_orders').insert({
-      agent_id:          agentId,
-      property_id:       propertyId,
-      razorpay_order_id: rzpOrder.id,
-      amount_paise:      feeAmountPaise,
-      currency:          fee.currency || 'INR',
-      purpose:           'property_listing',
-      status:            'created',
-      created_at:        new Date().toISOString(),
-      updated_at:        new Date().toISOString(),
+  // Store order with property_id so the webhook and the verify path can resolve which
+  // listing to publish, and who owns it. This is no longer optional: verifyPropertyPayment
+  // authorises against this row, so proceeding without it means the agent pays and is then
+  // told the order is unknown. Fail now, before the checkout modal opens.
+  const insertRes = await db.from('payment_orders').insert({
+    agent_id:          agentId,
+    property_id:       propertyId,
+    razorpay_order_id: rzpOrder.id,
+    amount_paise:      feeAmountPaise,
+    currency:          fee.currency || 'INR',
+    purpose:           'property_listing',
+    status:            'created',
+    created_at:        new Date().toISOString(),
+    updated_at:        new Date().toISOString(),
+  });
+
+  if (insertRes.error) {
+    console.error('[createPropertyPaymentOrder] payment_orders insert failed:', {
+      razorpay_order_id: rzpOrder.id, error: insertRes.error.message,
     });
-  } catch (err) {
-    console.error('[createPropertyPaymentOrder] DB insert failed:', err.message);
-    // Non-fatal — webhook + reconciliation will still capture payment
+    throw new Error('Could not start the payment. Please try again in a moment.');
   }
 
   return {
@@ -474,6 +294,12 @@ async function createPropertyPaymentOrder({ agentId, propertyId }) {
  * Optimistically publishes the property on valid signature.
  * The Razorpay webhook is the canonical source-of-truth but this path
  * ensures instant UX when webhooks are delayed.
+ *
+ * The signature only proves Razorpay issued this order/payment pair — it says nothing
+ * about *what* was bought or *who* bought it. Every field that decides which listing gets
+ * published therefore comes from our own payment_orders row, never from the request body.
+ * Without that, one ₹999 payment could be replayed to publish unlimited listings, including
+ * other agents'.
  */
 async function verifyPropertyPayment({ agentId, propertyId, razorpay_order_id, razorpay_payment_id, razorpay_signature }) {
   const isValid = razorpayService.verifyCheckoutSignature({
@@ -483,34 +309,77 @@ async function verifyPropertyPayment({ agentId, propertyId, razorpay_order_id, r
   });
 
   if (!isValid) {
+    await logSecurityEvent('payment_signature_invalid', {
+      agent_id: agentId,
+      razorpay_order_id,
+      razorpay_payment_id,
+    });
     throw new Error('Invalid Razorpay payment signature. Payment verification failed.');
   }
 
   const db = getDB();
   const now = new Date();
 
-  // Look up the actual amount charged (never trust frontend-supplied amount)
-  let amountPaise = 99900; // safe fallback
-  try {
-    const { data: payOrder } = await db
-      .from('payment_orders')
-      .select('amount_paise, id')
-      .eq('razorpay_order_id', razorpay_order_id)
-      .maybeSingle();
-    if (payOrder?.amount_paise) amountPaise = payOrder.amount_paise;
+  const { data: order, error: orderErr } = await db
+    .from('payment_orders')
+    .select('id, agent_id, property_id, amount_paise, currency, status, purpose')
+    .eq('razorpay_order_id', razorpay_order_id)
+    .maybeSingle();
 
-    // Mark payment order as paid
-    if (payOrder?.id) {
-      await db.from('payment_orders')
-        .update({ status: 'paid', updated_at: now.toISOString() })
-        .eq('id', payOrder.id);
-    }
-  } catch (_) {}
+  if (orderErr) {
+    // A DB fault here must not fall through to publishing. Fail; the webhook still owns
+    // the canonical publish, so the agent loses nothing but a few seconds.
+    console.error('[verifyPropertyPayment] order lookup failed:', orderErr.message);
+    throw new Error('Could not verify this payment right now. Please refresh in a moment.');
+  }
+  if (!order) {
+    await logSecurityEvent('payment_order_not_found', { agent_id: agentId, razorpay_order_id });
+    throw new Error('Unknown payment order. Payment verification failed.');
+  }
+
+  // The order must belong to the agent making the request…
+  if (String(order.agent_id) !== String(agentId)) {
+    await logSecurityEvent('payment_order_agent_mismatch', {
+      agent_id: agentId,
+      order_agent_id: order.agent_id,
+      razorpay_order_id,
+    });
+    throw new Error('This payment does not belong to your account.');
+  }
+
+  // …and must be the order raised for this exact listing.
+  if (String(order.property_id) !== String(propertyId)) {
+    await logSecurityEvent('payment_order_property_mismatch', {
+      agent_id: agentId,
+      requested_property_id: propertyId,
+      order_property_id: order.property_id,
+      razorpay_order_id,
+    });
+    throw new Error('This payment was raised for a different listing.');
+  }
+
+  // Already settled — return success without republishing, so a page refresh or a
+  // webhook that landed first is harmless.
+  if (order.status === 'paid') {
+    return { ok: true, property_id: order.property_id, payment_id: razorpay_payment_id, already_verified: true };
+  }
+
+  // Server-side amount, from the row we created. Never the client's.
+  const amountPaise = order.amount_paise;
+
+  await db.from('payment_orders')
+    .update({ status: 'paid', razorpay_payment_id, updated_at: now.toISOString() })
+    .eq('id', order.id);
 
   // Publish the property via the canonical service function
   const propSvc = require('./propertyService');
   try {
-    await propSvc.publishProperty(propertyId, razorpay_order_id, amountPaise);
+    await propSvc.publishProperty({
+      propertyId:  order.property_id,
+      agentId:     order.agent_id,
+      paidOrderId: razorpay_order_id,
+      amountPaise,
+    });
   } catch (err) {
     console.error('[verifyPropertyPayment] publishProperty failed:', err.message);
     // Non-fatal: webhook or reconciliation will catch this
@@ -519,24 +388,25 @@ async function verifyPropertyPayment({ agentId, propertyId, razorpay_order_id, r
   // Record payment row (non-fatal if payments table schema differs)
   try {
     await db.from('payments').upsert({
+      payment_order_id: order.id,
       razorpay_payment_id,
-      agent_id:    agentId,
-      property_id: propertyId,
+      agent_id:    order.agent_id,
+      property_id: order.property_id,
       razorpay_order_id,
       amount_paise: amountPaise,
-      currency:    'INR',
+      currency:    order.currency || 'INR',
       status:      'captured',
       captured_at: now.toISOString(),
       created_at:  now.toISOString(),
     }, { onConflict: 'razorpay_payment_id' });
-  } catch (_) {}
+  } catch (err) {
+    console.error('[verifyPropertyPayment] payments upsert failed:', err.message);
+  }
 
-  return { ok: true, property_id: propertyId, payment_id: razorpay_payment_id };
+  return { ok: true, property_id: order.property_id, payment_id: razorpay_payment_id };
 }
 
 module.exports = {
-  createPaymentOrder,
-  verifyClientPayment,
   processRazorpayWebhook,
   createPropertyPaymentOrder,
   verifyPropertyPayment,

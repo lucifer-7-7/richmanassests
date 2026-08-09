@@ -19,6 +19,15 @@ async function runTests() {
   console.log('STARTING END-TO-END RAZORPAY PAYMENT SYSTEM TESTS');
   console.log('====================================================\n');
 
+  // The suite signs payloads with the real secrets, so a missing one produces a crypto
+  // error 30 lines later that reads like a signature bug. Fail here instead.
+  const requiredEnvVars = ['RAZORPAY_KEY_SECRET', 'RAZORPAY_WEBHOOK_SECRET'];
+  const missingEnv = requiredEnvVars.filter(v => !process.env[v]);
+  if (missingEnv.length) {
+    console.error(`[FATAL] Tests require env vars: ${missingEnv.join(', ')}`);
+    process.exit(1);
+  }
+
   let passed = 0;
   let failed = 0;
 
@@ -34,7 +43,9 @@ async function runTests() {
 
   // TEST 1: Checkout HMAC-SHA256 Signature Verification
   console.log('--- Test 1: Checkout Signature Verification ---');
-  const secret = process.env.RAZORPAY_KEY_SECRET || 'rzp_secret_RMAAgentSignupSecretKey123';
+  // Env-only, same as the service. A fallback here would make the test pass against a
+  // constant while the app under test signs with something else.
+  const secret = process.env.RAZORPAY_KEY_SECRET;
   const orderId = 'order_test_12345';
   const paymentId = 'pay_test_67890';
   const validSig = crypto.createHmac('sha256', secret).update(`${orderId}|${paymentId}`).digest('hex');
@@ -55,7 +66,7 @@ async function runTests() {
 
   // TEST 2: Webhook HMAC-SHA256 Signature Verification
   console.log('\n--- Test 2: Webhook Signature Verification ---');
-  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'rzp_webhook_secret_RMA123';
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
   const rawBody = JSON.stringify({ event: 'payment.captured', contains: ['payment'] });
   const validWebhookSig = crypto.createHmac('sha256', webhookSecret).update(rawBody).digest('hex');
 
@@ -114,47 +125,15 @@ async function runTests() {
     });
     assert(newAgent.status === 'draft', 'New agent starts in draft status');
 
-    // 2. Verification -> pending_payment
+    // 2. Verification -> active. Onboarding is free: there is no payment step between
+    // verifying and being able to work. The fee is charged per listing at publish time.
     const verifiedAgent = await agentAuthService.verifyAgentAccount(newAgent.id);
-    assert(verifiedAgent.status === 'pending_payment', 'OTP verification transitions status draft -> pending_payment');
-
-    // 3. Create Razorpay Payment Order
-    const orderData = await agentPaymentService.createPaymentOrder({
-      agentId: newAgent.id,
-      purpose: 'signup',
-    });
-    assert(orderData.razorpay_order_id.length > 0, 'Razorpay order creation generates valid order_id');
-
-    // 4. Webhook payment.captured -> active
-    const webhookEventId = `evt_lifecycle_${Date.now()}`;
-    const webhookPayload = {
-      event: 'payment.captured',
-      payload: {
-        payment: {
-          entity: {
-            id: `pay_lifecycle_${Date.now()}`,
-            order_id: orderData.razorpay_order_id,
-            amount: orderData.amount_paise,
-            status: 'captured',
-            method: 'upi',
-            notes: { agent_id: newAgent.id },
-          },
-        },
-      },
-    };
-
-
-    const webhookRes = await agentPaymentService.processRazorpayWebhook({
-      eventId: webhookEventId,
-      eventType: 'payment.captured',
-      payload: webhookPayload,
-    });
-    assert(webhookRes.ok === true, 'Webhook captured payment processed successfully');
+    assert(verifiedAgent.status === 'active', 'OTP verification transitions status draft -> active');
 
     const activatedAgent = await agentAuthService.getAgentById(newAgent.id);
-    assert(activatedAgent.status === 'active', 'Payment captured webhook transitions agent status pending_payment -> active');
+    assert(activatedAgent.status === 'active', 'Activation is persisted, not just cached');
 
-    // 5. Admin manual override -> suspended
+    // 3. Admin manual override -> suspended
     const suspendedAgent = await agentAuthService.updateAgentStatus(newAgent.id, 'suspended', 'Admin dispute check', 'admin_unit_test');
     assert(suspendedAgent.status === 'suspended', 'Admin status override transitions active -> suspended');
 

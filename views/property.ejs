@@ -15,7 +15,7 @@
     <div class="t"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %> · <%= p.type %></div>
   </div>
   <div class="cta-actions">
-    <a class="cta-wa" href="https://wa.me/919036001234?text=<%= encodeURIComponent('Hi RichManAssets, I\'m interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <a class="cta-wa" href="https://wa.me/919380939961?text=<%= encodeURIComponent('Hi RichManAssets, I\'m interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener" aria-label="WhatsApp">
       <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
     </a>
     <a class="cta-btn" href="/properties" style="gap:6px;">
@@ -268,7 +268,7 @@ document.addEventListener('keydown', function(e) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               <span>Contact Agent</span>
             </button>
-            <a class="btn apc-wa-btn" href="https://wa.me/91<%= (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.phone) ? agentInfo.phone.replace(/\D/g,'') : '9036001234' %>?text=<%= encodeURIComponent('Hi ' + ((typeof agentInfo !== 'undefined' && agentInfo && agentInfo.name) ? agentInfo.name : 'RichManAssets') + ', I am interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener">
+            <a class="btn apc-wa-btn" href="https://wa.me/91<%= (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.phone) ? agentInfo.phone.replace(/\D/g,'') : '9380939961' %>?text=<%= encodeURIComponent('Hi ' + ((typeof agentInfo !== 'undefined' && agentInfo && agentInfo.name) ? agentInfo.name : 'RichManAssets') + ', I am interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
               <span>WhatsApp</span>
             </a>

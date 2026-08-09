@@ -5,6 +5,12 @@
  */
 const rateLimit = require('express-rate-limit');
 
+// Limits are ON unless someone deliberately opts out. This used to be
+// `NODE_ENV !== 'production'`, which meant brute-force protection on login and payment
+// silently vanished anywhere NODE_ENV wasn't set — including hosts that don't set it for you.
+// An explicit flag can't be switched off by accident.
+const skipInLocalDev = () => process.env.DISABLE_RATE_LIMIT === '1';
+
 const handler = (req, res) => {
   if (req.accepts('json')) {
     return res.status(429).json({ ok: false, error: 'Too many requests. Please slow down.' });
@@ -19,7 +25,7 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler,
-  skip: () => process.env.NODE_ENV !== 'production',
+  skip: skipInLocalDev,
 });
 
 /** Moderate limiter for payment creation */
@@ -29,7 +35,7 @@ const paymentLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler,
-  skip: () => process.env.NODE_ENV !== 'production',
+  skip: skipInLocalDev,
 });
 
 /** General API limiter */

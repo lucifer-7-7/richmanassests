@@ -83,27 +83,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--i
   <div class="card-box">
     <h3>Agent Signup & Activation Funnel</h3>
     <div class="funnel-bar">
-      <div class="lbl">1. Draft Signup</div>
+      <div class="lbl">1. Registered</div>
       <div class="bar-wrap"><div class="bar" style="width: 100%;"></div></div>
-      <div style="font-weight:700;"><%= analytics.funnel.draft %></div>
+      <div style="font-weight:700;"><%= analytics.funnel.registered %></div>
     </div>
     <div class="funnel-bar">
-      <div class="lbl">2. Pending Payment</div>
-      <div class="bar-wrap"><div class="bar" style="width: <%= analytics.funnel.draft > 0 ? (analytics.funnel.pending_payment / analytics.funnel.draft * 100).toFixed(0) : 0 %>%;"></div></div>
-      <div style="font-weight:700;"><%= analytics.funnel.pending_payment %></div>
+      <div class="lbl">2. Verified</div>
+      <div class="bar-wrap"><div class="bar" style="width: <%= analytics.funnel.registered > 0 ? (analytics.funnel.verified / analytics.funnel.registered * 100).toFixed(0) : 0 %>%;"></div></div>
+      <div style="font-weight:700;"><%= analytics.funnel.verified %></div>
     </div>
     <div class="funnel-bar">
-      <div class="lbl">3. Paid Plan</div>
-      <div class="bar-wrap"><div class="bar" style="width: <%= analytics.funnel.draft > 0 ? (analytics.funnel.paid / analytics.funnel.draft * 100).toFixed(0) : 0 %>%;"></div></div>
-      <div style="font-weight:700;"><%= analytics.funnel.paid %></div>
-    </div>
-    <div class="funnel-bar">
-      <div class="lbl">4. Active Status</div>
-      <div class="bar-wrap"><div class="bar" style="background:#10b981; width: <%= analytics.funnel.draft > 0 ? (analytics.funnel.active / analytics.funnel.draft * 100).toFixed(0) : 0 %>%;"></div></div>
-      <div style="font-weight:700;"><%= analytics.funnel.active %></div>
+      <div class="lbl">3. Published a listing</div>
+      <div class="bar-wrap"><div class="bar" style="background:#10b981; width: <%= analytics.funnel.registered > 0 ? (analytics.funnel.published / analytics.funnel.registered * 100).toFixed(0) : 0 %>%;"></div></div>
+      <div style="font-weight:700;"><%= analytics.funnel.published %></div>
     </div>
     <div style="margin-top:16px;font-size:13px;color:var(--muted);">
-      <strong>Drop-off Rates:</strong> Draft → Pending: <%= analytics.funnel_dropoff.draft_to_pending %>% | Pending → Paid: <%= analytics.funnel_dropoff.pending_to_paid %>%
+      <strong>Drop-off Rates:</strong> Registered → Verified: <%= analytics.funnel_dropoff.registered_to_verified %>% | Verified → Published: <%= analytics.funnel_dropoff.verified_to_published %>%
     </div>
   </div>
 

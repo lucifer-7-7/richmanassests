@@ -49,7 +49,7 @@ async function logStatusChange({ agentId, fromStatus, toStatus, reason = '', cha
 /**
  * Register a new Agent (initial state: draft)
  */
-async function registerAgent({ name, email, phone, password, rera_number, company_name, gst_number, city, plan_id }) {
+async function registerAgent({ name, email, phone, password, rera_number, company_name, gst_number, city }) {
   const db = getDB();
 
   // Check if email or phone already exists
@@ -67,15 +67,6 @@ async function registerAgent({ name, email, phone, password, rera_number, compan
     throw err;
   }
 
-  // Fetch or validate plan
-  let selectedPlanId = plan_id;
-  try {
-    const { data: defaultPlan } = await db.from('agent_plans').select('id').eq('is_active', true).order('amount_paise', { ascending: false }).limit(1).single();
-    if (defaultPlan) selectedPlanId = defaultPlan.id;
-  } catch (_) {
-    selectedPlanId = 'a0000000-0000-0000-0000-000000000001';
-  }
-
   const passwordHash = await bcrypt.hash(password, 10);
   const newAgent = {
     name,
@@ -88,7 +79,6 @@ async function registerAgent({ name, email, phone, password, rera_number, compan
     city: city || 'Udupi',
     status: 'draft',
     kyc_status: 'not_submitted',
-    plan_id: selectedPlanId,
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -118,7 +108,6 @@ async function registerAgent({ name, email, phone, password, rera_number, compan
       agent = check(fbResult, 'registerAgent.fallback');
       agent.status = 'draft';
       agent.kyc_status = 'not_submitted';
-      agent.plan_id = selectedPlanId;
     } else {
       throw err;
     }
@@ -137,7 +126,11 @@ async function registerAgent({ name, email, phone, password, rera_number, compan
 }
 
 /**
- * Verify OTP / Email (Transitions draft -> pending_payment)
+ * Verify OTP / Email (Transitions draft -> active)
+ *
+ * Onboarding is free. The ₹999 fee is charged per listing at publish time, not for the
+ * account, so a verified agent is immediately usable. The old draft -> pending_payment ->
+ * active membership ladder is gone.
  */
 async function verifyAgentAccount(agentId) {
   const db = getDB();
@@ -147,23 +140,28 @@ async function verifyAgentAccount(agentId) {
   const currentStatus = agent.status || agentStatusCache.get(String(agentId)) || 'draft';
 
   if (currentStatus === 'draft') {
-    try {
-      await db
-        .from('agents')
-        .update({
-          status: 'pending_payment',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', agentId);
-    } catch (_) {}
+    // Not swallowed: agents.status is the gate the login redirect reads, and silently
+    // failing here left accounts stuck in draft with no way to notice.
+    const { error } = await db
+      .from('agents')
+      .update({
+        status: 'active',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', agentId);
 
-    agent.status = 'pending_payment';
-    agentStatusCache.set(String(agentId), 'pending_payment');
+    if (error) {
+      console.error('[verifyAgentAccount] status update failed:', error.message);
+      throw new Error('Could not activate your account. Please try again.');
+    }
+
+    agent.status = 'active';
+    agentStatusCache.set(String(agentId), 'active');
 
     await logStatusChange({
       agentId,
       fromStatus: 'draft',
-      toStatus: 'pending_payment',
+      toStatus: 'active',
       reason: 'OTP / Account verification completed',
     });
   }
@@ -217,18 +215,17 @@ async function updateAgentStatus(agentId, newStatus, reason, changedBy = 'admin'
   const oldStatus = agent.status || agentStatusCache.get(String(agentId)) || 'draft';
   if (oldStatus === newStatus) return agent;
 
+  // No activated_at — the column does not exist. Including it made Postgres reject the
+  // whole UPDATE, so the status change never persisted and only the in-memory cache moved.
   const updatePayload = {
     status: newStatus,
     updated_at: new Date().toISOString(),
   };
 
-  if (newStatus === 'active' && !agent.activated_at) {
-    updatePayload.activated_at = new Date().toISOString();
-  }
-
-  try {
-    await db.from('agents').update(updatePayload).eq('id', agentId);
-  } catch (_) {}
+  // supabase-js returns { error }, it does not throw — a try/catch here caught nothing and
+  // every failed write looked like a success.
+  const { error } = await db.from('agents').update(updatePayload).eq('id', agentId);
+  if (error) throw new Error(`Could not update agent status: ${error.message}`);
 
   agent.status = newStatus;
   agentStatusCache.set(String(agentId), newStatus);
@@ -242,26 +239,6 @@ async function updateAgentStatus(agentId, newStatus, reason, changedBy = 'admin'
   });
 
   return agent;
-}
-
-/**
- * Get all available plans
- */
-async function getActiveAgentPlans() {
-  const db = getDB();
-  try {
-    const result = await db.from('agent_plans').select('*').eq('is_active', true).order('amount_paise', { ascending: false });
-    if (result.data && result.data.length > 0) return result.data;
-  } catch (_) {}
-
-  return [{
-    id: 'a0000000-0000-0000-0000-000000000001',
-    name: 'Annual Agent Membership',
-    amount_paise: 199900,
-    currency: 'INR',
-    validity_days: 365,
-    is_active: true,
-  }];
 }
 
 /**
@@ -467,7 +444,6 @@ module.exports = {
   getAgentById,
   updateAgentStatus,
   getAgentStatus,
-  getActiveAgentPlans,
   recordLoginLog,
   resetAgentPassword,
   revokeAgentSessions,

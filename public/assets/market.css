@@ -59,7 +59,7 @@
 /* ══════════════════════════════════════════
    LISTING CARD — mobile full-width, desktop grid
    ══════════════════════════════════════════ */
-.plist{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden;transition:.38s var(--ease)}
+.plist{position:relative;display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden;transition:.38s var(--ease)}
 .plist:hover{transform:translateY(-3px);border-color:var(--ink-3)}
 .plist .ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--paper-2)}
 .plist .ph img{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
@@ -81,7 +81,10 @@
 .plist .meta span{display:flex;align-items:center;gap:5px}
 .plist .meta svg{width:13px;height:13px;color:var(--muted)}
 .plist .cta{margin-top:auto;display:flex;gap:8px;padding-top:12px;align-items:center}
-.plist .cta a, .plist .cta .v{
+/* :not(.w) — the WhatsApp button is also an <a> here, and must not inherit the
+   dark pill background or the white !important colour (its icon is fill=currentColor,
+   which would render white-on-transparent and disappear). */
+.plist .cta a:not(.w), .plist .cta .v{
   flex:1;
   display:inline-flex;
   align-items:center;
@@ -103,10 +106,39 @@
   overflow:hidden;
   text-overflow:ellipsis;
 }
-.plist .cta a:hover, .plist .cta .v:hover{background:var(--gold-deep);color:#FFFFFF !important}
-.plist .cta .w{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;padding:0;background:transparent;border:1px solid var(--line);color:var(--ink);transition:all 0.2s var(--ease)}
-.plist .cta .w:hover{background:#25D366;border-color:#25D366;color:#fff}
-.plist .cta .w svg{width:16px;height:16px}
+.plist .cta a:not(.w):hover, .plist .cta .v:hover{background:var(--gold-deep);color:#FFFFFF !important}
+
+/* WhatsApp button — brand green, stays above the stretched card link */
+.plist .cta .w{
+  position:relative;
+  z-index:2;
+  flex:none;
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  padding:0;
+  background:#FFFFFF;
+  border:1px solid #25D366;
+  color:#25D366;
+  text-decoration:none;
+  transition:all 0.2s var(--ease);
+}
+.plist .cta .w:hover{background:#25D366;border-color:#25D366;color:#FFFFFF}
+.plist .cta .w svg{width:18px;height:18px}
+
+/* Whole card is clickable: the primary CTA stretches an invisible hit area over
+   the entire card. Inner anchors point at the same property URL, so the overlay
+   swallowing their clicks is harmless; the WhatsApp button is lifted above it. */
+.plist .cta .v::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  border-radius:var(--r);
+}
+.plist{cursor:pointer}
 .ph-placeholder{position:absolute;inset:0;background:linear-gradient(135deg, var(--paper-2) 0%, var(--paper-3) 100%);display:grid;place-items:center;backdrop-filter:blur(2px)}
 .ph-placeholder span{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);background:rgba(247,244,237,0.92);padding:8px 14px;border-radius:8px;border:none;font-weight:600}
 

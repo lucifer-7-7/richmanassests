@@ -2,7 +2,8 @@
 /**
  * middleware/rawBodyCapture.js
  * Captures the raw request body as a Buffer BEFORE JSON parsing.
- * Required for Cashfree webhook signature verification.
+ * Required for Razorpay webhook signature verification — the HMAC is computed over the
+ * exact bytes received, so it must be captured before express.json() reparses the body.
  *
  * Mount this BEFORE express.json() on the webhook route only.
  */

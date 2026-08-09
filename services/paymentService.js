@@ -19,7 +19,12 @@ async function getListingFee() {
     .order('valid_from', { ascending: false })
     .limit(1)
     .single();
-  if (result.error || !result.data) return { amount_paise: 99900, currency: 'INR', label: 'Property Listing Fee' };
+  // No hardcoded fallback. A guessed price that happens to be wrong charges the customer
+  // the wrong amount and looks like a successful sale — failing is strictly safer.
+  if (result.error || !result.data) {
+    console.error('[getListingFee] no active listing_fee_config row:', result.error?.message || 'empty result');
+    throw new Error('Listing fee is not configured. Please contact support.');
+  }
   return result.data;
 }
 
@@ -36,34 +41,68 @@ async function getOrderStatus(razorpayOrderId, agentId) {
   return result.data;
 }
 
-/** Admin: refund a paid property-listing order via Razorpay. */
-async function initiateRefund(razorpayOrderId, reason = 'Admin initiated refund') {
+/**
+ * Admin: refund a paid property-listing order via Razorpay.
+ *
+ * `amountPaise` is optional and is clamped to the captured amount — a caller can refund
+ * less (partial) but never more than was actually taken.
+ */
+async function initiateRefund(razorpayOrderId, reason = 'Admin initiated refund', amountPaise = null, initiatedBy = 'admin') {
   const db = getDB();
 
   const { data: order } = await db.from('payment_orders').select('*').eq('razorpay_order_id', razorpayOrderId).maybeSingle();
   if (!order) throw new Error('Order not found.');
   if (order.status !== 'paid') throw new Error('Only paid orders can be refunded.');
 
-  const { data: payment } = await db.from('payments').select('razorpay_payment_id').eq('razorpay_order_id', razorpayOrderId).eq('status', 'captured').maybeSingle();
+  const { data: payment } = await db
+    .from('payments')
+    .select('id, razorpay_payment_id, amount_paise, status')
+    .eq('razorpay_order_id', razorpayOrderId)
+    .eq('status', 'captured')
+    .maybeSingle();
   if (!payment?.razorpay_payment_id) throw new Error('No captured payment found for this order.');
+
+  const capturedPaise = payment.amount_paise || order.amount_paise;
+  const requestedPaise = Number.isInteger(amountPaise) && amountPaise > 0 ? amountPaise : capturedPaise;
+  const refundPaise = Math.min(requestedPaise, capturedPaise);
 
   const refund = await razorpayService.initiateRazorpayRefund({
     razorpay_payment_id: payment.razorpay_payment_id,
-    amount_paise: order.amount_paise,
+    amount_paise: refundPaise,
     notes: { reason },
   });
+
+  // Written before the status updates so the refund.processed webhook has a row to match.
+  // Without this the webhook's `UPDATE refunds ... WHERE razorpay_refund_id = ?` matched
+  // nothing and the refund never reached a terminal state locally.
+  const refundRow = await db.from('refunds').insert({
+    payment_id:         payment.id,
+    razorpay_refund_id: refund.id,
+    amount_paise:       refundPaise,
+    status:             refund.status === 'processed' ? 'processed' : 'pending',
+    reason,
+    initiated_by:       initiatedBy,
+    created_at:         new Date().toISOString(),
+  });
+  if (refundRow.error) {
+    // The money has already moved at this point; losing the local record is bad but
+    // reversing is worse. Log loudly so it can be reconciled by hand.
+    console.error('[initiateRefund] refunds insert failed AFTER Razorpay refund succeeded:', {
+      razorpay_refund_id: refund.id, error: refundRow.error.message,
+    });
+  }
 
   await db.from('payment_orders').update({
     status: 'refund_initiated',
     refund_id: refund.id,
-    refund_amount_paise: order.amount_paise,
+    refund_amount_paise: refundPaise,
     refund_status: refund.status || 'processed',
     updated_at: new Date().toISOString(),
   }).eq('razorpay_order_id', razorpayOrderId);
 
   await db.from('payments').update({ status: 'refunded' }).eq('razorpay_payment_id', payment.razorpay_payment_id);
 
-  return { refund_id: refund.id, status: refund.status };
+  return { refund_id: refund.id, status: refund.status, amount_paise: refundPaise };
 }
 
 /** Admin: get paginated payment orders & generated invoices. */
@@ -124,7 +163,7 @@ async function getAllOrders(limit = 100) {
 
     // Ensure agent details and order IDs are populated on all items
     for (const o of allOrders) {
-      if (!o.internal_order_id) o.internal_order_id = o.razorpay_order_id || o.cashfree_order_id || String(o.id);
+      if (!o.internal_order_id) o.internal_order_id = o.razorpay_order_id || String(o.id);
       const capturedPayment = paymentsByOrderId[o.razorpay_order_id];
       if (capturedPayment) {
         o.payment_method = capturedPayment.method;

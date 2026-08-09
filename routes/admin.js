@@ -9,6 +9,8 @@ const propSvc  = require('../services/propertyService');
 const agentSvc = require('../services/agentService');
 const { getAllOrders, initiateRefund } = require('../services/paymentService');
 const { getPromoBanner, updatePromoBanner, getUseDummyData, setUseDummyData, getHeroPropertyIds, setHeroPropertyIds } = require('../lib/settings');
+const { logSecurityEvent } = require('../lib/securityLog');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 // ── CSRF Protection: Verify Host Origin for all POST/PUT/DELETE requests ──
 router.use((req, res, next) => {
@@ -79,7 +81,8 @@ function requireAdmin(req, res, next) {
 
 let PASS_HASH;
 function getHash() {
-  if (!PASS_HASH) PASS_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'changeme123', 10);
+  // No fallback — server.js refuses to boot without ADMIN_PASSWORD.
+  if (!PASS_HASH) PASS_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10);
   return PASS_HASH;
 }
 
@@ -89,7 +92,7 @@ router.get('/login', (req, res) => {
   res.render('admin/login', { flash: req.session.flash || null });
   delete req.session.flash;
 });
-router.post('/login', (req, res) => {
+router.post('/login', authLimiter, (req, res) => {
   const { password } = req.body;
   if (bcrypt.compareSync(password || '', getHash())) {
     req.session.admin = true;
@@ -97,6 +100,13 @@ router.post('/login', (req, res) => {
       res.redirect('/admin');
     });
   }
+  // Durable record — a run of these is the only signal that someone is guessing the
+  // single admin password, and console output does not survive a restart.
+  logSecurityEvent('admin_login_failed', {}, {
+    actorType: 'admin',
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
   req.session.flash = 'Incorrect password.';
   req.session.save(() => res.redirect('/admin/login'));
 });
@@ -137,7 +147,7 @@ router.get('/', requireAdmin, async (req, res) => {
     };
 
     // ── Analytics: fetch page_views aggregates ────────────────────
-    let analytics = { totalAll: 0, today: 0, week: 0, month: 0, devices: [], browsers: [], oses: [], countries: [], cities: [], topPages: [], topReferrers: [] };
+    let analytics = { totalAll: 0, today: 0, week: 0, month: 0, devices: [], browsers: [], oses: [], countries: [], cities: [], topPages: [], topReferrers: [], trend: [], trendPeak: 0 };
     try {
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -178,6 +188,28 @@ router.get('/', requireAdmin, async (req, res) => {
         try { r.label = new URL(r.label).hostname; } catch(_) {}
         return r;
       });
+
+      // Daily trend for the last 30 days — every day present (zero-filled) so the
+      // chart shows real gaps in traffic instead of silently collapsing them.
+      const dayBuckets = {};
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        dayBuckets[d.toISOString().slice(0, 10)] = 0;
+      }
+      pvRows.forEach(r => {
+        if (!r.created_at) return;
+        const key = new Date(r.created_at).toISOString().slice(0, 10);
+        if (key in dayBuckets) dayBuckets[key]++;
+      });
+      const trendEntries = Object.entries(dayBuckets);
+      const trendPeak = Math.max(1, ...trendEntries.map(([, v]) => v));
+      analytics.trend = trendEntries.map(([day, count]) => ({
+        day,
+        count,
+        pct: Math.round((count / trendPeak) * 100),
+        label: new Date(day + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+      }));
+      analytics.trendPeak = trendPeak;
     } catch (aErr) {
       console.error('[admin/analytics]', aErr.message);
     }
@@ -201,7 +233,7 @@ router.get('/', requireAdmin, async (req, res) => {
     delete req.session.flash;
   } catch (err) {
     console.error('[admin/dashboard]', err.message);
-    res.render('admin/dashboard', { flash: { type:'err', msg: err.message }, properties:[], enquiries:[], agentProps:[], agents:[], orders:[], logs:[], auditLogs:[], stats:{}, analytics:{ totalAll:0, today:0, week:0, month:0, devices:[], browsers:[], oses:[], countries:[], cities:[], topPages:[], topReferrers:[] } });
+    res.render('admin/dashboard', { flash: { type:'err', msg: err.message }, properties:[], enquiries:[], agentProps:[], agents:[], orders:[], logs:[], auditLogs:[], stats:{}, analytics:{ totalAll:0, today:0, week:0, month:0, devices:[], browsers:[], oses:[], countries:[], cities:[], topPages:[], topReferrers:[], trend:[], trendPeak:0 }, promoBanner:null, useDummyData:true, heroIds:[], allPropsForHero:[] });
   }
 });
 
@@ -418,7 +450,7 @@ router.get('/invoices/:orderId', requireAdmin, async (req, res) => {
     let order = orders.find(o => 
       String(o.internal_order_id) === String(orderId) || 
       String(o.id) === String(orderId) || 
-      String(o.cashfree_order_id) === String(orderId) || 
+
       String(o.razorpay_order_id) === String(orderId) ||
       String(o.property_id) === String(orderId)
     );
@@ -427,7 +459,7 @@ router.get('/invoices/:orderId', requireAdmin, async (req, res) => {
       const db = getDB();
       // id is BIGINT — only include it in the OR filter when orderId actually looks numeric,
       // otherwise Postgres rejects the whole filter with a type-cast error (e.g. Razorpay's "order_xxx" ids).
-      const orFilters = [`internal_order_id.eq.${orderId}`, `cashfree_order_id.eq.${orderId}`, `razorpay_order_id.eq.${orderId}`];
+      const orFilters = [`internal_order_id.eq.${orderId}`, `razorpay_order_id.eq.${orderId}`];
       if (/^\d+$/.test(orderId)) orFilters.push(`id.eq.${orderId}`);
       const { data: dbOrder } = await db
         .from('payment_orders')
@@ -436,7 +468,7 @@ router.get('/invoices/:orderId', requireAdmin, async (req, res) => {
         .maybeSingle();
       if (dbOrder) {
         order = dbOrder;
-        if (!order.internal_order_id) order.internal_order_id = order.razorpay_order_id || order.cashfree_order_id || String(order.id);
+        if (!order.internal_order_id) order.internal_order_id = order.razorpay_order_id || String(order.id);
       }
     }
 
@@ -532,13 +564,31 @@ router.post('/payments/:id/refund', requireAdmin, async (req, res) => {
     const { data: payment } = await db.from('payments').select('*, payment_orders(*)').eq('id', paymentId).single();
     if (!payment) throw new Error('Payment not found');
 
-    const refundAmount = parseInt(amount_paise) || payment.amount_paise;
+    if (payment.status === 'refunded') {
+      throw new Error('This payment has already been refunded.');
+    }
+    if (payment.status !== 'captured') {
+      throw new Error(`Only captured payments can be refunded (this one is "${payment.status}").`);
+    }
+    if (!payment.razorpay_payment_id) {
+      throw new Error('This payment has no Razorpay payment id and cannot be refunded automatically.');
+    }
+
+    // Clamp to what was actually captured. The amount arrives from a form field, and an
+    // unclamped parseInt let a typo (or a crafted POST) refund more than the customer paid.
+    const requested = parseInt(amount_paise, 10);
+    const refundAmount = Number.isInteger(requested) && requested > 0
+      ? Math.min(requested, payment.amount_paise)
+      : payment.amount_paise;
+
     const razorpaySvc = require('../services/razorpayService');
+    const refundReason = reason || 'Admin Initiated Refund';
+    const adminUser = req.session.adminUser || 'admin';
 
     const rzpRefund = await razorpaySvc.initiateRazorpayRefund({
       razorpay_payment_id: payment.razorpay_payment_id,
       amount_paise: refundAmount,
-      notes: { reason: reason || 'Admin Initiated Refund', admin: req.session.adminUser || 'admin' },
+      notes: { reason: refundReason, admin: adminUser },
     });
 
     const refundRow = {
@@ -546,15 +596,33 @@ router.post('/payments/:id/refund', requireAdmin, async (req, res) => {
       razorpay_refund_id: rzpRefund.id,
       amount_paise: refundAmount,
       status: rzpRefund.status === 'processed' ? 'processed' : 'pending',
-      reason: reason || 'Admin Initiated Refund',
-      initiated_by: 'admin',
+      reason: refundReason,
+      initiated_by: adminUser,
       created_at: new Date().toISOString(),
     };
 
-    await db.from('refunds').insert(refundRow);
+    const insertRes = await db.from('refunds').insert(refundRow);
+    if (insertRes.error) {
+      // Money has already moved — surface it rather than reporting clean success.
+      console.error('[Admin Refund] refunds insert failed after Razorpay refund succeeded:', {
+        razorpay_refund_id: rzpRefund.id, error: insertRes.error.message,
+      });
+    }
+
     await db.from('payments').update({ status: 'refunded' }).eq('id', payment.id);
 
-    req.session.flash = { type: 'ok', msg: `Refund initiated successfully: ${rzpRefund.id}` };
+    if (payment.payment_orders?.razorpay_order_id) {
+      await db.from('payment_orders').update({
+        status: 'refund_initiated',
+        refund_id: rzpRefund.id,
+        refund_amount_paise: refundAmount,
+        refund_status: rzpRefund.status || 'pending',
+        updated_at: new Date().toISOString(),
+      }).eq('razorpay_order_id', payment.payment_orders.razorpay_order_id);
+    }
+
+    const refundedRs = (refundAmount / 100).toLocaleString('en-IN');
+    req.session.flash = { type: 'ok', msg: `Refund of ₹${refundedRs} initiated: ${rzpRefund.id}` };
   } catch (err) {
     console.error('[Admin Refund Error]:', err.message);
     req.session.flash = { type: 'err', msg: err.message };

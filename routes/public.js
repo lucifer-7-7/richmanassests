@@ -430,7 +430,7 @@ router.get('/property/:id', async (req, res) => {
       id: null,
       name: 'RichManAssets Advisory',
       company_name: 'RichManAssets Corporate Office',
-      phone: '9036001234',
+      phone: '9380939961',
       city: p.loc || 'Udupi & Mangaluru',
       is_verified: true,
       rera_number: 'PRM/KA/RERA/1251/309/PR/210312/004012'
@@ -489,7 +489,7 @@ router.get('/property/:id', async (req, res) => {
       'image': allImages,
       'category': `${p.type} for ${p.listing === 'rent' ? 'Rent' : p.listing === 'lease' ? 'Lease' : 'Sale'} in ${p.loc}`,
       'brand': { '@type': 'Brand', 'name': 'RichManAssets' },
-      'seller': { '@type': 'RealEstateAgent', '@id': `${SITE}/#organization`, 'name': agentInfo.name || 'RichManAssets', 'telephone': '+91' + (agentInfo.phone || '9036001234'), 'url': SITE },
+      'seller': { '@type': 'RealEstateAgent', '@id': `${SITE}/#organization`, 'name': agentInfo.name || 'RichManAssets', 'telephone': '+91' + (agentInfo.phone || '9380939961'), 'url': SITE },
       'offers': {
         '@type': 'Offer', 'price': p.price_val || undefined, 'priceCurrency': 'INR',
         'availability': 'https://schema.org/InStock', 'url': canon('/property/' + p.id),
@@ -549,7 +549,7 @@ router.post('/property/:id/enquire', async (req, res) => {
     }
 
     let agentId = p.agent_id || null;
-    let agentPhone = '9036001234';
+    let agentPhone = '9380939961';
     let agentName = 'RichManAssets Advisory';
 
     if (agentId) {
@@ -592,7 +592,7 @@ router.post('/property/:id/enquire', async (req, res) => {
 router.get('/contact', (req, res) => {
   res.render('contact', {
     title: 'Contact Us | Real Estate Agency in Udupi & Mangaluru | RichManAssets',
-    description: 'Contact RichManAssets property consultants in Udupi & Mangaluru. Call +91 90360 01234 or submit your enquiry for site visits, loans & legal aid.',
+    description: 'Contact RichManAssets property consultants in Udupi & Mangaluru. Call +91 93809 39961 or submit your enquiry for site visits, loans & legal aid.',
     keywords: 'contact richman assets, property dealer contact udupi, real estate agent udupi number, property consultant mangaluru, enquire real estate udupi',
     geoPlace: 'Udupi, Karnataka, India',
     canonical: canon('/contact'),

@@ -90,7 +90,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--i
       <div class="info-group"><span class="lbl">RERA Number</span><span class="val"><%= auditData.agent.rera_number || 'Not provided' %></span></div>
       <div class="info-group"><span class="lbl">GST Number</span><span class="val"><%= auditData.agent.gst_number || 'Not provided' %></span></div>
       <div class="info-group"><span class="lbl">KYC Status</span><span class="val"><%= auditData.agent.kyc_status %></span></div>
-      <div class="info-group"><span class="lbl">Activated At</span><span class="val"><%= auditData.agent.activated_at ? new Date(auditData.agent.activated_at).toLocaleDateString('en-IN') : 'Not active' %></span></div>
+      <div class="info-group"><span class="lbl">Registered</span><span class="val"><%= auditData.agent.created_at ? new Date(auditData.agent.created_at).toLocaleDateString('en-IN') : '—' %></span></div>
       <div class="info-group"><span class="lbl">Expires At</span><span class="val"><%= auditData.agent.expires_at ? new Date(auditData.agent.expires_at).toLocaleDateString('en-IN') : 'N/A' %></span></div>
     </div>
 
@@ -119,7 +119,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--i
         <form method="post" action="/admin/agents/<%= auditData.agent.id %>/status" class="form-inline">
           <select name="new_status" class="form-control">
             <option value="active" <%= auditData.agent.status === 'active' ? 'selected' : '' %>>Active</option>
-            <option value="pending_payment" <%= auditData.agent.status === 'pending_payment' ? 'selected' : '' %>>Pending Payment</option>
             <option value="suspended" <%= auditData.agent.status === 'suspended' ? 'selected' : '' %>>Suspended / Banned</option>
             <option value="deactivated" <%= auditData.agent.status === 'deactivated' ? 'selected' : '' %>>Deactivated</option>
           </select>
@@ -219,6 +218,45 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--i
           <td><%= new Date(o.created_at).toLocaleDateString('en-IN') %></td>
           <td>
             <a href="/admin/invoices/<%= o.internal_order_id || o.razorpay_order_id || o.id %>" target="_blank" style="display:inline-block;padding:4px 10px;border:1px solid #17150F;border-radius:6px;color:#17150F;text-decoration:none;font-size:11px;font-weight:600;">View GST Invoice</a>
+          </td>
+        </tr>
+        <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Property Listings -->
+  <div class="card-box">
+    <h3>Property Listings <span style="font-size:13px;font-weight:500;color:var(--muted)">(<%= (auditData.listings || []).length %> total)</span></h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Location</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Published Until</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!auditData.listings || auditData.listings.length === 0) { %>
+        <tr><td colspan="7" style="color:var(--muted);">This agent has not created any listings yet.</td></tr>
+        <% } else { %>
+        <% auditData.listings.forEach(l => { %>
+        <tr>
+          <td><strong><%= l.name %></strong></td>
+          <td><%= l.loc || '—' %><%= l.type ? ' · ' + l.type : '' %></td>
+          <td><b><%= l.price || '—' %></b></td>
+          <td><span class="badge <%= l.status === 'published' ? 'active' : 'draft' %>"><%= (l.status || 'draft').toUpperCase() %></span></td>
+          <td><%= l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN') : '—' %></td>
+          <td><%= l.expires_at ? new Date(l.expires_at).toLocaleDateString('en-IN') : '—' %></td>
+          <td>
+            <% if (l.status === 'published') { %>
+            <a href="/property/<%= l.id %>" target="_blank" style="display:inline-block;padding:4px 10px;border:1px solid #17150F;border-radius:6px;color:#17150F;text-decoration:none;font-size:11px;font-weight:600;">View Live</a>
+            <% } %>
           </td>
         </tr>
         <% }) %>

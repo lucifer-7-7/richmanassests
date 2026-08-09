@@ -45,13 +45,26 @@ body{font-family:'Inter','Plus Jakarta Sans',system-ui,sans-serif;background:var
 .top .nav-links a:hover{background:var(--ink);color:#fff}
 .top .nav-links .sign-out{color:var(--muted);background:transparent}
 .top .nav-links .sign-out:hover{color:var(--err);background:var(--err-bg)}
+/* Dummy-data toggle: styled here (not inline) so the mobile query can shrink it */
+.top .nav-links .dummy-toggle{border:none;cursor:pointer;font-weight:700;padding:8px 16px;border-radius:var(--r-pill);font-size:13px;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.top .nav-links .dummy-toggle.is-on{background:#F0FAF4;color:#27694A}
+.top .nav-links .dummy-toggle.is-off{background:#FDF2F2;color:#D93838}
+.lbl-short{display:none}
 
 @media (max-width:768px) {
-  .top{padding:0 12px;height:56px}
-  .top .brand{font-size:14px;gap:6px}
-  .top .brand .badge{font-size:8px;padding:2px 6px}
-  .top .nav-links a{font-size:11.5px;padding:6px 12px;white-space:nowrap!important}
+  /* The bar was a non-wrapping flex row of full-size items (~480px) inside a
+     375px sticky header, so its right edge was clipped off-screen. Shrink the
+     labels, let the brand truncate, and stop the page scrolling sideways. */
+  html,body{overflow-x:hidden}
+  .top{padding:0 10px;height:56px;gap:8px}
+  .top .brand{font-size:14px;gap:6px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .top .brand .badge{display:none}
+  .top .nav-links{gap:4px;flex:none}
+  .top .nav-links a{font-size:11.5px;padding:6px 10px;white-space:nowrap!important}
   .top .nav-links .sign-out{font-size:11.5px;padding:6px 8px}
+  .top .nav-links .dummy-toggle{font-size:11.5px;padding:6px 10px}
+  .lbl-full{display:none}
+  .lbl-short{display:inline}
   .desktop-table-wrap{display:none!important}
   .mobile-card-list{display:flex!important;flex-direction:column;gap:12px}
 }
@@ -82,31 +95,65 @@ body{font-family:'Inter','Plus Jakarta Sans',system-ui,sans-serif;background:var
 
 .content{flex:1;padding:32px 28px;max-width:1160px;overflow:hidden}
 
-/* mobile: sidebar drawer */
+/* mobile: sidebar drawer.
+   Offsets are 56px to match the mobile .top height (was 64px, leaving an
+   8px dead strip the drawer/overlay didn't cover). */
 @media(max-width:768px){
   .sidebar{
     display: flex;
     position: fixed;
-    top: 64px;
+    top: 56px;
     left: -260px;
     width: 248px;
-    height: calc(100svh - 64px);
+    height: calc(100svh - 56px);
     z-index: 99;
     box-shadow: 4px 0 24px rgba(0,0,0,.08);
     transition: left .25s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+    padding-bottom: 84px;
   }
   .sidebar.open { left: 0; }
   .sidebar-overlay {
     display: none;
     position: fixed;
-    inset: 64px 0 0 0;
+    inset: 56px 0 0 0;
     background: rgba(0,0,0,0.25);
     z-index: 98;
     backdrop-filter: blur(4px);
   }
   .sidebar-overlay.open { display: block; }
   .top .menu-toggle { display: flex !important; }
-  .content{padding:20px 16px 80px}
+  /* bottom padding clears the fixed .admin-tabbar */
+  .content{padding:20px 16px 96px}
+}
+
+/* ── MOBILE BOTTOM NAV (mirrors the public site's .tabbar) ── */
+.admin-tabbar{display:none}
+@media(max-width:768px){
+  .admin-tabbar{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    position:fixed;left:0;right:0;bottom:0;z-index:100;
+    background:var(--white);
+    border-top:1px solid var(--line);
+    padding:4px 2px calc(4px + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -4px 20px rgba(0,0,0,.06);
+  }
+  .admin-tabbar button{
+    position:relative;
+    background:none;border:0;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    min-height:48px;padding:5px 2px;
+    font-family:inherit;font-size:10px;font-weight:600;line-height:1;
+    color:var(--muted);
+  }
+  .admin-tabbar button svg{width:21px;height:21px}
+  .admin-tabbar button.is-active{color:var(--ink)}
+  .admin-tabbar button.is-active svg{stroke:var(--gold)}
+  .admin-tabbar .dot{
+    position:absolute;top:4px;right:calc(50% - 16px);
+    width:7px;height:7px;border-radius:50%;background:var(--err);
+  }
 }
 
 /* ── FLASH ── */
@@ -249,69 +296,69 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
 
 <div class="top">
   <div class="brand" style="gap:12px">
-    <button class="menu-toggle" onclick="toggleSidebar()" style="display:none;background:none;border:0;color:var(--ink);cursor:pointer;padding:4px;align-items:center;justify-content:center">
+    <button class="menu-toggle" data-toggle-sidebar style="display:none;background:none;border:0;color:var(--ink);cursor:pointer;padding:4px;align-items:center;justify-content:center">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     RichManAssets
     <span class="badge">Admin</span>
   </div>
   <div class="nav-links">
-    <form method="post" action="/admin/settings/toggle-dummy-data" style="display:inline">
-      <button type="submit" style="border:none;cursor:pointer;background:<%= useDummyData ? '#F0FAF4' : '#FDF2F2' %>;color:<%= useDummyData ? '#27694A' : '#D93838' %>;font-weight:700;padding:8px 16px;border-radius:999px;font-size:13px;font-family:inherit">
-        Dummy Data: <%= useDummyData ? 'ON' : 'OFF' %>
+    <form method="post" action="/admin/settings/toggle-dummy-data">
+      <button type="submit" class="dummy-toggle <%= useDummyData ? 'is-on' : 'is-off' %>">
+        <span class="lbl-full">Dummy Data:</span><span class="lbl-short">Dummy:</span> <%= useDummyData ? 'ON' : 'OFF' %>
       </button>
     </form>
-    <a href="/" target="_blank">View site ↗</a>
+    <a href="/" target="_blank" class="view-site"><span class="lbl-full">View site</span><span class="lbl-short">Site</span> ↗</a>
     <a href="/admin/logout" class="sign-out">Sign out</a>
   </div>
 </div>
 
 <div class="layout">
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay" data-toggle-sidebar></div>
   <!-- Desktop sidebar -->
   <nav class="sidebar" id="adminSidebar">
     <span class="sec-label">Manage</span>
-    <button class="active" onclick="showPanel('properties')" id="sb-properties">
+    <button class="active" data-panel="properties" id="sb-properties">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h3a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
       Properties
     </button>
-    <button onclick="showPanel('add')" id="sb-add">
+    <button data-panel="add" id="sb-add">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
       Add property
     </button>
-    <button onclick="showPanel('enquiries')" id="sb-enquiries">
+    <button data-panel="enquiries" id="sb-enquiries">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
       Enquiries
       <% if (stats.unreadEnquiries > 0) { %><span class="count-badge"><%= stats.unreadEnquiries %></span><% } %>
     </button>
-    <button onclick="showPanel('agent-listings')" id="sb-agent-listings">
+    <button data-panel="agent-listings" id="sb-agent-listings">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
       Agent Listings
       <% if (stats.agentPublished > 0) { %><span class="count-badge" style="background:#2D8A56"><%= stats.agentPublished %></span><% } %>
     </button>
-    <button onclick="showPanel('agents')" id="sb-agents">
+    <button data-panel="agents" id="sb-agents">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
       Agents
       <% if ((stats.totalAgents||0) > 0) { %><span class="count-badge" style="background:var(--muted)"><%= stats.totalAgents %></span><% } %>
     </button>
-    <button onclick="showPanel('payments')" id="sb-payments">
+    <button data-panel="payments" id="sb-payments">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/></svg>
       Payments
     </button>
-    <button onclick="showPanel('webhooks')" id="sb-webhooks">
+    <button data-panel="webhooks" id="sb-webhooks">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 3a1 1 0 00-1.414-1.414l-3 3A1 1 0 0013 5.293V6H5a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-5a1 1 0 10-2 0v5H5V8h8v.707a1 1 0 001.707.707l3-3z" clip-rule="evenodd"/></svg>
       Webhook Logs
     </button>
-    <button onclick="showPanel('audit')" id="sb-audit">
+    <button data-panel="audit" id="sb-audit">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h8a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
       Account Logs
     </button>
-    <button onclick="showPanel('analytics')" id="sb-analytics">
+    <button data-panel="analytics" id="sb-analytics">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/></svg>
       Analytics
       <% if ((analytics.today||0) > 0) { %><span class="count-badge" style="background:#6366f1"><%= analytics.today %></span><% } %>
     </button>
-    <button onclick="showPanel('settings')" id="sb-settings">
+    <button data-panel="settings" id="sb-settings">
       <svg class="icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.532 1.532 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
       Promo Ad Banner
     </button>
@@ -337,15 +384,15 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
     <div class="panel active" id="panel-properties">
       <div class="page-head">
         <h1>Properties</h1>
-        <button class="add-btn" onclick="showPanel('add')">
+        <button class="add-btn" data-panel="add">
           <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
           Add new
         </button>
       </div>
 
       <div class="list-controls">
-        <input type="text" id="searchProp" placeholder="Search by name or location…" oninput="filterProps()">
-        <select id="filterListing" onchange="filterProps()">
+        <input type="text" id="searchProp" placeholder="Search by name or location…" data-filter="props">
+        <select id="filterListing" data-filter="props">
           <option value="">All types</option>
           <option value="sale">For Sale</option>
           <option value="rent">For Rent</option>
@@ -380,7 +427,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             <form method="post" action="/admin/property/<%= p.id %>/toggle" style="flex:1;display:contents">
               <button class="a-toggle" type="submit"><%= p.active ? 'Hide' : 'Show' %></button>
             </form>
-            <form method="post" action="/admin/property/<%= p.id %>/delete" onsubmit="return confirm('Delete <%= p.name %>?')" style="flex:1;display:contents">
+            <form method="post" action="/admin/property/<%= p.id %>/delete" data-confirm="Delete <%= p.name %>?" style="flex:1;display:contents">
               <button class="a-del" type="submit">Del</button>
             </form>
           </div>
@@ -394,7 +441,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
     <div class="panel" id="panel-add">
       <div class="page-head">
         <h1>Add property</h1>
-        <button class="btn-cancel" onclick="showPanel('properties')">← Back</button>
+        <button class="btn-cancel" data-panel="properties">← Back</button>
       </div>
       <div class="form-card">
         <form method="post" action="/admin/property" enctype="multipart/form-data" id="addForm">
@@ -465,20 +512,20 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             <div class="fg">
               <div class="field">
                 <label>Card image (thumbnail)</label>
-                <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp" onchange="previewImg(this,'prev-card-add')">
+                <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp" data-preview-img="prev-card-add">
                 <img id="prev-card-add" class="img-preview" alt="">
                 <small>800×600 JPG recommended · shown in listing grids</small>
               </div>
               <div class="field">
                 <label>Hero image (full-width)</label>
-                <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp" onchange="previewImg(this,'prev-hero-add')">
+                <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp" data-preview-img="prev-hero-add">
                 <img id="prev-hero-add" class="img-preview" alt="">
                 <small>1600×900 JPG recommended · shown at top of property page</small>
               </div>
             </div>
             <div class="field" style="margin-top:12px">
               <label>Gallery images <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--muted)">(up to 10 images, shown in photo strip on property page)</span></label>
-              <input type="file" name="gallery" multiple accept="image/jpeg,image/png,image/webp" onchange="previewGallery(this,'gallery-prev-add')">
+              <input type="file" name="gallery" multiple accept="image/jpeg,image/png,image/webp" data-preview-gallery="gallery-prev-add">
               <div class="gallery-prev" id="gallery-prev-add"></div>
               <small>1200×800 JPG recommended · select multiple files at once</small>
             </div>
@@ -497,7 +544,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
 
           <div class="form-actions">
             <button class="btn-save" type="submit">Save property →</button>
-            <button class="btn-cancel" type="button" onclick="showPanel('properties')">Cancel</button>
+            <button class="btn-cancel" type="button" data-panel="properties">Cancel</button>
           </div>
         </form>
       </div>
@@ -516,8 +563,8 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
       </div>
 
       <div class="list-controls" style="margin-bottom:20px">
-        <input type="text" id="searchEnq" placeholder="Search by name, contact or message…" oninput="filterEnquiries()">
-        <select id="filterEnqStatus" onchange="filterEnquiries()">
+        <input type="text" id="searchEnq" placeholder="Search by name, contact or message…" data-filter="enquiries">
+        <select id="filterEnqStatus" data-filter="enquiries">
           <option value="">All statuses</option>
           <option value="unread">Unread only</option>
           <option value="read">Read only</option>
@@ -559,7 +606,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
                 <%= e.is_read ? 'Mark Unread' : 'Mark Read' %>
               </button>
             </form>
-            <form method="post" action="/admin/enquiries/<%= e.id %>/delete" onsubmit="return confirm('Delete enquiry from <%= e.name || "Anonymous" %>?')">
+            <form method="post" action="/admin/enquiries/<%= e.id %>/delete" data-confirm="Delete enquiry from <%= e.name || 'Anonymous' %>?">
               <button class="btn-delete" type="submit">Delete</button>
             </form>
           </div>
@@ -575,7 +622,51 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
       <% if (!agentProps || agentProps.length === 0) { %>
       <div class="empty"><h3>No agent listings yet</h3><p>Listings appear here after agents submit and pay.</p></div>
       <% } else { %>
-      <div style="overflow-x:auto">
+
+      <!-- Mobile card view -->
+      <div class="mobile-card-list">
+        <% agentProps.forEach(function(p) { %>
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div style="min-width:0">
+              <div style="font-weight:700;font-size:14px"><%= p.name %></div>
+              <div style="font-size:12px;color:var(--muted)"><%= p.loc %></div>
+            </div>
+            <span style="flex:none;padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:700;background:<%= p.status==='published'?'#F0FAF4':p.status==='payment_failed'?'#FDF2F2':'#EFF0F4' %>;color:<%= p.status==='published'?'#2D8A56':p.status==='payment_failed'?'#E03E3E':'#8E8E93' %>">
+              <%= p.status.replace(/_/g,' ') %>
+            </span>
+          </div>
+          <div style="font-size:12px;color:var(--ink-2)"><%= p.type %> · <%= p.listing %></div>
+          <div style="font-size:12px;color:var(--muted)">
+            Agent: <b style="color:var(--ink)"><%= p.agents ? p.agents.name : '—' %></b>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted)">
+            Expires: <%= p.expires_at ? new Date(p.expires_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—' %>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px">
+            <% if (p.status === 'published') { %>
+            <a href="/property/<%= p.id %>" target="_blank" style="flex:1;min-height:40px;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;background:var(--surface2);border-radius:999px;font-size:12px;font-weight:700;text-decoration:none;color:var(--ink)">View ↗</a>
+            <form method="post" action="/admin/agent-listings/<%= p.id %>/archive" style="flex:1">
+              <button type="submit" style="width:100%;min-height:40px;padding:8px 14px;background:#FFF8EC;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#D97706">Archive</button>
+            </form>
+            <% if (p.paid_order_id) { %>
+            <form method="post" action="/admin/agent-listings/<%= p.id %>/refund" style="flex:1" data-confirm="Refund ₹999 to agent?">
+              <input type="hidden" name="reason" value="Admin initiated refund">
+              <button type="submit" style="width:100%;min-height:40px;padding:8px 14px;background:#FDF2F2;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#E03E3E">Refund</button>
+            </form>
+            <% } %>
+            <% } else if (p.status === 'deleted') { %>
+            <form method="post" action="/admin/agent-listings/<%= p.id %>/restore" style="flex:1">
+              <button type="submit" style="width:100%;min-height:40px;padding:8px 14px;background:#F0FAF4;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#2D8A56">Restore ↺</button>
+            </form>
+            <% } %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Desktop table view -->
+      <div class="desktop-table-wrap" style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)">
           <thead><tr style="background:var(--surface2)">
             <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Property</th>
@@ -613,7 +704,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
                   <button type="submit" style="padding:6px 14px;background:#FFF8EC;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#D97706">Archive</button>
                 </form>
                 <% if (p.paid_order_id) { %>
-                <form method="post" action="/admin/agent-listings/<%= p.id %>/refund" style="display:inline" onsubmit="return confirm('Refund ₹999 to agent?')">
+                <form method="post" action="/admin/agent-listings/<%= p.id %>/refund" style="display:inline" data-confirm="Refund ₹999 to agent?">
                   <input type="hidden" name="reason" value="Admin initiated refund">
                   <button type="submit" style="padding:6px 14px;background:#FDF2F2;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#E03E3E">Refund</button>
                 </form>
@@ -637,14 +728,44 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
     <div class="panel" id="panel-agents">
       <div class="page-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <h1>Agents <span style="font-size:14px;font-weight:500;color:var(--muted)">(<%= stats.totalAgents||0 %> total)</span></h1>
-        <form method="post" action="/admin/agents/purge-test-agents" onsubmit="return confirm('Purge all automated test accounts?')">
+        <form method="post" action="/admin/agents/purge-test-agents" data-confirm="Purge all automated test accounts?">
           <button type="submit" style="padding:8px 16px;background:#FDF2F2;border:1px solid #F87171;border-radius:100px;font-size:12px;font-weight:700;color:#991B1B;cursor:pointer;">Purge Test Accounts 🗑</button>
         </form>
       </div>
       <% if (!agents || agents.length === 0) { %>
       <div class="empty"><h3>No agents registered yet</h3><p>Registered agents will appear here.</p></div>
       <% } else { %>
-      <div style="overflow-x:auto">
+
+      <!-- Mobile card view -->
+      <div class="mobile-card-list">
+        <% agents.forEach(function(a) { %>
+        <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div style="min-width:0">
+              <div style="font-weight:700;font-size:14px"><%= a.name %></div>
+              <div style="font-size:12px;color:var(--muted);word-break:break-all"><%= a.email %></div>
+            </div>
+            <span style="flex:none;padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:700;background:<%= a.is_active?'#F0FAF4':'#FDF2F2' %>;color:<%= a.is_active?'#2D8A56':'#E03E3E' %>">
+              <%= a.is_active ? 'Active' : 'Banned' %>
+            </span>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted)">
+            Registered <%= new Date(a.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a href="/admin/agents/<%= a.id %>" style="flex:1;min-height:40px;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;background:#E8E2D8;border-radius:999px;font-size:12px;font-weight:700;text-decoration:none;color:var(--ink)">Profile &amp; Logs</a>
+            <form method="post" action="/admin/agents/<%= a.id %>/toggle" style="flex:1">
+              <button type="submit" style="width:100%;min-height:40px;padding:8px 14px;background:<%= a.is_active?'#FDF2F2':'#F0FAF4' %>;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:<%= a.is_active?'#E03E3E':'#2D8A56' %>">
+                <%= a.is_active ? 'Ban' : 'Activate' %>
+              </button>
+            </form>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Desktop table view -->
+      <div class="desktop-table-wrap" style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)">
           <thead><tr style="background:var(--surface2)">
             <th style="text-align:left;padding:14px 18px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)">Agent</th>
@@ -676,7 +797,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
                   <%= a.is_active ? 'Ban' : 'Activate' %>
                 </button>
               </form>
-              <form method="post" action="/admin/agents/<%= a.id %>/delete" style="display:inline" onsubmit="return confirm('Delete agent account permanently?')">
+              <form method="post" action="/admin/agents/<%= a.id %>/delete" style="display:inline" data-confirm="Delete agent account permanently?">
                 <button type="submit" style="padding:6px 12px;background:#fee2e2;border:0;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;color:#991b1b;margin-left:4px;">Delete</button>
               </form>
             </td>
@@ -695,8 +816,8 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
       <div class="empty"><h3>No payments yet</h3><p>All attempted payments (created, processing, paid, failed, refunded) will appear here.</p></div>
       <% } else { %>
       <div class="list-controls" style="margin-bottom:20px">
-        <input type="text" id="searchPayment" placeholder="Search by order ID, agent, property…" oninput="filterPayments()">
-        <select id="filterPaymentStatus" onchange="filterPayments()">
+        <input type="text" id="searchPayment" placeholder="Search by order ID, agent, property…" data-filter="payments">
+        <select id="filterPaymentStatus" data-filter="payments">
           <option value="">All statuses</option>
           <option value="paid">Paid / Captured</option>
           <option value="processing">Processing</option>
@@ -732,10 +853,10 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             <span style="font-family:monospace;font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:6px"><%= o.internal_order_id %></span>
             <span><%= o.payment_method || 'Online' %></span>
           </div>
-          <% if (o.cashfree_order_id || o.cashfree_payment_id) { %>
+          <% if (o.razorpay_order_id || o.razorpay_payment_id || o.refund_id) { %>
           <div style="font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line2);padding-top:8px">
-            <% if (o.cashfree_order_id) { %><span>CF Order: <b style="font-family:monospace"><%= o.cashfree_order_id %></b></span><% } %>
-            <% if (o.cashfree_payment_id) { %><span>Payment ID: <b style="font-family:monospace"><%= o.cashfree_payment_id %></b></span><% } %>
+            <% if (o.razorpay_order_id) { %><span>Order: <b style="font-family:monospace"><%= o.razorpay_order_id %></b></span><% } %>
+            <% if (o.razorpay_payment_id) { %><span>Payment ID: <b style="font-family:monospace"><%= o.razorpay_payment_id %></b></span><% } %>
             <% if (o.refund_id) { %><span>Refund: <b style="font-family:monospace"><%= o.refund_id %></b> (<%= o.refund_status || 'pending' %>)</span><% } %>
           </div>
           <% } %>
@@ -770,7 +891,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
                  var stBg = (st==='paid'||st==='captured')?'#F0FAF4':(st==='failed'||st==='cancelled')?'#FDF2F2':(st==='processing'||st==='created')?'#FFF8EC':'#EFF6FF';
                  var stColor = (st==='paid'||st==='captured')?'#2D8A56':(st==='failed'||st==='cancelled')?'#E03E3E':(st==='processing'||st==='created')?'#D97706':'#1D4ED8';
             %>
-            <tr class="payment-row" style="border-bottom:1px solid var(--line2);cursor:pointer" data-search="<%= searchStr %>" data-status="<%= st %>" onclick="togglePayDetail('pd<%= idx %>')">
+            <tr class="payment-row" style="border-bottom:1px solid var(--line2);cursor:pointer" data-search="<%= searchStr %>" data-status="<%= st %>" data-pay-detail="pd<%= idx %>">
               <td style="padding:12px 14px;font-family:monospace;font-size:11px;font-weight:600"><%= o.internal_order_id %></td>
               <td style="padding:12px 14px"><b><%= agentName %></b><% if (agentEmail) { %><div style="font-size:11px;color:var(--muted)"><%= agentEmail %></div><% } %></td>
               <td style="padding:12px 14px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= propName %>"><%= propName %></td>
@@ -778,15 +899,15 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
               <td style="padding:12px 14px;font-size:12px"><%= o.payment_method || 'Online' %></td>
               <td style="padding:12px 14px"><span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;background:<%= stBg %>;color:<%= stColor %>"><%= st.toUpperCase() %></span></td>
               <td style="padding:12px 14px;font-size:11.5px;color:var(--muted);white-space:nowrap"><%= new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></td>
-              <td style="padding:12px 14px"><a href="/admin/invoices/<%= o.internal_order_id %>" target="_blank" onclick="event.stopPropagation()" style="padding:4px 10px;border:1px solid var(--ink);border-radius:6px;color:var(--ink);text-decoration:none;font-size:11px;font-weight:600">Invoice</a></td>
+              <td style="padding:12px 14px"><a href="/admin/invoices/<%= o.internal_order_id %>" target="_blank" data-stop-propagation style="padding:4px 10px;border:1px solid var(--ink);border-radius:6px;color:var(--ink);text-decoration:none;font-size:11px;font-weight:600">Invoice</a></td>
             </tr>
             <tr id="pd<%= idx %>" style="display:none;background:var(--surface2)">
               <td colspan="8" style="padding:12px 18px;font-size:12px">
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px 20px">
-                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">CF Order ID</span><div style="font-family:monospace;font-weight:600"><%= o.cashfree_order_id || '—' %></div></div>
-                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Payment ID</span><div style="font-family:monospace;font-weight:600"><%= o.cashfree_payment_id || '—' %></div></div>
-                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Session ID</span><div style="font-family:monospace;font-weight:600;word-break:break-all"><%= o.payment_session_id ? o.payment_session_id.slice(0,30) + '…' : '—' %></div></div>
-                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Idempotency Key</span><div style="font-family:monospace;font-weight:600"><%= o.idempotency_key || '—' %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Razorpay Order ID</span><div style="font-family:monospace;font-weight:600;word-break:break-all"><%= o.razorpay_order_id || '—' %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Razorpay Payment ID</span><div style="font-family:monospace;font-weight:600;word-break:break-all"><%= o.razorpay_payment_id || '—' %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Purpose</span><div style="font-weight:600"><%= o.purpose || 'property_listing' %></div></div>
+                  <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Currency</span><div style="font-weight:600"><%= o.currency || 'INR' %></div></div>
                   <% if (o.refund_id) { %>
                   <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Refund ID</span><div style="font-family:monospace;font-weight:600"><%= o.refund_id %></div></div>
                   <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Refund Amount</span><div style="font-weight:700">₹<%= o.refund_amount_paise ? ((o.refund_amount_paise)/100).toLocaleString('en-IN') : '—' %></div></div>
@@ -802,6 +923,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
         </div>
       </div>
       <% } %>
+    </div>
 
     <!-- PROMO AD BANNER SETTINGS PANEL -->
     <div class="panel" id="panel-settings">
@@ -830,7 +952,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
               </div>
               <div class="field">
                 <label for="pb_photo">Upload Banner Photo / Graphic</label>
-                <input type="file" id="pb_photo" name="banner_photo" accept="image/*" onchange="previewImg(this, 'bannerPhotoPreview')" style="padding:6px 0;">
+                <input type="file" id="pb_photo" name="banner_photo" accept="image/*" data-preview-img="bannerPhotoPreview" style="padding:6px 0;">
               </div>
             </div>
             <div style="margin-top:8px;">
@@ -901,7 +1023,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
               <label style="display:block;cursor:pointer;border:2px solid var(--line);border-radius:10px;overflow:hidden;transition:0.2s;position:relative;">
                 <input type="checkbox" name="hero_ids" value="<%=prop.id%>" <%= isChecked ? 'checked' : '' %> data-prop-id="<%=prop.id%>" data-prop-name="<%=prop.name%>" data-prop-img="<%=prop.img_card || '/assets/img/site-hero.jpg'%>"
                   style="position:absolute;left:-9999px;"
-                  onchange="window.HeroPicker.updateSelection()">
+                  data-hero-checkbox>
                 <div style="aspect-ratio:1;background:#f5f5f5;position:relative;overflow:hidden;">
                   <img src="<%=prop.img_card || '/assets/img/site-hero.jpg'%>" alt="<%=prop.name%>" style="width:100%;height:100%;object-fit:cover;display:block;">
                   <div style="position:absolute;inset:0;background:rgba(0,0,0,0);transition:0.2s;pointer-events:none;" class="hero-thumb-overlay"></div>
@@ -1060,6 +1182,31 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
         </div>
       </div>
 
+      <!-- Daily traffic trend (last 30 days) -->
+      <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:20px 18px;margin-bottom:28px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700">Daily Traffic — Last 30 Days</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:600">Peak: <%= analytics.trendPeak || 0 %> views/day</div>
+        </div>
+        <% if (!analytics.trend || analytics.trend.length === 0) { %>
+        <div style="font-size:13px;color:var(--muted);padding:12px 0">No traffic recorded yet.</div>
+        <% } else { %>
+        <div style="display:flex;align-items:flex-end;gap:3px;height:140px;overflow-x:auto;padding-bottom:4px">
+          <% analytics.trend.forEach(function(d) { %>
+          <div style="flex:1 0 14px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:5px"
+               title="<%= d.label %> — <%= d.count %> views">
+            <div style="font-size:9px;color:var(--muted);font-weight:700;line-height:1;height:11px"><%= d.count > 0 ? d.count : '' %></div>
+            <div style="width:100%;min-height:2px;height:<%= Math.max(d.pct, 1) %>%;border-radius:3px 3px 0 0;background:<%= d.count > 0 ? 'var(--ink)' : 'var(--line)' %>;transition:height .3s"></div>
+          </div>
+          <% }) %>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:600;margin-top:8px">
+          <span><%= analytics.trend[0].label %></span>
+          <span><%= analytics.trend[analytics.trend.length - 1].label %></span>
+        </div>
+        <% } %>
+      </div>
+
       <!-- Device + Browser + OS -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-bottom:28px">
         <!-- Devices -->
@@ -1185,353 +1332,31 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
   </main>
 </div>
 
-<script>
-function toggleSidebar() {
-  const sidebar = document.getElementById('adminSidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('open');
-}
+<!-- MOBILE BOTTOM NAV (≤768px) — mirrors the public site's .tabbar pattern -->
+<nav class="admin-tabbar" aria-label="Admin quick navigation">
+  <button type="button" class="is-active" data-panel="properties">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+    <span>Properties</span>
+  </button>
+  <button type="button" data-panel="add">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+    <span>Add</span>
+  </button>
+  <button type="button" data-panel="enquiries">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Enquiries</span>
+    <% if (stats.unreadEnquiries) { %><i class="dot" aria-hidden="true"></i><% } %>
+  </button>
+  <button type="button" data-panel="agents">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+    <span>Agents</span>
+  </button>
+  <button type="button" data-toggle-sidebar>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    <span>More</span>
+  </button>
+</nav>
 
-function showPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
-  const sb = document.getElementById('sb-' + id);
-  if (sb) sb.classList.add('active');
-  
-  // Close drawer on mobile
-  const sidebar = document.getElementById('adminSidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-  if (sidebar && sidebar.classList.contains('open')) {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('open');
-  }
-  
-  window.scrollTo(0,0);
-}
-
-function previewImg(input, previewId) {
-  const file = input.files[0];
-  if (!file) return;
-  const img = document.getElementById(previewId);
-  img.src = URL.createObjectURL(file);
-  img.classList.add('show');
-}
-
-// auto-slug from name
-const nameField = document.getElementById('nameField');
-const slugField = document.getElementById('slugField');
-if (nameField && slugField) {
-  nameField.addEventListener('input', function() {
-    if (!slugField.dataset.manual) {
-      slugField.value = nameField.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    }
-  });
-  slugField.addEventListener('input', function() { slugField.dataset.manual = '1'; });
-}
-
-// filter properties
-function filterProps() {
-  const q = (document.getElementById('searchProp').value || '').toLowerCase();
-  const l = document.getElementById('filterListing').value;
-  document.querySelectorAll('#propGrid .prop-card').forEach(card => {
-    const nameMatch = !q || card.dataset.name.includes(q);
-    const listMatch = !l || card.dataset.listing === l;
-    card.style.display = nameMatch && listMatch ? '' : 'none';
-  });
-}
-
-// open add panel if URL hash says so
-if (location.hash === '#add') showPanel('add');
-if (location.search.includes('tab=enquiries')) showPanel('enquiries');
-if (location.search.includes('tab=agent-listings')) showPanel('agent-listings');
-if (location.search.includes('tab=agents')) showPanel('agents');
-if (location.search.includes('tab=payments')) showPanel('payments');
-if (location.search.includes('tab=webhooks')) showPanel('webhooks');
-if (location.search.includes('tab=audit')) showPanel('audit');
-if (location.search.includes('tab=analytics')) showPanel('analytics');
-
-// filter enquiries
-function filterEnquiries() {
-  const q = (document.getElementById('searchEnq').value || '').toLowerCase();
-  const f = document.getElementById('filterEnqStatus').value;
-  document.querySelectorAll('#enqGrid .enq-card').forEach(card => {
-    const textContent = (card.dataset.name + ' ' + card.dataset.details).toLowerCase();
-    const textMatch = !q || textContent.includes(q);
-    const statusMatch = !f || (f === 'unread' && card.dataset.read === '0') || (f === 'read' && card.dataset.read === '1');
-    card.style.display = textMatch && statusMatch ? '' : 'none';
-  });
-}
-
-// filter payments (mobile & desktop)
-function filterPayments() {
-  const searchInput = document.getElementById('searchPayment');
-  const statusSelect = document.getElementById('filterPaymentStatus');
-  if (!searchInput || !statusSelect) return;
-  const q = searchInput.value.toLowerCase().trim();
-  const st = statusSelect.value.toLowerCase().trim();
-  document.querySelectorAll('.payment-row').forEach(row => {
-    const textMatch = !q || (row.dataset.search || '').includes(q);
-    const rowStatus = row.dataset.status || '';
-    let statusMatch = !st;
-    if (st === 'paid') statusMatch = (rowStatus === 'paid' || rowStatus === 'captured');
-    else if (st === 'failed') statusMatch = (rowStatus === 'failed' || rowStatus === 'cancelled');
-    else if (st === 'processing') statusMatch = (rowStatus === 'processing');
-    else if (st === 'created') statusMatch = (rowStatus === 'created');
-    else if (st === 'refunded') statusMatch = (rowStatus === 'refunded' || rowStatus === 'refund_initiated');
-    
-    row.style.display = textMatch && statusMatch ? '' : 'none';
-  });
-}
-
-function togglePayDetail(id) {
-  const el = document.getElementById(id);
-  if (el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'table-row' : 'none';
-}
-
-// ── gallery multi-preview ──
-function previewGallery(input, containerId) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
-  Array.from(input.files).forEach(function(file) {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-    img.style.cssText = 'width:80px;height:54px;object-fit:cover;border-radius:10px;border:1px solid #e0ddd6';
-    container.appendChild(img);
-  });
-}
-
-// ── tag-input (amenities + pills) ──
-(function() {
-  var style = document.createElement('style');
-  style.textContent = [
-    '.tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border:1px solid transparent;border-radius:12px;min-height:44px;cursor:text;background:var(--surface2)}',
-    '.tag-input:focus-within{background:#fff;border-color:#0F0F12;box-shadow:0 0 0 3px rgba(15,15,18,0.06)}',
-    '.tag-chip{display:inline-flex;align-items:center;gap:6px;background:#0F0F12;color:#fff;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}',
-    '.tag-chip button{background:none;border:0;cursor:pointer;color:#8E8E93;font-size:14px;line-height:1;padding:0 2px}',
-    '.tag-chip button:hover{color:#fff}',
-    '.tag-typeahead{border:0;outline:0;flex:1;min-width:120px;font:inherit;font-size:13.5px;background:none;padding:2px 4px}',
-    '.gallery-prev{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}',
-  ].join('');
-  document.head.appendChild(style);
-
-  function initTagInput(containerEl, hiddenInputId) {
-    if (!containerEl) return;
-    var hidden = document.getElementById(hiddenInputId);
-    var chips = [];
-
-    var input = document.createElement('input');
-    input.className = 'tag-typeahead';
-    input.placeholder = 'Type and press Enter…';
-    containerEl.appendChild(input);
-
-    function sync() {
-      if (hidden) hidden.value = chips.join('|');
-    }
-    function addChip(val) {
-      val = val.trim();
-      if (!val || chips.indexOf(val) !== -1) return;
-      chips.push(val);
-      var chip = document.createElement('span');
-      chip.className = 'tag-chip';
-      chip.textContent = val;
-      var del = document.createElement('button');
-      del.type = 'button';
-      del.textContent = '×';
-      del.addEventListener('click', function() {
-        chips.splice(chips.indexOf(val), 1);
-        chip.remove();
-        sync();
-      });
-      chip.appendChild(del);
-      containerEl.insertBefore(chip, input);
-      sync();
-    }
-
-    input.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        addChip(input.value.replace(/,/g,''));
-        input.value = '';
-      } else if (e.key === 'Backspace' && !input.value && chips.length) {
-        var last = chips[chips.length - 1];
-        chips.pop();
-        containerEl.querySelectorAll('.tag-chip')[containerEl.querySelectorAll('.tag-chip').length - 1].remove();
-        sync();
-      }
-    });
-    input.addEventListener('blur', function() {
-      if (input.value.trim()) { addChip(input.value); input.value = ''; }
-    });
-    containerEl.addEventListener('click', function() { input.focus(); });
-
-    if (hidden && hidden.value) {
-      hidden.value.split('|').forEach(function(v) { addChip(v); });
-    }
-  }
-
-  initTagInput(document.getElementById('amen-tags-add'), 'amenities-add');
-  initTagInput(document.getElementById('pills-tags-add'), 'setting_pills-add');
-
-  // Dynamic property type field adaptation for Admin Add Property form
-  var addPtype = document.getElementById('add-ptype');
-  var lblAddBeds = document.getElementById('lbl-add-beds');
-  var inputAddBeds = document.getElementById('add-beds');
-  var lblAddBaths = document.getElementById('lbl-add-baths');
-  var inputAddBaths = document.getElementById('add-baths');
-  var lblAddSqft = document.getElementById('lbl-add-sqft');
-  var inputAddSqft = document.getElementById('add-sqft');
-
-  function updateAddPropFieldLabels() {
-    if (!addPtype) return;
-    var v = (addPtype.value || '').toLowerCase();
-    if (v.includes('plot') || v.includes('land')) {
-      if (lblAddBeds) lblAddBeds.textContent = 'Road Width / Facing';
-      if (inputAddBeds) inputAddBeds.placeholder = 'e.g. 30 ft road · East facing';
-      if (lblAddBaths) lblAddBaths.textContent = 'Plot Dimensions';
-      if (inputAddBaths) inputAddBaths.placeholder = 'e.g. 40 x 60 ft';
-      if (lblAddSqft) lblAddSqft.textContent = 'Plot Area (sqft / Cents)';
-      if (inputAddSqft) inputAddSqft.placeholder = 'e.g. 10 Cents (4,356 sqft)';
-    } else if (v.includes('agricultural')) {
-      if (lblAddBeds) lblAddBeds.textContent = 'Irrigation Source';
-      if (inputAddBeds) inputAddBeds.placeholder = 'e.g. Borewell & River stream';
-      if (lblAddBaths) lblAddBaths.textContent = 'Soil Type / Crop';
-      if (inputAddBaths) inputAddBaths.placeholder = 'e.g. Red fertile soil · Coconut plantation';
-      if (lblAddSqft) lblAddSqft.textContent = 'Land Area (Acres)';
-      if (inputAddSqft) inputAddSqft.placeholder = 'e.g. 3.5 Acres';
-    } else if (v.includes('commercial') || v.includes('office') || v.includes('shop')) {
-      if (lblAddBeds) lblAddBeds.textContent = 'Floor Level / Lift';
-      if (inputAddBeds) inputAddBeds.placeholder = 'e.g. 2nd Floor (Lift available)';
-      if (lblAddBaths) lblAddBaths.textContent = 'Washrooms / Parking';
-      if (inputAddBaths) inputAddBaths.placeholder = 'e.g. 2 Washrooms · 4 Car parking';
-      if (lblAddSqft) lblAddSqft.textContent = 'Carpet Area (sqft)';
-      if (inputAddSqft) inputAddSqft.placeholder = 'e.g. 2,200 sqft';
-    } else {
-      if (lblAddBeds) lblAddBeds.textContent = 'Bedrooms';
-      if (inputAddBeds) inputAddBeds.placeholder = 'e.g. 4';
-      if (lblAddBaths) lblAddBaths.textContent = 'Bathrooms';
-      if (inputAddBaths) inputAddBaths.placeholder = 'e.g. 4';
-      if (lblAddSqft) lblAddSqft.textContent = 'Built-up Area (sqft)';
-      if (inputAddSqft) inputAddSqft.placeholder = 'e.g. 4,200 sqft';
-    }
-  }
-  if (addPtype) {
-    addPtype.addEventListener('change', updateAddPropFieldLabels);
-    updateAddPropFieldLabels();
-  }
-})();
-
-// ── Hero Picker Logic ──
-window.HeroPicker = (function() {
-  var selectedOrder = [];
-  var maxItems = 6;
-
-  function getSelectedCheckboxes() {
-    return Array.from(document.querySelectorAll('input[name="hero_ids"]:checked'));
-  }
-
-  function updateSelection() {
-    var checkboxes = getSelectedCheckboxes();
-
-    // Enforce 6-item cap
-    if (checkboxes.length > maxItems) {
-      checkboxes[checkboxes.length - 1].checked = false;
-      checkboxes = getSelectedCheckboxes();
-    }
-
-    // Build selection order from checked state
-    selectedOrder = checkboxes.map(cb => cb.value);
-
-    // Update preview strip
-    var strip = document.getElementById('heroPreviewStrip');
-    if (selectedOrder.length === 0) {
-      strip.innerHTML = '<div style="font-size:13px;color:var(--muted);flex:0 0 auto;">None selected yet</div>';
-    } else {
-      strip.innerHTML = selectedOrder.map(function(propId) {
-        var checkbox = document.querySelector('input[value="' + propId + '"]');
-        if (!checkbox) return '';
-        var name = checkbox.getAttribute('data-prop-name') || 'Unknown';
-        var img = checkbox.getAttribute('data-prop-img') || '/assets/img/site-hero.jpg';
-        return '<div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;">' +
-          '<img src="' + img + '" alt="' + name + '" style="width:80px;height:60px;object-fit:cover;border-radius:8px;border:2px solid #0F0F12;">' +
-          '<span style="font-size:11px;color:var(--ink-2);text-align:center;max-width:80px;white-space:normal;line-height:1.2;">' + name + '</span>' +
-          '</div>';
-      }).join('');
-    }
-
-    // Update cap message
-    var capMsg = document.getElementById('heroCapMessage');
-    if (capMsg) capMsg.textContent = selectedOrder.length + ' selected' + (selectedOrder.length === maxItems ? ' (max reached)' : '');
-
-    // Update order badges and overlay highlighting
-    Array.from(document.querySelectorAll('input[name="hero_ids"]')).forEach(function(cb) {
-      var wrapper = cb.closest('div[style*="position:relative"]');
-      if (!wrapper) return;
-
-      var badge = wrapper.querySelector('.hero-order-badge');
-      var overlay = wrapper.querySelector('.hero-thumb-overlay');
-      var label = cb.closest('label');
-
-      if (cb.checked) {
-        var position = selectedOrder.indexOf(cb.value) + 1;
-        if (badge) {
-          badge.style.display = 'flex';
-          badge.textContent = position;
-        }
-        if (overlay) overlay.style.background = 'rgba(0,0,0,0.3)';
-        if (label) label.style.borderColor = '#0F0F12';
-      } else {
-        if (badge) badge.style.display = 'none';
-        if (overlay) overlay.style.background = 'rgba(0,0,0,0)';
-        if (label) label.style.borderColor = 'var(--line)';
-      }
-    });
-
-    // Disable remaining checkboxes if at max
-    var allCheckboxes = Array.from(document.querySelectorAll('input[name="hero_ids"]'));
-    var atMax = selectedOrder.length >= maxItems;
-    allCheckboxes.forEach(function(cb) {
-      if (!cb.checked) {
-        cb.disabled = atMax;
-      } else {
-        cb.disabled = false;
-      }
-      var label = cb.closest('label');
-      if (label) label.style.opacity = cb.disabled ? '0.5' : '1';
-      if (label) label.style.pointerEvents = cb.disabled ? 'none' : 'auto';
-    });
-  }
-
-  // Form submission: build ordered hidden inputs
-  var heroForm = document.getElementById('heroForm');
-  if (heroForm) {
-    heroForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      // Remove old hidden inputs
-      Array.from(heroForm.querySelectorAll('input[type="hidden"][name="hero_ids[]"]')).forEach(el => el.remove());
-
-      // Add ordered hidden inputs
-      selectedOrder.forEach(function(propId) {
-        var hidden = document.createElement('input');
-        hidden.type = 'hidden';
-        hidden.name = 'hero_ids[]';
-        hidden.value = propId;
-        heroForm.appendChild(hidden);
-      });
-
-      heroForm.submit();
-    });
-  }
-
-  // Initial update on page load
-  updateSelection();
-
-  return {
-    updateSelection: updateSelection,
-  };
-})();
-</script>
+<script src="/assets/admin.js" defer></script>
 </body>
 </html>

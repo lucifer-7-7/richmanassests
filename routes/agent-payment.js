@@ -33,7 +33,9 @@ router.post('/create', requireAgent, paymentLimiter, async (req, res) => {
 
 // ── VERIFY RAZORPAY PAYMENT ──────────────────────────────────────
 // POST /agent/payment/verify
-router.post('/verify', requireAgent, async (req, res) => {
+// Rate-limited: this endpoint is the replay target, so bound how fast an attacker can
+// probe order/property combinations even though each one is now rejected.
+router.post('/verify', requireAgent, paymentLimiter, async (req, res) => {
   const { property_id, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
   try {
     const result = await agentPaymentSvc.verifyPropertyPayment({

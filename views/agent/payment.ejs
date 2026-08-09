@@ -186,11 +186,36 @@
 <script>
 var PROPERTY_ID = '<%- prop.id %>';
 
+// Captured once, before anything overwrites it, so the card icon survives every
+// disable/re-enable cycle. Previously one branch used textContent (which wiped the inline
+// SVG) and the rest used innerHTML, so the icon vanished after the first failure.
+var PAY_BTN_HTML = document.getElementById('payBtn').innerHTML;
+
+function setBusy(label) {
+  var btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.textContent = label;
+}
+
+function resetBtn() {
+  var btn = document.getElementById('payBtn');
+  btn.disabled = false;
+  btn.innerHTML = PAY_BTN_HTML;
+}
+
+function showError(msg) {
+  var errDiv = document.getElementById('payError');
+  errDiv.style.display = 'flex';
+  errDiv.textContent = msg;
+}
+
 async function initPayment() {
   var btn = document.getElementById('payBtn');
   var errDiv = document.getElementById('payError');
-  btn.disabled = true;
-  btn.textContent = 'Initialising Razorpay…';
+  // Guard first: on a slow connection the button stays clickable long enough to fire
+  // twice and create two Razorpay orders for one listing.
+  if (btn.disabled) return;
+  setBusy('Initialising Razorpay…');
   errDiv.style.display = 'none';
 
   try {
@@ -219,7 +244,7 @@ async function initPayment() {
       },
       theme: { color: '#1C1917' },
       handler: async function (response) {
-        btn.textContent = 'Verifying Payment…';
+        setBusy('Verifying Payment…');
         try {
           var vResp = await fetch('/agent/payment/verify', {
             method: 'POST',
@@ -238,28 +263,41 @@ async function initPayment() {
             throw new Error(vData.error || 'Signature verification failed.');
           }
         } catch (vErr) {
-          btn.disabled = false;
-          btn.innerHTML = 'Pay ₹<%= feeRs %> via Razorpay';
-          errDiv.style.display = 'flex';
-          errDiv.textContent = vErr.message || 'Payment verification failed.';
+          resetBtn();
+          // The money may well have been taken — the webhook is the source of truth and
+          // will publish regardless. Say so instead of implying the payment failed.
+          showError(
+            (vErr.message || 'Payment verification failed.') +
+            ' If you were charged, your listing will publish automatically within a few minutes.'
+          );
         }
       },
       modal: {
         ondismiss: function () {
-          btn.disabled = false;
-          btn.innerHTML = 'Pay ₹<%= feeRs %> via Razorpay';
+          resetBtn();
         }
       }
     };
 
     var rzp = new Razorpay(options);
+
+    // Card declines and UPI timeouts resolve here, not in `handler`. Without this the
+    // modal closed and the button sat disabled with no explanation.
+    rzp.on('payment.failed', function (response) {
+      resetBtn();
+      var e = (response && response.error) || {};
+      var reason = e.description || 'Your payment could not be completed.';
+      if (e.reason === 'payment_cancelled') {
+        reason = 'Payment was cancelled. You can try again.';
+      }
+      showError(reason + (e.code ? ' (' + e.code + ')' : ''));
+    });
+
     rzp.open();
 
   } catch (err) {
-    btn.disabled = false;
-    btn.innerHTML = 'Pay ₹<%= feeRs %> via Razorpay';
-    errDiv.style.display = 'flex';
-    errDiv.textContent = err.message || 'Something went wrong. Please try again.';
+    resetBtn();
+    showError(err.message || 'Something went wrong. Please try again.');
   }
 }
 </script>

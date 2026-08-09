@@ -16,15 +16,17 @@ async function getAgentAnalytics() {
   const db = getDB();
 
   // 1. Status Breakdown (counts + percentages)
-  const { data: allAgents } = await db.from('agents').select('id, status, city, kyc_status, created_at, activated_at, plan_id');
+  // No activated_at / plan_id — neither column exists, and selecting them errored the
+  // whole query, which is why this dashboard rendered all zeros.
+  const { data: allAgents } = await db.from('agents').select('id, status, city, kyc_status, created_at');
   const agentsList = allAgents || [];
   const totalAgents = agentsList.length || 1; // avoid divide by zero
 
+  // pending_payment / payment_failed are gone: onboarding is free, so an account never
+  // waits on money. The fee is per listing and lives in the listing's own status.
   const statusCounts = {
     draft: 0,
-    pending_payment: 0,
     active: 0,
-    payment_failed: 0,
     suspended: 0,
     expired: 0,
     deactivated: 0,
@@ -38,8 +40,6 @@ async function getAgentAnalytics() {
   };
 
   const cityCounts = {};
-  let totalActivationTimeMs = 0;
-  let activatedAgentCount = 0;
 
   agentsList.forEach((a) => {
     if (statusCounts[a.status] !== undefined) statusCounts[a.status]++;
@@ -47,15 +47,6 @@ async function getAgentAnalytics() {
 
     const city = a.city || 'Udupi';
     cityCounts[city] = (cityCounts[city] || 0) + 1;
-
-    if (a.activated_at && a.created_at) {
-      const createdMs = new Date(a.created_at).getTime();
-      const activatedMs = new Date(a.activated_at).getTime();
-      if (activatedMs >= createdMs) {
-        totalActivationTimeMs += (activatedMs - createdMs);
-        activatedAgentCount++;
-      }
-    }
   });
 
   const statusBreakdown = Object.keys(statusCounts).map((key) => ({
@@ -64,20 +55,56 @@ async function getAgentAnalytics() {
     percentage: parseFloat(((statusCounts[key] / totalAgents) * 100).toFixed(1)),
   }));
 
-  // 2. Signup Funnel
+  // 2. Signup funnel — now measured against what actually matters commercially:
+  // how many people who register go on to verify, and how many of those ever pay to
+  // publish. The old draft → pending_payment → paid ladder no longer exists.
+  const { data: publishers } = await db
+    .from('agent_properties')
+    .select('agent_id')
+    .eq('status', 'published');
+  const publishingAgents = new Set((publishers || []).map(p => p.agent_id)).size;
+
+  const registered = agentsList.length;
+  const verified = registered - statusCounts.draft;
+
   const funnel = {
-    draft: statusCounts.draft + statusCounts.pending_payment + statusCounts.active + statusCounts.payment_failed + statusCounts.suspended + statusCounts.expired + statusCounts.deactivated,
-    pending_payment: statusCounts.pending_payment + statusCounts.active + statusCounts.payment_failed + statusCounts.suspended + statusCounts.expired,
-    paid: statusCounts.active + statusCounts.suspended + statusCounts.expired,
-    active: statusCounts.active,
+    registered,
+    verified,
+    published: publishingAgents,
   };
 
   const funnelDropoff = {
-    draft_to_pending: funnel.draft > 0 ? parseFloat((((funnel.draft - funnel.pending_payment) / funnel.draft) * 100).toFixed(1)) : 0,
-    pending_to_paid: funnel.pending_payment > 0 ? parseFloat((((funnel.pending_payment - funnel.paid) / funnel.pending_payment) * 100).toFixed(1)) : 0,
+    registered_to_verified: registered > 0
+      ? parseFloat((((registered - verified) / registered) * 100).toFixed(1)) : 0,
+    verified_to_published: verified > 0
+      ? parseFloat((((verified - publishingAgents) / verified) * 100).toFixed(1)) : 0,
   };
 
-  // 3. Avg time to activation in hours
+  // 3. Avg time from signup to verification, from the durable status history.
+  // (Previously read agents.activated_at, a column that does not exist.)
+  const { data: activations } = await db
+    .from('agent_status_history')
+    .select('agent_id, changed_at')
+    .eq('to_status', 'active')
+    .order('changed_at', { ascending: true });
+
+  const createdAtById = new Map(agentsList.map(a => [String(a.id), a.created_at]));
+  let totalActivationTimeMs = 0;
+  let activatedAgentCount = 0;
+  const seenAgents = new Set();
+
+  for (const row of activations || []) {
+    const key = String(row.agent_id);
+    if (seenAgents.has(key)) continue;      // first activation only
+    const createdAt = createdAtById.get(key);
+    if (!createdAt) continue;
+    const deltaMs = new Date(row.changed_at).getTime() - new Date(createdAt).getTime();
+    if (deltaMs < 0) continue;
+    seenAgents.add(key);
+    totalActivationTimeMs += deltaMs;
+    activatedAgentCount++;
+  }
+
   const avgTimeToActivationHours = activatedAgentCount > 0
     ? parseFloat((totalActivationTimeMs / (activatedAgentCount * 1000 * 3600)).toFixed(2))
     : 0;

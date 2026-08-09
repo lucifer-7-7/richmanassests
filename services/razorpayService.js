@@ -10,9 +10,11 @@
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 
-const KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_RMAAgentSignupKey';
-const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'rzp_secret_RMAAgentSignupSecretKey123';
-const WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || 'rzp_webhook_secret_RMA123';
+// No fallbacks. A missing key must fail loudly at boot (see server.js) rather than
+// silently running on a constant that is public in this repo's history.
+const KEY_ID = process.env.RAZORPAY_KEY_ID;
+const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
+const WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET;
 
 // Initialize Razorpay SDK instance
 let razorpayInstance = null;
@@ -45,24 +47,8 @@ async function createRazorpayOrder({ amount_paise, currency = 'INR', receipt, no
     const order = await rzp.orders.create(orderOptions);
     return order;
   } catch (err) {
-    // If API credentials are dummy or network fails in test environment, generate deterministic fallback order for sandbox test run
-    if (KEY_ID.startsWith('rzp_test_') && (err.statusCode === 401 || err.message?.includes('Authentication failed') || err.code === 'ENOTFOUND')) {
-      console.warn('[Razorpay API] Using test-mode simulated order creation:', err.message);
-      const simulatedId = `order_${crypto.randomBytes(8).toString('hex')}`;
-      return {
-        id: simulatedId,
-        entity: 'order',
-        amount: amount_paise,
-        amount_paid: 0,
-        amount_due: amount_paise,
-        currency,
-        receipt,
-        status: 'created',
-        attempts: 0,
-        notes,
-        created_at: Math.floor(Date.now() / 1000),
-      };
-    }
+    // Never fabricate an order. A failure here must surface — an invented order id
+    // would be recorded as real and could never be reconciled against Razorpay.
     console.error('[Razorpay Order Creation Error]:', err.message || err);
     throw err;
   }
@@ -121,19 +107,8 @@ async function initiateRazorpayRefund({ razorpay_payment_id, amount_paise, notes
     const refund = await rzp.payments.refund(razorpay_payment_id, refundOptions);
     return refund;
   } catch (err) {
-    if (KEY_ID.startsWith('rzp_test_') && (err.statusCode === 401 || err.message?.includes('Authentication failed'))) {
-      console.warn('[Razorpay Refund] Using test-mode simulated refund:', err.message);
-      return {
-        id: `rfnd_${crypto.randomBytes(8).toString('hex')}`,
-        entity: 'refund',
-        amount: amount_paise,
-        currency: 'INR',
-        payment_id: razorpay_payment_id,
-        notes,
-        status: 'processed',
-        created_at: Math.floor(Date.now() / 1000),
-      };
-    }
+    // Never fabricate a refund — the admin UI would report money returned that never moved.
+    console.error('[Razorpay Refund Error]:', err.message || err);
     throw err;
   }
 }
@@ -147,10 +122,10 @@ async function fetchRazorpayOrder(razorpay_order_id) {
     const order = await rzp.orders.fetch(razorpay_order_id);
     return order;
   } catch (err) {
-    if (KEY_ID.startsWith('rzp_test_')) {
-      return null;
-    }
-    throw err;
+    // Reconciliation calls this per open order. Swallowing every error to null silently
+    // no-ops the whole healing pass, so log it — the caller treats null as "skip this one".
+    console.error(`[Razorpay Order Fetch Error] ${razorpay_order_id}:`, err.message || err);
+    return null;
   }
 }
 

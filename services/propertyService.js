@@ -14,8 +14,8 @@
  *   deleteDraft(propId, agentId)        — delete draft (only draft/payment_failed)
  *
  * Payment state machine
- *   markPaymentPending(propId)          — called before opening Cashfree checkout
- *   publishProperty(propId, orderId, amountPaise)
+ *   markPaymentPending(propId)          — called before opening Razorpay checkout
+ *   publishProperty({ propertyId, agentId, paidOrderId, amountPaise })
  *   markPaymentFailed(propId)
  *   markRefunded(propId)
  *
@@ -287,11 +287,37 @@ async function markPaymentPending(propId) {
 /**
  * Publish an agent property after successful payment.
  * Sets status = 'published', records published_at and expires_at.
+ *
+ * `agentId` is required and is matched in the UPDATE itself. Without it this function
+ * published any listing id the caller passed, which let one paid order publish another
+ * agent's listing. Callers must prove ownership by supplying the agent the paid order
+ * belongs to — not the agent the request claims to be.
+ *
+ * Safe to call twice for the same payment: the webhook and the checkout-verify path both
+ * fire for one successful order, and whichever loses the race is a no-op.
  */
-async function publishProperty(propertyId, internalOrderId, amountPaise) {
+async function publishProperty({ propertyId, agentId, paidOrderId, amountPaise }) {
+  if (!propertyId) throw new Error('publishProperty requires a propertyId.');
+  if (!agentId)    throw new Error('publishProperty requires an agentId.');
+
   const db = getDB();
   const now = new Date();
   const expiresAt = new Date(now.getTime() + LISTING_DURATION_DAYS * 24 * 60 * 60 * 1000);
+
+  // Already published by this same order — don't restart the 12-month clock.
+  const { data: existing } = await db
+    .from('agent_properties')
+    .select('id, status, published_at, expires_at, paid_order_id')
+    .eq('id', propertyId)
+    .eq('agent_id', agentId)
+    .maybeSingle();
+
+  if (!existing) {
+    throw new Error(`Property ${propertyId} not found for agent ${agentId}.`);
+  }
+  if (existing.status === 'published' && existing.paid_order_id === paidOrderId) {
+    return existing;
+  }
 
   const result = await db
     .from('agent_properties')
@@ -299,11 +325,12 @@ async function publishProperty(propertyId, internalOrderId, amountPaise) {
       status:         'published',
       published_at:   now.toISOString(),
       expires_at:     expiresAt.toISOString(),  // ← correct column name per schema
-      paid_order_id:  internalOrderId || null,   // ← correct column name per schema
+      paid_order_id:  paidOrderId || null,       // ← correct column name per schema
       fee_paid_paise: amountPaise || 0,
       updated_at:     now.toISOString(),
     })
     .eq('id', propertyId)
+    .eq('agent_id', agentId)
     .select('id, status, published_at, expires_at')
     .single();
 
@@ -338,12 +365,21 @@ async function markPaymentFailed(propertyId) {
 
 /**
  * Mark property as refunded after a successful refund.
+ *
+ * Clears published_at/expires_at as well as the status: the listing fee bought a 12-month
+ * slot, and refunding it takes the slot back. Leaving those set kept a refunded listing
+ * looking live to anything that reads the dates rather than the status.
  */
 async function markRefunded(propertyId) {
   const db = getDB();
   const result = await db
     .from('agent_properties')
-    .update({ status: 'refunded', updated_at: new Date().toISOString() })
+    .update({
+      status:       'refunded',
+      published_at: null,
+      expires_at:   null,
+      updated_at:   new Date().toISOString(),
+    })
     .eq('id', propertyId)
     .select('id, status')
     .single();

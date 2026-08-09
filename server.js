@@ -1,12 +1,33 @@
 'use strict';
 require('dotenv').config();
 
-// Validate required environment variables
-const requiredEnvVars = ['SUPABASE_SERVICE_KEY', 'SESSION_SECRET'];
+// Validate required environment variables.
+// Every one of these previously had a hardcoded fallback somewhere in the codebase, which
+// meant a missing value booted the app on a constant an attacker could read from git history.
+// Failing here is the point: a misconfigured deploy must not start.
+const requiredEnvVars = [
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_KEY',
+  'SESSION_SECRET',
+  'ADMIN_PASSWORD',
+  'RAZORPAY_KEY_ID',
+  'RAZORPAY_KEY_SECRET',
+  'RAZORPAY_WEBHOOK_SECRET',
+];
 const missing = requiredEnvVars.filter(v => !process.env[v]);
 if (missing.length) {
   console.error('[FATAL] Missing required env vars:', missing.join(', '));
   process.exit(1);
+}
+
+// Test keys in production are legitimate during a soft launch, so warn rather than exit —
+// but make it impossible to miss in the logs when the live-key swap hasn't happened yet.
+if (process.env.NODE_ENV === 'production' && process.env.RAZORPAY_KEY_ID.startsWith('rzp_test_')) {
+  console.warn('='.repeat(72));
+  console.warn('[WARNING] NODE_ENV=production but RAZORPAY_KEY_ID is a TEST key.');
+  console.warn('          No real payments will be collected. Swap to live keys in .env');
+  console.warn('          when you are ready to charge.');
+  console.warn('='.repeat(72));
 }
 
 const express     = require('express');
@@ -27,15 +48,22 @@ app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  // CSP: allow Razorpay + Cashfree SDK + Cloudinary images + Google Fonts (no unsafe-inline)
+  // CSP: allow Razorpay SDK + Cloudinary images + Google Fonts.
+  // Cashfree was removed from every directive — the integration is gone, and leaving its
+  // origins whitelisted kept a third-party script source we no longer control or need.
+  // 'unsafe-inline' is required in script-src: property.ejs, agent/payment.ejs
+  // (Razorpay checkout), the agent layouts and partials/mobile-tabbar.ejs all rely
+  // on inline <script> blocks and inline on* handlers. Removing it silently blocked
+  // every one of them — including the Pay button. The admin dashboard no longer
+  // depends on it (its JS lives in /assets/admin.js with delegated listeners).
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' https://checkout.razorpay.com https://sdk.cashfree.com https://cdnjs.cloudflare.com",
+    "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdnjs.cloudflare.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https://res.cloudinary.com https://upload.wikimedia.org blob:",
-    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://sdk.cashfree.com https://*.supabase.co https://ip-api.com",
-    "frame-src https://checkout.razorpay.com https://api.razorpay.com https://sdk.cashfree.com",
+    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://*.supabase.co https://ip-api.com",
+    "frame-src https://checkout.razorpay.com https://api.razorpay.com",
     "worker-src 'none'",
   ].join('; '));
   next();
@@ -95,7 +123,6 @@ app.use(trackVisit);
 app.use('/',               require('./routes/public'));
 app.use('/admin',          require('./routes/admin'));
 app.use('/agent',          require('./routes/agent'));
-app.use('/payments',       require('./routes/payments'));
 app.use('/agent/payment',  require('./routes/agent-payment'));
 app.use('/agent/invoices', require('./routes/agent-invoices'));
 
@@ -218,9 +245,9 @@ app.get('/llms.txt', (req, res) => {
     '',
     '## Contact',
     '- Office: 2nd Floor, Sri Ram Building, Opp. Manjunath Eye Hospital, Bannanje Road, Udupi, Karnataka 576101, India',
-    '- Phone: +91 90360 01234 (Mobile), +91 820 253 9961 (Landline)',
+    '- Phone: +91 93809 39961 (Mobile), +91 820 253 9961 (Landline)',
     '- Email: hello@richmanassets.com',
-    '- WhatsApp: https://wa.me/919036001234',
+    '- WhatsApp: https://wa.me/919380939961',
     '',
     '## Important Pages',
     `- Homepage: ${host}/`,
