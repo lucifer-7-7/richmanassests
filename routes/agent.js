@@ -287,7 +287,7 @@ router.get('/listings/new', requireAgent, (req, res) => {
     title: 'Add New Listing | RichManAssets Agent',
     robots: 'noindex,nofollow',
     agent: req.agent,
-    prop: null,
+    prop: propSvc.getEditorialDefaults({}),
     isEdit: false,
     flash: null,
     csrfToken: genCsrf(req),
@@ -355,6 +355,8 @@ router.get('/listings/:id/edit', requireAgent, requirePropertyOwner, (req, res) 
     req.session.agentFlash = { type: 'err', msg: 'Only draft listings can be edited.' };
     return res.redirect('/agent/listings');
   }
+  const editorialDefaults = propSvc.getEditorialDefaults(prop);
+  Object.keys(editorialDefaults).forEach((k) => { if (!prop[k]) prop[k] = editorialDefaults[k]; });
   res.render('agent/listing-form', {
     title: `Edit: ${prop.name} | RichManAssets Agent`,
     robots: 'noindex,nofollow',
@@ -447,6 +449,8 @@ router.get('/listings/:id/manage', requireAgent, requirePropertyOwner, (req, res
   }
   let gallery = [];
   try { gallery = JSON.parse(prop.gallery || '[]'); } catch (_) {}
+  const editorialDefaults = propSvc.getEditorialDefaults(prop);
+  Object.keys(editorialDefaults).forEach((k) => { if (!prop[k]) prop[k] = editorialDefaults[k]; });
   res.render('agent/manage-listing', {
     title: `Manage: ${prop.name} | RichManAssets Agent`,
     robots: 'noindex,nofollow',

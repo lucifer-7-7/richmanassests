@@ -42,6 +42,24 @@ function isLandOrPlot(type) {
 }
 
 /**
+ * Compute default property-page section titles/copy from real listing fields,
+ * for use wherever a field is left blank (agent forms and the public page).
+ * Returns only the fields it has a sensible default for.
+ */
+function getEditorialDefaults(p) {
+  const land = isLandOrPlot(p.type);
+  const listLabel = p.listing === 'rent' ? 'for Rent' : p.listing === 'lease' ? 'for Lease' : 'for Sale';
+  const bedsPart = (!land && p.beds && p.beds !== '—' && p.beds !== 'N/A' && !/bhk|bed/i.test(p.beds)) ? `${p.beds}-Bedroom ` : '';
+  return {
+    story_kicker:      (p.type && p.loc) ? `${p.type} ${listLabel} in ${p.loc}` : '',
+    story_heading:     (p.type && p.loc) ? `A ${bedsPart}${p.type} in ${p.loc}.` : '',
+    amenities_kicker:  "What's here",
+    amenities_heading: 'The essentials',
+    setting_kicker:    p.setting_heading ? 'The setting' : 'Good to know',
+  };
+}
+
+/**
  * Generate a clean property ID slug from a name + timestamp.
  */
 function makeId(name) {
@@ -507,6 +525,7 @@ async function updatePublishedListing(propId, agentId, body, { img_card, img_her
 
 module.exports = {
   isLandOrPlot,
+  getEditorialDefaults,
   // Agent CRUD
   getAgentListings,
   getAgentProperty,

@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { getDB } = require('../db/db');
 const { getPromoBanner, getUseDummyData, getHeroPropertyIds } = require('../lib/settings');
+const propSvc = require('../services/propertyService');
 
 // canonical site origin (production domain) for SEO tags
 const SITE = process.env.SITE_URL || 'https://richmanassets.com';
@@ -510,18 +511,10 @@ router.get('/property/:id', async (req, res) => {
     const pTypeLower = (p.type || '').toLowerCase();
     const isLandOrPlot = pTypeLower.includes('plot') || pTypeLower.includes('land') || pTypeLower.includes('agricultural');
 
-    // Derive editorial kicker/heading from real listing data when the agent form
-    // never populated the demo-only story fields — real facts, not filler prose.
-    if (!p.story_kicker) {
-      p.story_kicker = `${p.type} ${listLabel} in ${p.loc}`;
-    }
-    if (!p.story_heading) {
-      const bedsPart = (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A' && !/bhk|bed/i.test(p.beds)) ? `${p.beds}-Bedroom ` : '';
-      p.story_heading = `A ${bedsPart}${p.type} in ${p.loc}.`;
-    }
-    if (!p.amenities_kicker) p.amenities_kicker = "What's here";
-    if (!p.amenities_heading) p.amenities_heading = 'The essentials';
-    if (!p.setting_kicker) p.setting_kicker = p.setting_heading ? 'The setting' : 'Good to know';
+    // Fill in any blank editorial fields with defaults derived from real listing data
+    // — agents can override each one from the listing form; this is just the fallback.
+    const editorialDefaults = propSvc.getEditorialDefaults(p);
+    Object.keys(editorialDefaults).forEach((k) => { if (!p[k]) p[k] = editorialDefaults[k]; });
 
     res.render('property', {
       title: pageTitle,
