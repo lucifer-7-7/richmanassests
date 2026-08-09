@@ -69,7 +69,7 @@
         </label>
         <input type="file" id="img_card" name="img_card" accept="image/jpeg,image/png,image/webp" class="manage-file-input" onchange="previewFile(this, 'card-preview')">
         <div class="manage-new-preview" id="card-preview"></div>
-        <div class="manage-hint">JPEG/PNG/WebP · max 15 MB</div>
+        <div class="manage-hint">JPEG/PNG/WebP · auto-compressed to ~3 MB, max 8 MB</div>
       </div>
 
       <div class="manage-img-slot">
@@ -114,7 +114,7 @@
     <div class="manage-form-group" style="margin-top: 16px;">
       <label class="manage-form-label" for="gallery">Add Gallery Images (up to 10)</label>
       <input type="file" id="gallery" name="gallery" multiple accept="image/jpeg,image/png,image/webp" class="manage-file-input-multi">
-      <div class="manage-hint">Select multiple files. New images are added to existing gallery.</div>
+      <div class="manage-hint">Select multiple files. Each auto-compressed to ~3 MB, max 8 MB. New images are added to existing gallery.</div>
     </div>
   </div>
 
@@ -352,5 +352,6 @@ document.getElementById('manageForm').addEventListener('submit', function() {
   btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving…';
 });
 </script>
+<script src="/assets/agent-image-compress.js" defer></script>
 
 <%- include('../partials/agent-layout-end') %>

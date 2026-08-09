@@ -146,17 +146,21 @@
       <div class="form-group">
         <label for="img_card">Card / Thumbnail Image</label>
         <input type="file" id="img_card" name="img_card" accept="image/jpeg,image/png,image/webp">
-        <div class="form-hint">JPEG/PNG/WebP, max 15 MB. Shown in listings grid.</div>
+        <div class="form-hint">JPEG/PNG/WebP. Auto-compressed to ~3 MB, max 8 MB.</div>
+        <div id="img_card_status" class="form-hint" style="min-height:14px"></div>
       </div>
       <div class="form-group">
         <label for="img_hero">Hero / Full-size Image <span style="color:#D93838;font-weight:700">* (Compulsory)</span></label>
         <input type="file" id="img_hero" name="img_hero" accept="image/jpeg,image/png,image/webp" <%= (!isEdit || !prop || !prop.img_hero) ? 'required' : '' %>>
-        <div class="form-hint">Compulsory primary image for property detail page.</div>
+        <div class="form-hint">Compulsory primary image. Auto-compressed to ~3 MB, max 8 MB.</div>
+        <div id="img_hero_status" class="form-hint" style="min-height:14px"></div>
       </div>
     </div>
     <div class="form-group">
       <label for="gallery">Gallery Images (up to 10)</label>
       <input type="file" id="gallery" name="gallery" multiple accept="image/jpeg,image/png,image/webp">
+      <div class="form-hint">Each image auto-compressed to ~3 MB, max 8 MB.</div>
+      <div id="gallery_status" class="form-hint" style="min-height:14px"></div>
     </div>
   </div>
 
@@ -289,6 +293,7 @@
 })();
 </script>
 
+<script src="/assets/agent-image-compress.js" defer></script>
 <script src="/assets/agent-preview.js" defer></script>
 
 <%- include('../partials/agent-layout-end') %>

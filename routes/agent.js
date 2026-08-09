@@ -6,7 +6,6 @@
 const express  = require('express');
 const router   = express.Router();
 const multer   = require('multer');
-const path     = require('path');
 const crypto   = require('crypto');
 const bcrypt   = require('bcryptjs');
 const { getDB } = require('../db/db');
@@ -19,43 +18,38 @@ const { getListingFee } = require('../services/paymentService');
 const { logSecurityEvent } = require('../lib/securityLog');
 
 // ── multer setup ─────────────────────────────────────────────────
-const uploadDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../uploads');
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `agent-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
-  },
-});
+// Memory storage only — no disk writes. Vercel /tmp is ephemeral and
+// shared across warm invocations; writing large files there risked
+// filling it up and crashing the function outright. Client-side
+// compression (agent-image-compress.js) keeps buffers small before
+// they ever reach this handler.
 const upload = multer({
-  storage,
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB hard ceiling (safety net; client compresses to ~3MB)
   fileFilter: (req, file, cb) => {
     if (/image\/(jpeg|png|webp|gif)/.test(file.mimetype)) return cb(null, true);
     cb(new Error('Only JPEG, PNG, WebP images are allowed.'));
   },
 });
 
-async function uploadToCloudinary(localPath, publicId) {
+async function uploadToCloudinary(buffer, publicId) {
   if (!process.env.CLOUDINARY_CLOUD_NAME) return null;
   const { v2 } = require('cloudinary');
   v2.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME, api_key: process.env.CLOUDINARY_API_KEY, api_secret: process.env.CLOUDINARY_API_SECRET });
-  const result = await v2.uploader.upload(localPath, {
-    folder: 'richmanassets/agents',
-    public_id: publicId,
-    overwrite: true,
-    transformation: [{ width: 1600, height: 1200, crop: 'limit', quality: 82, fetch_format: 'auto' }],
+  return new Promise((resolve, reject) => {
+    const stream = v2.uploader.upload_stream({
+      folder: 'richmanassets/agents',
+      public_id: publicId,
+      overwrite: true,
+      transformation: [{ width: 1600, height: 1200, crop: 'limit', quality: 82, fetch_format: 'auto' }],
+    }, (err, result) => err ? reject(err) : resolve(result.secure_url));
+    stream.end(buffer);
   });
-  try { require('fs').unlinkSync(localPath); } catch (_) {}
-  return result.secure_url;
 }
 
 async function resolveImg(file, publicId) {
   if (!file) return null;
-  const url = await uploadToCloudinary(file.path, publicId).catch(() => null);
-  if (url) return url;
-  const filename = path.basename(file.path);
-  return `/uploads/${filename}`;
+  return uploadToCloudinary(file.buffer, publicId);
 }
 
 

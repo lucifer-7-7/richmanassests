@@ -3,7 +3,6 @@ const express  = require('express');
 const router   = express.Router();
 const bcrypt   = require('bcryptjs');
 const multer   = require('multer');
-const path     = require('path');
 const { getDB, check } = require('../db/db');
 const propSvc  = require('../services/propertyService');
 const agentSvc = require('../services/agentService');
@@ -49,27 +48,24 @@ router.use((req, res, next) => {
 });
 
 // ── upload ────────────────────────────────────────────────────────
-const uploadDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../uploads');
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/[^a-z0-9.]/gi, '-').toLowerCase()),
-});
-const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
-async function uploadToCloudinary(localPath, publicId) {
+async function uploadToCloudinaryBuffer(buffer, publicId) {
   if (!process.env.CLOUDINARY_CLOUD_NAME) return null;
   const { v2 } = require('cloudinary');
   v2.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME, api_key: process.env.CLOUDINARY_API_KEY, api_secret: process.env.CLOUDINARY_API_SECRET });
-  const result = await v2.uploader.upload(localPath, { folder: 'richmanassets', public_id: publicId, overwrite: true, transformation: [{ width: 1600, height: 1200, crop: 'limit', quality: 82, fetch_format: 'auto' }] });
-  try { require('fs').unlinkSync(localPath); } catch (_) {}
-  return result.secure_url;
+  return new Promise((resolve, reject) => {
+    const stream = v2.uploader.upload_stream({
+      folder: 'richmanassets', public_id: publicId, overwrite: true,
+      transformation: [{ width: 1600, height: 1200, crop: 'limit', quality: 82, fetch_format: 'auto' }],
+    }, (err, result) => err ? reject(err) : resolve(result.secure_url));
+    stream.end(buffer);
+  });
 }
+
 async function resolveImg(file, publicId) {
   if (!file) return null;
-  const cloudUrl = await uploadToCloudinary(file.path, publicId).catch(() => null);
-  if (cloudUrl) return cloudUrl;
-  const rel = file.path.replace(/\\/g, '/').split('public/')[1];
-  return rel || file.path;
+  return uploadToCloudinaryBuffer(file.buffer, publicId);
 }
 
 // ── auth ──────────────────────────────────────────────────────────
