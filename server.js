@@ -35,6 +35,7 @@ const session     = require('express-session');
 const compression = require('compression');
 const path        = require('path');
 const rawBodyCapture = require('./middleware/rawBodyCapture');
+const SupabaseSessionStore = require('./lib/sessionStore');
 const { initDB }  = require('./db/db');
 
 const app  = express();
@@ -92,6 +93,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: new SupabaseSessionStore(),
   name: 'rma.sid',
   cookie: {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days persistent login
