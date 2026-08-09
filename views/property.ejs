@@ -307,8 +307,8 @@ document.addEventListener('keydown', function(e) {
   <div class="feat-grid">
     <% if (p.amenities) { %>
     <div class="reveal">
-      <div class="kicker" style="margin-bottom:18px">What's here</div>
-      <h3>The essentials</h3>
+      <div class="kicker" style="margin-bottom:18px"><%= p.amenities_kicker %></div>
+      <h3><%= p.amenities_heading %></h3>
       <ul class="amen">
         <% p.amenities.split(/\||·|\n/).forEach(function(a) { if (a.trim()) { %>
         <li><span class="d"></span><%= a.trim() %></li>
@@ -318,7 +318,7 @@ document.addEventListener('keydown', function(e) {
     <% } %>
     <% if (p.setting_heading) { %>
     <div class="setting reveal">
-      <div class="kicker" style="margin-bottom:18px">The setting</div>
+      <div class="kicker" style="margin-bottom:18px"><%= p.setting_kicker %></div>
       <h3><%= p.setting_heading %></h3>
       <% if (p.setting_body) {
         const paras = p.setting_body.split('\n\n');
@@ -333,16 +333,18 @@ document.addEventListener('keydown', function(e) {
       </div>
       <% } %>
     </div>
-    <% } else { %>
+    <% } else {
+      var bedsLabel = (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A') ? (/bhk|bed/i.test(p.beds) ? p.beds : p.beds + ' Bedrooms') : null;
+    %>
     <div class="setting reveal">
-      <div class="kicker" style="margin-bottom:18px">Good to know</div>
+      <div class="kicker" style="margin-bottom:18px"><%= p.setting_kicker %></div>
       <h3>Property details</h3>
-      <ul class="amen">
+      <ul class="amen facts-list">
         <li><span class="d"></span>Verified &amp; title-checked listing</li>
         <% if (typeof postedAgo !== 'undefined' && postedAgo) { %><li><span class="d"></span>Listed <%= postedAgo %></li><% } %>
         <% if (p.subtype) { %><li><span class="d"></span><%= p.subtype %></li><% } %>
         <% if (p.sqft) { %><li><span class="d"></span><%= isLandOrPlot ? 'Land area' : 'Built-up area' %>: <%= p.sqft %></li><% } %>
-        <% if (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A') { %><li><span class="d"></span><%= p.beds %> Bedrooms<% if (p.baths && p.baths !== '—' && p.baths !== 'N/A') { %> · <%= p.baths %> Bathrooms<% } %></li><% } %>
+        <% if (bedsLabel) { %><li><span class="d"></span><%= bedsLabel %><% if (p.baths && p.baths !== '—' && p.baths !== 'N/A') { %> · <%= p.baths %> Bathrooms<% } %></li><% } %>
         <% if (p.emi_val && p.listing === 'sale') { %><li><span class="d"></span>EMI from <%= p.emi_val %>/mo</li><% } %>
       </ul>
       <% if (p.price_note) { %>

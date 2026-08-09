@@ -139,6 +139,50 @@
     </div>
   </div>
 
+  <!-- Page Text Overrides -->
+  <div class="manage-section">
+    <details>
+      <summary class="manage-section-title" style="cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+        Customize Page Text (optional)
+      </summary>
+      <div class="manage-hint" style="margin:8px 0 16px;">Leave blank to use the auto-generated defaults shown on the live page.</div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="mstoryk">Headline Label</label>
+        <input type="text" id="mstoryk" name="story_kicker" class="manage-input" placeholder="e.g. House for Sale in Udupi" value="<%= prop.story_kicker || '' %>">
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="mstoryh">Headline</label>
+        <input type="text" id="mstoryh" name="story_heading" class="manage-input" placeholder="e.g. A 2-Bedroom House in Udupi." value="<%= prop.story_heading || '' %>">
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="mamenk">Amenities Section Label</label>
+        <input type="text" id="mamenk" name="amenities_kicker" class="manage-input" placeholder="What's here" value="<%= prop.amenities_kicker || '' %>">
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="mamenh">Amenities Section Title</label>
+        <input type="text" id="mamenh" name="amenities_heading" class="manage-input" placeholder="The essentials" value="<%= prop.amenities_heading || '' %>">
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="msetk">Details Panel Label</label>
+        <input type="text" id="msetk" name="setting_kicker" class="manage-input" placeholder="Good to know" value="<%= prop.setting_kicker || '' %>">
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="mseth">Details Panel Title (writes a full custom "setting" write-up instead of the auto facts list)</label>
+        <input type="text" id="mseth" name="setting_heading" class="manage-input" placeholder="e.g. Peaceful, well-connected neighbourhood" value="<%= prop.setting_heading || '' %>">
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="msetb">Details Panel Write-up</label>
+        <textarea id="msetb" name="setting_body" rows="3" class="manage-textarea" placeholder="Only used if Details Panel Title above is filled in."><%= prop.setting_body || '' %></textarea>
+      </div>
+      <div class="manage-form-group">
+        <label class="manage-form-label" for="msetp">Details Panel Tags</label>
+        <input type="text" id="msetp" name="setting_pills" class="manage-input" placeholder="e.g. Near Highway | 10 min to Market | Gated Community" value="<%= prop.setting_pills || '' %>">
+        <div class="manage-hint">Separate with | (pipe). Shown under the write-up above.</div>
+      </div>
+    </details>
+  </div>
+
   <!-- Specifications -->
   <div class="manage-section">
     <div class="manage-section-title">

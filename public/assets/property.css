@@ -286,6 +286,8 @@ body.has-prop-cta .tabbar { display: none !important; }
 /* Balance the grid when only one panel renders (no editorial setting content) */
 .feat-grid > div:only-child{grid-column:1/-1}
 @media(min-width:860px){.feat-grid > div:only-child .amen{columns:2}}
+/* Facts panel: items vary a lot in length, forcing 2 columns leaves an orphan line */
+.amen.facts-list{columns:1}
 
 /* ── LOAN / PRICE NOTE CHIP ── */
 .loan-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;color:var(--gold-deep);background:rgba(138,109,56,.1);border:1px solid rgba(138,109,56,.25);border-radius:var(--r-pill);padding:5px 12px;margin-top:8px}

@@ -105,6 +105,47 @@
     </div>
   </div>
 
+  <!-- OPTIONAL PAGE COPY OVERRIDES -->
+  <div class="form-section">
+    <details>
+      <summary class="form-section-title" style="cursor:pointer;">Customize Page Text (optional)</summary>
+      <div class="form-hint" style="margin:8px 0 16px;">Leave blank to use the auto-generated defaults shown on the live page.</div>
+      <div class="form-group">
+        <label for="pstoryk">Headline Label</label>
+        <input type="text" id="pstoryk" name="story_kicker" placeholder="e.g. House for Sale in Udupi" value="<%= prop && prop.story_kicker ? prop.story_kicker : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="pstoryh">Headline</label>
+        <input type="text" id="pstoryh" name="story_heading" placeholder="e.g. A 2-Bedroom House in Udupi." value="<%= prop && prop.story_heading ? prop.story_heading : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="pamenk">Amenities Section Label</label>
+        <input type="text" id="pamenk" name="amenities_kicker" placeholder="What's here" value="<%= prop && prop.amenities_kicker ? prop.amenities_kicker : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="pamenh">Amenities Section Title</label>
+        <input type="text" id="pamenh" name="amenities_heading" placeholder="The essentials" value="<%= prop && prop.amenities_heading ? prop.amenities_heading : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="psetk">Details Panel Label</label>
+        <input type="text" id="psetk" name="setting_kicker" placeholder="Good to know" value="<%= prop && prop.setting_kicker ? prop.setting_kicker : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="pseth">Details Panel Title (writes a full custom "setting" write-up instead of the auto facts list)</label>
+        <input type="text" id="pseth" name="setting_heading" placeholder="e.g. Peaceful, well-connected neighbourhood" value="<%= prop && prop.setting_heading ? prop.setting_heading : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="psetb">Details Panel Write-up</label>
+        <textarea id="psetb" name="setting_body" rows="3" placeholder="Only used if Details Panel Title above is filled in."><%= prop && prop.setting_body ? prop.setting_body : '' %></textarea>
+      </div>
+      <div class="form-group">
+        <label for="psetp">Details Panel Tags</label>
+        <input type="text" id="psetp" name="setting_pills" placeholder="e.g. Near Highway | 10 min to Market | Gated Community" value="<%= prop && prop.setting_pills ? prop.setting_pills : '' %>">
+        <div class="form-hint">Separate with | (pipe). Shown under the write-up above.</div>
+      </div>
+    </details>
+  </div>
+
   <!-- IMAGES -->
   <div class="form-section">
     <div class="form-section-title">Property Images</div>

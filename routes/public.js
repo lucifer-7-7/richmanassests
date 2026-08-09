@@ -516,9 +516,12 @@ router.get('/property/:id', async (req, res) => {
       p.story_kicker = `${p.type} ${listLabel} in ${p.loc}`;
     }
     if (!p.story_heading) {
-      const bedsPart = (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A') ? `${p.beds}-Bedroom ` : '';
+      const bedsPart = (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A' && !/bhk|bed/i.test(p.beds)) ? `${p.beds}-Bedroom ` : '';
       p.story_heading = `A ${bedsPart}${p.type} in ${p.loc}.`;
     }
+    if (!p.amenities_kicker) p.amenities_kicker = "What's here";
+    if (!p.amenities_heading) p.amenities_heading = 'The essentials';
+    if (!p.setting_kicker) p.setting_kicker = p.setting_heading ? 'The setting' : 'Good to know';
 
     res.render('property', {
       title: pageTitle,
