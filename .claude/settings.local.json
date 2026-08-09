@@ -46,7 +46,14 @@
       "mcp__plugin_supabase_supabase__execute_sql",
       "mcp__headroom__headroom_retrieve",
       "Bash(git log *)",
-      "mcp__plugin_supabase_supabase__list_tables"
+      "mcp__plugin_supabase_supabase__list_tables",
+      "mcp__plugin_playwright_playwright__browser_tabs",
+      "mcp__plugin_playwright_playwright__browser_run_code_unsafe",
+      "mcp__plugin_playwright_playwright__browser_resize",
+      "Bash(git commit -m 'fix: persist admin sessions across serverless cold restarts *)",
+      "Bash(git commit -m 'fix: migrate vercel.json to modern config, fix 413 on image upload *)",
+      "Bash(git push *)",
+      "mcp__plugin_supabase_supabase__list_projects"
     ]
   },
   "hooks": {

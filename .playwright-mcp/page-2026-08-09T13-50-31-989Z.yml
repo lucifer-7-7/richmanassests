@@ -1,0 +1,193 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - link "RichManAssets Home" [ref=e3] [cursor=pointer]:
+      - /url: /
+      - img "RichManAssets Logo" [ref=e4]
+      - generic [ref=e5]:
+        - text: RichMan
+        - generic [ref=e6]: ASSETS
+    - generic [ref=e7]:
+      - link "Buy" [ref=e8] [cursor=pointer]:
+        - /url: /properties?listing=sale
+      - link "Rent" [ref=e9] [cursor=pointer]:
+        - /url: /properties?listing=rent
+      - link "Interiors" [ref=e10] [cursor=pointer]:
+        - /url: /interiors
+      - link "Services" [ref=e11] [cursor=pointer]:
+        - /url: /services
+      - link "Loans" [ref=e12] [cursor=pointer]:
+        - /url: /loans
+      - link "About" [ref=e13] [cursor=pointer]:
+        - /url: /about
+      - link "Agent Portal" [ref=e14] [cursor=pointer]:
+        - /url: /agent/login
+      - link "Enquire →" [ref=e15] [cursor=pointer]:
+        - /url: /contact
+  - generic [ref=e16]:
+    - heading "404" [level=1] [ref=e17]
+    - heading "Page not found." [level=2] [ref=e18]
+    - paragraph [ref=e19]: The page you're looking for doesn't exist or may have moved.
+    - generic [ref=e20]:
+      - link "Go home" [ref=e21] [cursor=pointer]:
+        - /url: /
+      - link "Browse properties" [ref=e23] [cursor=pointer]:
+        - /url: /properties
+  - contentinfo [ref=e25]:
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - heading "Premium property, handled end to end." [level=3] [ref=e28]: Premium property,handled end to end.
+        - generic [ref=e29]:
+          - heading "Explore" [level=5] [ref=e30]
+          - list [ref=e31]:
+            - listitem [ref=e32]:
+              - link "Buy" [ref=e33] [cursor=pointer]:
+                - /url: /properties?listing=sale
+            - listitem [ref=e34]:
+              - link "Rent & Lease" [ref=e35] [cursor=pointer]:
+                - /url: /properties?listing=rent
+            - listitem [ref=e36]:
+              - link "Services" [ref=e37] [cursor=pointer]:
+                - /url: /services
+            - listitem [ref=e38]:
+              - link "Home Loans & EMI" [ref=e39] [cursor=pointer]:
+                - /url: /loans
+            - listitem [ref=e40]:
+              - link "About us" [ref=e41] [cursor=pointer]:
+                - /url: /about
+        - generic [ref=e42]:
+          - heading "Popular searches" [level=5] [ref=e43]
+          - list [ref=e44]:
+            - listitem [ref=e45]:
+              - link "Property in Udupi" [ref=e46] [cursor=pointer]:
+                - /url: /properties?area=Udupi
+            - listitem [ref=e47]:
+              - link "Property in Mangaluru" [ref=e48] [cursor=pointer]:
+                - /url: /properties?area=Mangaluru
+            - listitem [ref=e49]:
+              - link "Homes in Manipal" [ref=e50] [cursor=pointer]:
+                - /url: /properties?area=Manipal
+            - listitem [ref=e51]:
+              - link "Property in Kaup" [ref=e52] [cursor=pointer]:
+                - /url: /properties?area=Kaup
+            - listitem [ref=e53]:
+              - link "Property in Padubidri" [ref=e54] [cursor=pointer]:
+                - /url: /properties?area=Padubidri
+            - listitem [ref=e55]:
+              - link "Houses for sale in Udupi" [ref=e56] [cursor=pointer]:
+                - /url: /properties?area=Udupi&listing=sale
+            - listitem [ref=e57]:
+              - link "Rentals in Manipal" [ref=e58] [cursor=pointer]:
+                - /url: /properties?area=Manipal&listing=rent
+            - listitem [ref=e59]:
+              - link "Villas for sale" [ref=e60] [cursor=pointer]:
+                - /url: /properties?type=Villa
+            - listitem [ref=e61]:
+              - link "Flats & apartments" [ref=e62] [cursor=pointer]:
+                - /url: /properties?type=Apartment
+            - listitem [ref=e63]:
+              - link "Plots & sites" [ref=e64] [cursor=pointer]:
+                - /url: /properties?type=Plot
+            - listitem [ref=e65]:
+              - link "Commercial space" [ref=e66] [cursor=pointer]:
+                - /url: /properties?type=Commercial
+            - listitem [ref=e67]:
+              - link "Agricultural land" [ref=e68] [cursor=pointer]:
+                - /url: /properties?type=Agricultural
+            - listitem [ref=e69]:
+              - link "Homes for rent" [ref=e70] [cursor=pointer]:
+                - /url: /properties?listing=rent
+            - listitem [ref=e71]:
+              - link "NRI property services" [ref=e72] [cursor=pointer]:
+                - /url: /contact?service=nri
+        - generic [ref=e73]:
+          - heading "Reach us" [level=5] [ref=e74]
+          - list [ref=e75]:
+            - listitem [ref=e76]:
+              - link "Enquire now" [ref=e77] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e78]:
+              - link "hello@richmanassets.com" [ref=e79] [cursor=pointer]:
+                - /url: mailto:hello@richmanassets.com
+            - listitem [ref=e80]:
+              - link "+91 90360 01234" [ref=e81] [cursor=pointer]:
+                - /url: tel:+919380939961
+              - text: (Mobile)
+            - listitem [ref=e82]:
+              - link "+91 820 253 9961" [ref=e83] [cursor=pointer]:
+                - /url: tel:+918202539961
+              - text: (Landline)
+            - listitem [ref=e84]:
+              - link "Udupi · Karnataka" [ref=e85] [cursor=pointer]:
+                - /url: /about
+        - generic [ref=e86]:
+          - heading "Portals" [level=5] [ref=e87]
+          - list [ref=e88]:
+            - listitem [ref=e89]:
+              - link "Agent Sign In" [ref=e90] [cursor=pointer]:
+                - /url: /agent/login
+            - listitem [ref=e91]:
+              - link "Agent Registration" [ref=e92] [cursor=pointer]:
+                - /url: /agent/register
+            - listitem [ref=e93]:
+              - link "Admin Dashboard" [ref=e94] [cursor=pointer]:
+                - /url: /admin/login
+      - generic [ref=e95]:
+        - generic [ref=e96]: © 2026 RichManAssets
+        - generic [ref=e97]:
+          - text: Powered by
+          - link "Vittu Bharat Associates LLP" [ref=e98] [cursor=pointer]:
+            - /url: https://vittubharat.com
+  - generic [ref=e99]:
+    - link "WhatsApp" [ref=e100] [cursor=pointer]:
+      - /url: https://wa.me/919380939961?text=Hi%20RichManAssets%2C%20I%27d%20like%20to%20know%20more%20about%20your%20properties.
+    - link "Call" [ref=e104] [cursor=pointer]:
+      - /url: tel:+919380939961
+  - generic "Mobile Navigation Menu" [ref=e107]:
+    - generic [ref=e108]:
+      - link "RichManAssets Logo RichManAssets" [ref=e109] [cursor=pointer]:
+        - /url: /
+        - img "RichManAssets Logo" [ref=e110]
+        - generic [ref=e111]: RichManAssets
+      - button "Close menu" [ref=e112] [cursor=pointer]: ✕
+    - generic [ref=e113]:
+      - generic [ref=e114]:
+        - generic [ref=e115]: Properties & Rentals
+        - generic [ref=e116]:
+          - link "Buy Properties" [ref=e117] [cursor=pointer]:
+            - /url: /properties?listing=sale
+          - link "Rent & Lease" [ref=e121] [cursor=pointer]:
+            - /url: /properties?listing=rent
+          - link "All Listings Grid" [ref=e125] [cursor=pointer]:
+            - /url: /properties
+      - generic [ref=e129]:
+        - generic [ref=e130]: Services & Loans
+        - generic [ref=e131]:
+          - link "Interior Design Showcase" [ref=e132] [cursor=pointer]:
+            - /url: /interiors
+          - link "Real Estate Services" [ref=e136] [cursor=pointer]:
+            - /url: /services
+          - link "Home Loans & EMI Calculator" [ref=e140] [cursor=pointer]:
+            - /url: /loans
+          - link "NRI Property Advisory" [ref=e144] [cursor=pointer]:
+            - /url: /contact?service=nri
+      - generic [ref=e148]:
+        - generic [ref=e149]: Portals & Account
+        - generic [ref=e150]:
+          - link "Agent Portal / List Property" [ref=e151] [cursor=pointer]:
+            - /url: /agent/login
+          - link "Register as New Agent" [ref=e155] [cursor=pointer]:
+            - /url: /agent/register
+          - link "Admin Login" [ref=e159] [cursor=pointer]:
+            - /url: /admin/login
+      - generic [ref=e163]:
+        - generic [ref=e164]: Company
+        - generic [ref=e165]:
+          - link "About Us" [ref=e166] [cursor=pointer]:
+            - /url: /about
+          - link "Contact & Enquiry" [ref=e170] [cursor=pointer]:
+            - /url: /contact
+    - generic [ref=e174]:
+      - link "WhatsApp Us" [ref=e175] [cursor=pointer]:
+        - /url: https://wa.me/919380939961?text=Hi%20RichManAssets%2C%20I%27d%20like%20to%20know%20more.
+      - link "Call Directly" [ref=e179] [cursor=pointer]:
+        - /url: tel:+919380939961
