@@ -1,15 +1,15 @@
 <%- include('../partials/agent-layout-start', { activeNav: 'listings', pageTitle: 'Payment Failed' }) %>
 
-<div class="result-page" style="padding: 0; display: flex; justify-content: center; align-items: flex-start; min-height: unset;">
-  <div class="result-box" style="margin: 20px auto 40px; max-width: 520px; width: 100%;">
+<div class="result-page" style="display: flex; justify-content: center; align-items: flex-start; min-height: unset;">
+  <div class="result-box" style="max-width: 480px; width: 100%;">
     <div class="result-icon fail">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#E05353" stroke-width="2.5" width="36" height="36"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#D93838" stroke-width="2.5" width="34" height="34"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </div>
-    <h1 style="font-family: var(--serif); color: var(--cream); margin-bottom: 12px;">Payment Failed</h1>
-    <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 28px;">Your payment could not be completed. <strong style="color: var(--cream)">No amount has been charged.</strong> Your listing draft is saved — you can retry payment anytime from My Listings.</p>
+    <h1>Payment Failed</h1>
+    <p style="margin-bottom: 24px;">Your payment could not be completed. <strong style="color: var(--ink)">No amount has been charged.</strong> Your listing draft is saved — you can retry payment anytime from My Listings.</p>
     <a href="/agent/listings" class="btn btn-primary btn-full" style="margin-bottom: 10px;">Retry Payment →</a>
     <a href="/agent/dashboard" class="btn btn-ghost btn-full">Back to Dashboard</a>
-    <p style="margin-top: 20px; font-size: 12px; color: var(--muted);">If you believe this is an error, please contact us at <a href="mailto:hello@richmanassets.com" style="color: var(--gold)">hello@richmanassets.com</a></p>
+    <p style="margin-top: 20px; font-size: 12px;">If you believe this is an error, contact us at <a href="mailto:hello@richmanassets.com" style="color: var(--gold)">hello@richmanassets.com</a></p>
   </div>
 </div>
 

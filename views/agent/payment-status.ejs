@@ -1,16 +1,16 @@
 <%- include('../partials/agent-layout-start', { activeNav: 'listings', pageTitle: 'Verifying Payment' }) %>
 
-<div style="display:flex;justify-content:center;align-items:flex-start;min-height:unset;">
-  <div class="result-box" style="margin:20px auto 40px;max-width:480px;width:100%;">
-    <div id="spinnerWrap" style="text-align:center;">
+<div class="result-page" style="display:flex;justify-content:center;align-items:flex-start;min-height:unset;">
+  <div class="result-box" style="max-width:480px;width:100%;">
+    <div id="spinnerWrap">
       <div class="spinner" style="margin:0 auto 16px;"></div>
-      <h2 style="color:var(--cream);margin-bottom:8px">Verifying Payment</h2>
-      <p style="color:var(--muted);font-size:14px">Please wait while we confirm your payment…</p>
+      <h2>Verifying Payment</h2>
+      <p>Please wait while we confirm your payment…</p>
     </div>
-    <div id="statusDone" style="display:none;text-align:center;">
-      <div id="resultIcon" class="result-icon" style="margin:0 auto 16px"></div>
-      <h2 id="resultTitle" style="color:var(--cream);margin-bottom:8px"></h2>
-      <p id="resultMsg" style="color:var(--muted);font-size:14px;margin-bottom:20px"></p>
+    <div id="statusDone" style="display:none;">
+      <div id="resultIcon" class="result-icon"></div>
+      <h2 id="resultTitle"></h2>
+      <p id="resultMsg" style="margin-bottom:20px"></p>
       <a id="resultBtn" href="/agent/listings" class="btn btn-primary btn-full" style="margin-bottom:10px">Continue</a>
       <a href="/agent/listings" class="btn btn-outline btn-full">← My Listings</a>
     </div>
@@ -32,21 +32,21 @@ function showResult(status, propId) {
 
   if (status === 'paid') {
     icon.className  = 'result-icon success';
-    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="#4CAF82" stroke-width="2.5" width="36" height="36"><polyline points="20 6 9 17 4 12"/></svg>';
+    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="#27694A" stroke-width="2.5" width="34" height="34"><polyline points="20 6 9 17 4 12"/></svg>';
     title.textContent = 'Payment Successful!';
     msg.textContent   = 'Your listing is now live on RichManAssets.';
     btn.href = propId ? '/property/' + propId : '/agent/listings';
     btn.textContent = 'View Live Listing →';
   } else if (['failed','cancelled'].includes(status)) {
     icon.className  = 'result-icon fail';
-    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="#E05353" stroke-width="2.5" width="36" height="36"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="#D93838" stroke-width="2.5" width="34" height="34"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     title.textContent = 'Payment Failed';
     msg.textContent   = 'Your payment could not be completed. No charge has been made. You can retry.';
     btn.href = '/agent/listings';
     btn.textContent = 'Back to Listings';
   } else {
     icon.className  = 'result-icon';
-    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2" width="36" height="36"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>';
+    icon.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" width="34" height="34"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>';
     title.textContent = 'Payment Pending';
     msg.textContent   = 'Your payment is being processed. Check My Listings in a minute.';
     btn.href = '/agent/listings';

@@ -1,12 +1,18 @@
 <%- include('../partials/agent-layout-start', { activeNav: 'listings', pageTitle: 'Payment Successful' }) %>
 
-<div class="result-page" style="padding: 0; display: flex; justify-content: center; align-items: flex-start; min-height: unset;">
-  <div class="result-box" style="margin: 20px auto 40px; max-width: 520px; width: 100%;">
+<div class="result-page" style="display: flex; justify-content: center; align-items: flex-start; min-height: unset;">
+  <div class="result-box" style="max-width: 480px; width: 100%;">
     <div class="result-icon success">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#4CAF82" stroke-width="2.5" width="36" height="36"><polyline points="20 6 9 17 4 12"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#27694A" stroke-width="2.5" width="34" height="34"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <h1 style="font-family: var(--serif); color: var(--cream); margin-bottom: 12px;">Listing Published!</h1>
-    <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 28px;">Your payment was successful and your property is now <strong style="color: var(--success)">live on RichManAssets</strong>. It will be visible to buyers and renters in Udupi &amp; Mangaluru.</p>
+    <h1>Listing Published!</h1>
+    <p style="margin-bottom: 24px;">Your payment was successful and your property is now <strong style="color: var(--success)">live on RichManAssets</strong>. It will be visible to buyers and renters in Udupi &amp; Mangaluru.</p>
+    <% if (order && (order.razorpay_order_id || order.internal_order_id)) { %>
+    <div style="background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 24px; text-align: left; font-size: 12.5px; color: var(--muted);">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Order ID</span><span style="color:var(--ink);font-weight:600;"><%= order.razorpay_order_id || order.internal_order_id %></span></div>
+      <% if (order.amount_paise) { %><div style="display:flex;justify-content:space-between;"><span>Amount Paid</span><span style="color:var(--ink);font-weight:600;">₹<%= (order.amount_paise/100).toLocaleString('en-IN') %></span></div><% } %>
+    </div>
+    <% } %>
     <% if (order && order.property_id) { %>
     <a href="/property/<%= order.property_id %>" class="btn btn-primary btn-full" style="margin-bottom: 10px;">View Live Listing →</a>
     <% } %>
