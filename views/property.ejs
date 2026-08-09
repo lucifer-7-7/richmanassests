@@ -40,8 +40,11 @@
       </div>
     </div>
     <div style="text-align:right;">
-      <div style="font-family:var(--f-display);font-size:32px;font-weight:600;color:var(--ink);letter-spacing:-.01em;"><%= p.price %><% if (p.price_note) { %><small style="font-size:14px;font-weight:400;color:var(--muted)"> <%= p.price_note %></small><% } %></div>
+      <div style="font-family:var(--f-display);font-size:32px;font-weight:600;color:var(--ink);letter-spacing:-.01em;"><%= p.price %></div>
       <div style="font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);margin-top:4px;">Verified Title-Checked Listing</div>
+      <% if (p.price_note) { %>
+      <div class="loan-chip" style="margin-top:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><%= p.price_note %></div>
+      <% } %>
     </div>
   </div>
 
@@ -95,7 +98,7 @@
     <div class="eyebrow"><span class="ln"></span><span><%= p.loc %></span></div>
     <h1><%= p.name %></h1>
     <div class="pprice-wrap" style="display:flex;justify-content:space-between;align-items:flex-end;">
-      <div class="pprice"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
+      <div><div class="pprice"><%= p.price %></div><% if (p.price_note) { %><div class="loan-chip" style="margin-top:6px;color:#FFF;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><%= p.price_note %></div><% } %></div>
       <% if (pImgs.length > 1) { %>
       <span style="font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);background:rgba(10,9,6,0.5);padding:4px 10px;border-radius:100px;">Swipe &rarr; (1/<%= pImgs.length %>)</span>
       <% } %>
@@ -283,8 +286,11 @@ document.addEventListener('keydown', function(e) {
 
         <div class="bc-divider" style="height:1px;background:var(--line-soft);margin:20px 0;"></div>
 
-        <div class="bc-price"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
+        <div class="bc-price"><%= p.price %></div>
         <div class="bc-sub"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %> · <%= p.type %> · <%= p.loc %></div>
+        <% if (p.price_note) { %>
+        <div class="loan-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><%= p.price_note %></div>
+        <% } %>
         <% if (p.emi_val && p.listing === 'sale') { %>
         <div class="bc-emi">
           <div class="l">Est. EMI<br><span style="font-size:11px;color:var(--muted)"><%= p.emi_label %></span></div>
@@ -324,6 +330,25 @@ document.addEventListener('keydown', function(e) {
         <% p.setting_pills.split('|').forEach(function(pill) { if (pill.trim()) { %>
         <span class="pill"><%= pill.trim() %></span>
         <% }}); %>
+      </div>
+      <% } %>
+    </div>
+    <% } else { %>
+    <div class="setting reveal">
+      <div class="kicker" style="margin-bottom:18px">Good to know</div>
+      <h3>Property details</h3>
+      <ul class="amen">
+        <li><span class="d"></span>Verified &amp; title-checked listing</li>
+        <% if (typeof postedAgo !== 'undefined' && postedAgo) { %><li><span class="d"></span>Listed <%= postedAgo %></li><% } %>
+        <% if (p.subtype) { %><li><span class="d"></span><%= p.subtype %></li><% } %>
+        <% if (p.sqft) { %><li><span class="d"></span><%= isLandOrPlot ? 'Land area' : 'Built-up area' %>: <%= p.sqft %></li><% } %>
+        <% if (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A') { %><li><span class="d"></span><%= p.beds %> Bedrooms<% if (p.baths && p.baths !== '—' && p.baths !== 'N/A') { %> · <%= p.baths %> Bathrooms<% } %></li><% } %>
+        <% if (p.emi_val && p.listing === 'sale') { %><li><span class="d"></span>EMI from <%= p.emi_val %>/mo</li><% } %>
+      </ul>
+      <% if (p.price_note) { %>
+      <div class="loan-chip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <%= p.price_note %>
       </div>
       <% } %>
     </div>

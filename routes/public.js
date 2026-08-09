@@ -509,6 +509,17 @@ router.get('/property/:id', async (req, res) => {
     const promoBanner = await getPromoBanner();
     const pTypeLower = (p.type || '').toLowerCase();
     const isLandOrPlot = pTypeLower.includes('plot') || pTypeLower.includes('land') || pTypeLower.includes('agricultural');
+
+    // Derive editorial kicker/heading from real listing data when the agent form
+    // never populated the demo-only story fields — real facts, not filler prose.
+    if (!p.story_kicker) {
+      p.story_kicker = `${p.type} ${listLabel} in ${p.loc}`;
+    }
+    if (!p.story_heading) {
+      const bedsPart = (!isLandOrPlot && p.beds && p.beds !== '—' && p.beds !== 'N/A') ? `${p.beds}-Bedroom ` : '';
+      p.story_heading = `A ${bedsPart}${p.type} in ${p.loc}.`;
+    }
+
     res.render('property', {
       title: pageTitle,
       description: pageDesc,

@@ -283,6 +283,13 @@ body.has-prop-cta .tabbar { display: none !important; }
 .setting p{font-size:clamp(14.5px,1.4vw,16px);line-height:1.75;color:var(--ink-2);margin-bottom:20px;max-width:54ch}
 .setting .pill-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
 .setting .pill{font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--r-pill);padding:8px 16px;font-weight:600}
+/* Balance the grid when only one panel renders (no editorial setting content) */
+.feat-grid > div:only-child{grid-column:1/-1}
+@media(min-width:860px){.feat-grid > div:only-child .amen{columns:2}}
+
+/* ── LOAN / PRICE NOTE CHIP ── */
+.loan-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;color:var(--gold-deep);background:rgba(138,109,56,.1);border:1px solid rgba(138,109,56,.25);border-radius:var(--r-pill);padding:5px 12px;margin-top:8px}
+.loan-chip svg{flex:none}
 
 /* ── SIMILAR HOMES ── */
 .similar{padding-block:clamp(32px,5.5vw,72px);border-top:1px solid var(--line-soft)}
