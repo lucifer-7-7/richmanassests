@@ -92,7 +92,7 @@ window.RMA = (function () {
         <div class="loc">${svg('pin','pin')} ${p.loc} · ${p.type}${p.subtype?` · ${p.subtype}`:''}</div>
         <div class="meta">${meta}</div>
         <div class="cta">
-          <a class="v" href="${detail}">${p.hasImg?'View home':'Enquire'}</a>
+          <a class="v" href="${detail}">${p.hasImg?'View':'Enquire'}</a>
           <a class="w" href="${waLink('Hi RichManAssets, I am interested in '+p.name+' ('+p.loc+').')}" aria-label="WhatsApp" target="_blank" rel="noopener">${svg('wa')}</a>
         </div>
       </div>

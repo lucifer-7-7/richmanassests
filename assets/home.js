@@ -73,7 +73,7 @@
           '</div>' +
           '<div class="hero-side">' +
             '<div class="hero-price">' + p.price + (p.note ? '<small> ' + p.note + '</small>' : '') + '</div>' +
-            '<a class="hero-view" href="' + detail + '">View home <span class="arr">&rarr;</span></a>' +
+            '<a class="hero-view" href="' + detail + '">View <span class="arr">&rarr;</span></a>' +
           '</div>' +
         '</div></div>' +
       '</div>';
