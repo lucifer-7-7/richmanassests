@@ -252,6 +252,42 @@ async function getAllPublicProperties(db) {
   }
 }
 
+// Levenshtein edit distance — used for typo-tolerant fuzzy matching
+function editDistance(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp = new Array(n + 1);
+  for (let j = 0; j <= n; j++) dp[j] = j;
+  for (let i = 1; i <= m; i++) {
+    let prev = dp[0];
+    dp[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const tmp = dp[j];
+      dp[j] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[j], dp[j - 1]);
+      prev = tmp;
+    }
+  }
+  return dp[n];
+}
+
+// Does token fuzzy-match any whitespace-separated word in str (typo tolerance)?
+function fuzzyIncludes(str, token) {
+  if (token.length < 4) return false; // too short for fuzzy matching to be meaningful
+  const maxDist = token.length <= 5 ? 1 : 2;
+  const words = str.split(/\s+/).filter(Boolean);
+  return words.some(w => Math.abs(w.length - token.length) <= maxDist && editDistance(w, token) <= maxDist);
+}
+
+// Base sort used whenever there's no free-text query to rank by
+function sortByDefault(list) {
+  return [...list].sort((a, b) => {
+    if (Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1;
+    if ((a.sort_order || 0) !== (b.sort_order || 0)) return (a.sort_order || 0) - (b.sort_order || 0);
+    return (b.price_val || 0) - (a.price_val || 0);
+  });
+}
+
 // Tokenized relevant keyword matcher & scorer
 function searchAndSortProperties(allProps, { listing, area, type, budget, q }) {
   let list = [...allProps];
@@ -269,15 +305,11 @@ function searchAndSortProperties(allProps, { listing, area, type, budget, q }) {
   if (budget === '5c')    list = list.filter(p => (p.price_val || 0) >= 50000000);
 
   if (!q || !q.trim()) {
-    return list.sort((a, b) => {
-      if (Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1;
-      if ((a.sort_order || 0) !== (b.sort_order || 0)) return (a.sort_order || 0) - (b.sort_order || 0);
-      return (b.price_val || 0) - (a.price_val || 0);
-    });
+    return { properties: sortByDefault(list), fallback: false };
   }
 
   const tokens = q.trim().toLowerCase().split(/\s+/).filter(t => t.length > 0);
-  if (!tokens.length) return list;
+  if (!tokens.length) return { properties: list, fallback: false };
 
   const scored = [];
   for (const p of list) {
@@ -289,9 +321,16 @@ function searchAndSortProperties(allProps, { listing, area, type, budget, q }) {
 
     for (const token of tokens) {
       if (nameStr.includes(token)) score += 10;
+      else if (fuzzyIncludes(nameStr, token)) score += 5;
+
       if (locStr.includes(token))  score += 8;
+      else if (fuzzyIncludes(locStr, token)) score += 4;
+
       if (typeStr.includes(token)) score += 6;
+      else if (fuzzyIncludes(typeStr, token)) score += 3;
+
       if (descStr.includes(token)) score += 3;
+      else if (fuzzyIncludes(descStr, token)) score += 1;
     }
 
     if (score > 0) {
@@ -299,8 +338,14 @@ function searchAndSortProperties(allProps, { listing, area, type, budget, q }) {
     }
   }
 
-  scored.sort((a, b) => b.score - a.score);
-  return scored.map(s => s.property);
+  if (scored.length) {
+    scored.sort((a, b) => b.score - a.score);
+    return { properties: scored.map(s => s.property), fallback: false };
+  }
+
+  // Nothing matched, even fuzzily — fall back to the other active filters (or everything)
+  // so the user sees relevant properties instead of a dead end.
+  return { properties: sortByDefault(list).slice(0, 12), fallback: true };
 }
 
 // ── HOME ─────────────────────────────────────────────────────────
@@ -357,7 +402,7 @@ router.get('/properties', async (req, res) => {
     const { listing, area, type, budget, q } = req.query;
 
     const allProps = await getAllPublicProperties(db);
-    const properties = searchAndSortProperties(allProps, { listing, area, type, budget, q });
+    const { properties, fallback: fallbackSearch } = searchAndSortProperties(allProps, { listing, area, type, budget, q });
     const areas = [...new Set(allProps.map(r => r.area || r.loc).filter(Boolean))].sort();
 
     const seo = buildPropertiesSEO({ listing, area, type, budget, q, count: properties.length });
@@ -393,6 +438,7 @@ router.get('/properties', async (req, res) => {
       headerKicker: seo.headerKicker,
       headerTitle: seo.headerTitle,
       headerDesc: seo.headerDesc,
+      fallbackSearch,
       promoBanner,
     });
   } catch (err) {

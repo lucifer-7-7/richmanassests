@@ -96,6 +96,12 @@
 <div class="wrap">
   <div class="results-meta"><%= properties.length %> propert<%= properties.length === 1 ? 'y' : 'ies' %> found</div>
 
+  <% if (typeof fallbackSearch !== 'undefined' && fallbackSearch && q && q.q) { %>
+  <div class="empty-state" style="padding:32px 0;">
+    <p>No exact matches for "<%= q.q %>" — here are some properties you might like instead:</p>
+  </div>
+  <% } %>
+
   <% if (properties.length === 0) { %>
   <div class="empty-state">
     <h3>No properties found</h3>
