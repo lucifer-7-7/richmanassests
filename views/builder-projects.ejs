@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+<link rel="stylesheet" href="/assets/builder-project.css?v=1">
+</head>
+<body>
+<%- include('partials/nav') %>
+
+<section class="bp-list-hero">
+  <div class="wrap">
+    <span class="kicker" style="color:var(--accent-soft);margin-bottom:16px;display:block"><span class="gold-line"></span>New Launches</span>
+    <h1>Builder Projects in <span class="it">Udupi.</span></h1>
+    <p>RERA status, unit mix, real site photos and specifications — straight from the promoter, for every project we represent.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <% if (!projects.length) { %>
+  <div class="empty-state" style="padding:80px 0;text-align:center;color:var(--ink-3)">
+    <h3>No builder projects listed right now</h3>
+    <p>Check back soon, or <a href="/properties" style="color:var(--accent)">browse all listings</a>.</p>
+  </div>
+  <% } else { %>
+  <div class="bp-grid">
+    <% projects.forEach(function(p) { %>
+    <a class="bp-card" href="/builder-project/<%= p.slug %>">
+      <div class="bp-card-img" style="background-image:url('<%= p.img_card || p.img_hero || '' %>')">
+        <% if (p.rera_status === 'Approved') { %><span class="bp-badge">RERA Approved</span><% } %>
+      </div>
+      <div class="bp-card-body">
+        <h3><%= p.name %></h3>
+        <% if (p.tagline) { %><p class="bp-card-tagline"><%= p.tagline %></p><% } %>
+        <p class="bp-card-meta"><%= p.area || p.loc %> &middot; <%= (p.unit_types || []).map(u => u.config).join(', ') %></p>
+      </div>
+    </a>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
+</body>
+</html>
