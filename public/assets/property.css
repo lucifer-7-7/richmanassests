@@ -207,10 +207,14 @@
 }
 
 /* Admin-entered free-text detail fields (e.g. Approvals) vary wildly in
-   length — sharing a grid row with compact stats stretched every cell
-   in that row to match the tallest one. Give them their own full row. */
-.spec.spec-wide{grid-column:1/-1;text-align:left;border-right:0}
-.spec.spec-wide .v{font-size:clamp(14px,1.4vw,18px)!important;line-height:1.5;font-weight:400}
+   length; they get their own definition-list section below the compact
+   spec bar rather than sharing a grid row with fixed-height stats. */
+.detail-list{padding:clamp(24px,4vw,40px) 0;border-bottom:1px solid var(--line)}
+.detail-row{display:grid;grid-template-columns:180px 1fr;gap:8px 24px;padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.detail-row:last-child{border-bottom:0}
+.detail-label{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.detail-value{font-family:var(--f-display);font-size:clamp(14px,1.4vw,17px);line-height:1.55;font-weight:400;word-break:break-word}
+@media(max-width:600px){.detail-row{grid-template-columns:1fr;gap:4px}}
 
 /* Hide duplicate floating WhatsApp/Call widget on property pages with sticky CTA */
 body.has-prop-cta .floaters { display: none !important; }

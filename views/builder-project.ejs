@@ -270,15 +270,15 @@ document.addEventListener('keydown', function(e) {
   <section class="bp-section">
     <h2>RERA Compliance</h2>
     <div class="bp-rera-panel">
-      <div>
-        <% if (p.rera_status) { %><p><strong>Status:</strong> <%= p.rera_status %></p><% } %>
-        <% if (p.rera_number) { %><p><strong>Registration No.:</strong> <%= p.rera_number %></p><% } %>
-        <% if (p.rera_date) { %><p><strong>Registered on:</strong> <%= p.rera_date %></p><% } %>
-        <% if (p.rera_validity) { %><p><strong>Valid until:</strong> <%= p.rera_validity %></p><% } %>
-        <% if (p.survey_number) { %><p><strong>Survey No.:</strong> <%= p.survey_number %></p><% } %>
-        <% if (p.registered_office) { %><p><strong>Registered Office:</strong> <%= p.registered_office %></p><% } %>
+      <div class="bp-rera-items">
+        <% if (p.rera_status) { %><div class="bp-rera-item"><div class="bp-cred-label">Status</div><div class="bp-rera-value<%= /^registered$/i.test(p.rera_status) ? ' is-good' : '' %>"><%= p.rera_status %></div></div><% } %>
+        <% if (p.rera_number) { %><div class="bp-rera-item"><div class="bp-cred-label">Registration No.</div><div class="bp-rera-value"><%= p.rera_number %></div></div><% } %>
+        <% if (p.rera_date) { %><div class="bp-rera-item"><div class="bp-cred-label">Registered On</div><div class="bp-rera-value"><%= p.rera_date %></div></div><% } %>
+        <% if (p.rera_validity) { %><div class="bp-rera-item"><div class="bp-cred-label">Valid Until</div><div class="bp-rera-value"><%= p.rera_validity %></div></div><% } %>
+        <% if (p.survey_number) { %><div class="bp-rera-item"><div class="bp-cred-label">Survey No.</div><div class="bp-rera-value"><%= p.survey_number %></div></div><% } %>
+        <% if (p.registered_office) { %><div class="bp-rera-item bp-rera-item-wide"><div class="bp-cred-label">Registered Office</div><div class="bp-rera-value"><%= p.registered_office %></div></div><% } %>
       </div>
-      <% if (p.rera_cert_img) { %><a href="<%= p.rera_cert_img %>" target="_blank" rel="noopener"><img src="<%= p.rera_cert_img %>" alt="RERA Certificate" style="width:100%;border-radius:10px"></a><% } %>
+      <% if (p.rera_cert_img) { %><a class="bp-rera-cert" href="<%= p.rera_cert_img %>" target="_blank" rel="noopener"><img src="<%= p.rera_cert_img %>" alt="RERA Certificate" loading="lazy"><span class="bp-rera-cert-label">View Certificate ↗</span></a><% } %>
     </div>
   </section>
   <% } %>

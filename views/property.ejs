@@ -178,21 +178,26 @@ document.addEventListener('keydown', function(e) {
     <% if (!isLandOrPlot && p.baths && p.baths !== '—' && p.baths !== 'N/A') { %><div class="spec"><h6>Bathrooms</h6><div class="v"><%= p.baths %></div></div><% } %>
     <% if (p.sqft) { %><div class="spec"><h6><%= isLandOrPlot ? 'Land Area' : 'Area' %></h6><div class="v" style="font-size:clamp(17px,1.7vw,22px)"><%= p.sqft %><% if (!p.sqft.toLowerCase().includes('sq') && !p.sqft.toLowerCase().includes('acre') && !p.sqft.toLowerCase().includes('cent')) { %> sq ft<% } %></div></div><% } %>
     <% if (p.subtype) { %><div class="spec"><h6>Sub-type</h6><div class="v" style="font-size:clamp(15px,1.5vw,20px)"><%= p.subtype %></div></div><% } %>
-    <% 
-      if (p.details) {
-        var parsedDet = {};
-        try { parsedDet = typeof p.details === 'string' ? JSON.parse(p.details) : p.details; } catch(_) {}
-        Object.keys(parsedDet).forEach(function(key) {
-          if (parsedDet[key] && parsedDet[key] !== '—') {
-    %>
-    <div class="spec spec-wide"><h6><%= key %></h6><div class="v" style="font-size:clamp(15px,1.5vw,20px)"><%= parsedDet[key] %></div></div>
-    <% 
-          }
-        });
-      } 
-    %>
   </div></div>
 </section>
+
+<%
+  var parsedDet = {};
+  if (p.details) {
+    try { parsedDet = typeof p.details === 'string' ? JSON.parse(p.details) : p.details; } catch(_) {}
+  }
+  var detKeys = Object.keys(parsedDet).filter(function(key) { return parsedDet[key] && parsedDet[key] !== '—'; });
+%>
+<% if (detKeys.length) { %>
+<section class="detail-list wrap">
+  <% detKeys.forEach(function(key) { %>
+  <div class="detail-row">
+    <div class="detail-label"><%= key.replace(/[_-]+/g, ' ').replace(/\w\S*/g, function(w){ return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }) %></div>
+    <div class="detail-value"><%= parsedDet[key] %></div>
+  </div>
+  <% }); %>
+</section>
+<% } %>
 
 <section class="story wrap">
   <div class="story-grid with-buy">

@@ -52,8 +52,16 @@
 .bp-credibility{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
 .bp-credibility-item .bp-cred-label{font:11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 
-.bp-rera-panel{background:var(--paper-2);border-radius:14px;padding:26px 28px;display:grid;grid-template-columns:1fr;gap:16px}
-@media(min-width:720px){.bp-rera-panel{grid-template-columns:1fr 1fr}}
+.bp-rera-panel{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:clamp(20px,3vw,32px);display:grid;grid-template-columns:1fr;gap:24px;align-items:start}
+@media(min-width:720px){.bp-rera-panel{grid-template-columns:1fr 200px}}
+.bp-rera-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px 18px}
+.bp-rera-item-wide{grid-column:1/-1}
+.bp-rera-value{font-size:15px;font-weight:500;word-break:break-word}
+.bp-rera-value.is-good{color:var(--accent,#1a7a4c)}
+.bp-rera-cert{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--line);position:relative;transition:border-color .18s var(--ease,ease)}
+.bp-rera-cert img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.bp-rera-cert-label{display:block;text-align:center;font:11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:9px 8px;color:var(--ink-3);background:var(--paper)}
+@media(hover:hover) and (pointer:fine){.bp-rera-cert:hover{border-color:var(--ink-3)}}
 
 @media(max-width:680px){.bp-grid{grid-template-columns:1fr}}
 
