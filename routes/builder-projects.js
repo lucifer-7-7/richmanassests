@@ -57,7 +57,7 @@ router.get('/builder-projects', async (req, res) => {
       keywords: 'builder projects udupi, new flats udupi, upcoming projects udupi, rera approved flats udupi, new launch apartments udupi, flats for sale in udupi',
       geoPlace: 'Udupi, Karnataka, India',
       canonical: canon('/builder-projects'), siteUrl: SITE,
-      jsonld: JSON.stringify([itemList]),
+      jsonld: JSON.stringify([itemList]).replace(/</g, '\\u003c'),
       projects,
     });
   } catch (err) {
@@ -85,8 +85,6 @@ router.get('/builder-project/:slug', async (req, res) => {
       'name': p.name, 'description': p.seo_description || p.marketing_desc || p.unit_mix_summary,
       'image': allImages,
       'address': { '@type': 'PostalAddress', 'streetAddress': p.address || p.loc, 'addressLocality': p.area || 'Udupi', 'addressRegion': 'Karnataka', 'addressCountry': 'IN' },
-      'numberOfAccommodationUnits': (p.unit_types || []).reduce((sum, u) => sum + (u.count || 1), 0) || undefined,
-      'petsAllowed': undefined,
     };
     const breadcrumbLd = {
       '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -104,7 +102,7 @@ router.get('/builder-project/:slug', async (req, res) => {
       geoPlace: `${p.area || 'Udupi'}, Karnataka, India`,
       canonical: canon('/builder-project/' + p.slug), siteUrl: SITE,
       ogType: 'website', ogImage: allImages[0],
-      jsonld: JSON.stringify([apartmentComplexLd, breadcrumbLd]),
+      jsonld: JSON.stringify([apartmentComplexLd, breadcrumbLd]).replace(/</g, '\\u003c'),
       p, similar, allImages, configs,
     });
   } catch (err) {
@@ -120,7 +118,7 @@ router.post('/builder-project/:slug/enquire', async (req, res) => {
     const { name, phone, email, message } = req.body;
     if (!name || !phone) return res.status(400).json({ ok: false, error: 'Name and Phone number are required.' });
 
-    const { data: p } = await db.from('builder_projects').select('id, name, loc, contact_numbers').eq('slug', req.params.slug).maybeSingle();
+    const { data: p } = await db.from('builder_projects').select('id, name, loc, contact_numbers').eq('slug', req.params.slug).eq('status', 'active').maybeSingle();
     if (!p) return res.status(404).json({ ok: false, error: 'Project not found.' });
 
     const { error: insertErr } = await db.from('enquiries').insert({
@@ -128,7 +126,10 @@ router.post('/builder-project/:slug/enquire', async (req, res) => {
       property_ref: `${p.name} (${p.loc})`, page: '/builder-project/' + req.params.slug,
       created_at: new Date().toISOString(),
     });
-    if (insertErr) console.error('[/builder-project/:slug/enquire] insert error:', insertErr.message);
+    if (insertErr) {
+      console.error('[/builder-project/:slug/enquire] insert error:', insertErr.message);
+      return res.status(500).json({ ok: false, error: 'Failed to process enquiry. Please try again.' });
+    }
 
     let agentPhone = '9380939961';
     if (p.contact_numbers) {

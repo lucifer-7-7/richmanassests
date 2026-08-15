@@ -31,7 +31,7 @@
       <div class="bp-card-body">
         <h3><%= p.name %></h3>
         <% if (p.tagline) { %><p class="bp-card-tagline"><%= p.tagline %></p><% } %>
-        <p class="bp-card-meta"><%= p.area || p.loc %> &middot; <%= (p.unit_types || []).map(u => u.config).join(', ') %></p>
+        <p class="bp-card-meta"><%= p.area || p.loc %> &middot; <%= [...new Set((p.unit_types || []).map(u => u.config))].join(', ') %></p>
       </div>
     </a>
     <% }) %>

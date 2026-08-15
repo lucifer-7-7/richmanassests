@@ -369,7 +369,7 @@ document.addEventListener('keydown', function(e) {
   </div>
   <div class="plist-grid">
     <% similar.forEach(function(s) { %>
-    <a class="plist" href="/property/<%= s.id %>" style="text-decoration:none">
+    <a class="plist" href="<%= s.is_builder_project ? ('/builder-project/' + s.slug) : ('/property/' + s.id) %>" style="text-decoration:none">
       <div class="ph">
         <% var simImg = s.img_card || s.img_hero; %>
         <% if (simImg) { %>
@@ -393,7 +393,7 @@ document.addEventListener('keydown', function(e) {
 <% } %>
 
 <% if (next) { %>
-<a class="p-next" href="/property/<%= next.id %>">
+<a class="p-next" href="<%= next.is_builder_project ? ('/builder-project/' + next.slug) : ('/property/' + next.id) %>">
   <% var nextImg = next.img_card || next.img_hero; %>
   <% if (nextImg) { %><img src="<%= nextImg.startsWith('http') ? nextImg : '/' + nextImg.replace(/^\//, '') %>" alt="<%= next.name %>, <%= next.loc %>" loading="lazy"><% } %>
   <div class="scrim"></div>

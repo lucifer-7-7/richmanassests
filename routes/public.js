@@ -241,14 +241,15 @@ async function getAllPublicProperties(db) {
     try {
       const raw = await getActiveBuilderProjects(db);
       builderProps = raw.map(p => {
-        const configs = (p.unit_types || []).map(u => u.config).join(', ');
+        const configs = [...new Set((p.unit_types || []).map(u => u.config))].join(', ');
+        const sqftRange = [...new Set((p.unit_types || []).map(u => u.sizeRange).filter(Boolean))].join(', ');
         return {
           id: p.id, slug: p.slug, name: p.name, loc: p.loc, area: p.area,
           type: 'Apartment', listing: 'sale',
           price: 'Price on request', price_val: 0, price_note: null,
-          beds: configs || null, baths: null, sqft: (p.unit_types || []).map(u => u.sizeRange).join(', ') || null,
+          beds: configs || null, baths: null, sqft: sqftRange || null,
           subtype: 'Builder Project',
-          description: [p.tagline, p.marketing_desc, p.unit_mix_summary].filter(Boolean).join(' '),
+          description: [p.tagline, p.marketing_desc, p.unit_mix_summary, p.seo_keywords].filter(Boolean).join(' '),
           amenities: (p.amenities || []).join(' | '),
           active: true, has_img: Boolean(p.img_card || p.img_hero),
           img_card: p.img_card, img_hero: p.img_hero,

@@ -172,7 +172,7 @@
         </div>
         <div class="hero-side">
           <div class="hero-price"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
-          <a class="hero-view" href="/property/<%= p.id %>">View home <span class="arr">&rarr;</span></a>
+          <a class="hero-view" href="<%= p.is_builder_project ? ('/builder-project/' + p.slug) : ('/property/' + p.id) %>">View home <span class="arr">&rarr;</span></a>
         </div>
       </div></div>
     </div>

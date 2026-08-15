@@ -94,32 +94,42 @@ document.addEventListener('keydown', function(e) {
   <% } %>
 
   <% if (p.unit_types && p.unit_types.length) { %>
+  <% const showFlatNo = p.unit_types.some(u => u.flatNo); const showCount = p.unit_types.some(u => u.count); %>
   <section class="bp-section">
     <h2>Unit Mix</h2>
     <% if (p.unit_mix_summary) { %><p style="margin-bottom:18px;color:var(--ink-3)"><%= p.unit_mix_summary %></p><% } %>
     <table class="bp-unit-table">
-      <thead><tr><th>Configuration</th><th>Size</th><th>Flat No.</th><th>Count</th></tr></thead>
+      <thead><tr><th>Configuration</th><th>Size</th><% if (showFlatNo) { %><th>Flat No.</th><% } %><% if (showCount) { %><th>Count</th><% } %></tr></thead>
       <tbody>
       <% p.unit_types.forEach(function(u) { %>
-        <tr><td><%= u.config %></td><td><%= u.sizeRange %></td><td><%= u.flatNo || '—' %></td><td><%= u.count || '—' %></td></tr>
+        <tr><td><%= u.config %></td><td><%= u.sizeRange %></td><% if (showFlatNo) { %><td><%= u.flatNo || '—' %></td><% } %><% if (showCount) { %><td><%= u.count || '—' %></td><% } %></tr>
       <% }) %>
       </tbody>
     </table>
   </section>
   <% } %>
 
+  <% if (p.highlights && p.highlights.length) { %>
+  <section class="bp-section">
+    <h2>Highlights</h2>
+    <ul style="line-height:1.9;max-width:70ch">
+    <% p.highlights.forEach(function(h) { %><li><%= h %></li><% }) %>
+    </ul>
+  </section>
+  <% } %>
+
   <% if (p.floor_breakdown && p.floor_breakdown.length) { %>
   <section class="bp-section">
     <h2>Floor-wise Breakdown</h2>
-    <% p.floor_breakdown.forEach(function(f) { %>
+    <% p.floor_breakdown.forEach(function(f) { var fUnits = f.units || []; var showSqft = fUnits.some(u => u.sqft); %>
     <details class="bp-floor">
-      <summary><%= f.floor %> — <%= f.units.length %> unit<%= f.units.length === 1 ? '' : 's' %><%= f.shops ? ' + ' + f.shops.length + ' shops' : '' %></summary>
+      <summary><%= f.floor %> — <%= fUnits.length %> unit<%= fUnits.length === 1 ? '' : 's' %><%= f.shops ? ' + ' + f.shops.length + ' shops' : '' %></summary>
       <div class="bp-floor-body">
         <table class="bp-unit-table">
-          <thead><tr><th>Flat</th><th>Configuration</th><th>Size (sft)</th></tr></thead>
+          <thead><tr><th>Flat</th><th>Configuration</th><% if (showSqft) { %><th>Size (sft)</th><% } %></tr></thead>
           <tbody>
-          <% f.units.forEach(function(u) { %>
-            <tr><td><%= u.flat %></td><td><%= u.config %></td><td><%= u.sqft || '—' %></td></tr>
+          <% fUnits.forEach(function(u) { %>
+            <tr><td><%= u.flat %></td><td><%= u.config %></td><% if (showSqft) { %><td><%= u.sqft || '—' %></td><% } %></tr>
           <% }) %>
           </tbody>
         </table>
@@ -224,11 +234,12 @@ document.addEventListener('keydown', function(e) {
   </section>
   <% } %>
 
-  <% if (p.gallery && p.gallery.length) { %>
+  <% const restGallery = (p.gallery || []).filter(g => g.type !== 'site_photo'); %>
+  <% if (restGallery.length) { %>
   <section class="bp-section">
     <h2>Gallery</h2>
     <div class="bp-site-gallery">
-    <% p.gallery.forEach(function(g) { var gi = allImages.indexOf(g.url); %><img src="<%= g.url %>" alt="<%= g.label || p.name %>" onclick="openLightbox(<%= gi >= 0 ? gi : 0 %>)"><% }) %>
+    <% restGallery.forEach(function(g) { var gi = allImages.indexOf(g.url); %><img src="<%= g.url %>" alt="<%= g.label || p.name %>" onclick="openLightbox(<%= gi >= 0 ? gi : 0 %>)"><% }) %>
     </div>
   </section>
   <% } %>
@@ -280,22 +291,22 @@ document.addEventListener('keydown', function(e) {
     <form id="bpEnquiryForm" onsubmit="handleEnquirySubmit(event)">
       <div style="margin-bottom:14px;">
         <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Your Name <span style="color:#D93838">*</span></label>
-        <input type="text" name="name" id="enqName" required placeholder="e.g. Rahul Sharma" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;">
+        <input type="text" name="name" id="enqName" required placeholder="e.g. Rahul Sharma" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;outline:none;">
       </div>
 
       <div style="margin-bottom:14px;">
         <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Phone Number <span style="color:#D93838">*</span></label>
-        <input type="tel" name="phone" id="enqPhone" required placeholder="e.g. +91 98765 43210" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;">
+        <input type="tel" name="phone" id="enqPhone" required placeholder="e.g. +91 98765 43210" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;outline:none;">
       </div>
 
       <div style="margin-bottom:14px;">
         <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Email Address (Optional)</label>
-        <input type="email" name="email" id="enqEmail" placeholder="rahul@example.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;">
+        <input type="email" name="email" id="enqEmail" placeholder="rahul@example.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;outline:none;">
       </div>
 
       <div style="margin-bottom:18px;">
         <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Message</label>
-        <textarea name="message" id="enqMsg" placeholder="Hi, I would like to know unit availability, pricing and floor plans for this project." style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;min-height:75px;outline:none;resize:vertical;"></textarea>
+        <textarea name="message" id="enqMsg" placeholder="Hi, I would like to know unit availability, pricing and floor plans for this project." style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;min-height:75px;outline:none;resize:vertical;"></textarea>
       </div>
 
       <div id="enqStatus" style="display:none;font-size:13px;font-weight:600;margin-bottom:14px;padding:10px 14px;border-radius:8px;"></div>
