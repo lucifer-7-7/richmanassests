@@ -4,6 +4,7 @@ const router = express.Router();
 const { getDB } = require('../db/db');
 const { getPromoBanner, getUseDummyData, getHeroPropertyIds } = require('../lib/settings');
 const propSvc = require('../services/propertyService');
+const { getActiveBuilderProjects } = require('./builder-projects');
 
 // canonical site origin (production domain) for SEO tags
 const SITE = process.env.SITE_URL || 'https://richmanassets.com';
@@ -73,7 +74,7 @@ const SERVICES = [
 ];
 
 const CATEGORIES = [
-  { id: 'builder', title: 'Builder Sales', note: 'New launches & projects', img: 'samudra-card', q: 'type=Apartment' },
+  { id: 'builder', title: 'Builder Sales', note: 'New launches & projects', img: 'samudra-card', q: 'type=Apartment', href: '/builder-projects' },
   { id: 'resale', title: 'Resale & Homes', note: 'Houses, villas & flats', img: 'mermaid-card', q: 'type=Villa' },
   { id: 'commercial', title: 'Commercial Spaces', note: 'Offices, retail & sites', img: 'jumeirah-card', q: 'type=Commercial' },
   { id: 'plots', title: 'Plots & Sites', note: 'Residential, beach, river', img: 'kopparige-card', q: 'type=Plot' },
@@ -219,33 +220,47 @@ async function getAllPublicProperties(db) {
   try {
     let adminProps = [];
     let agentProps = [];
+    let builderProps = [];
 
     try {
       const { data } = await db.from('properties').select('*').eq('active', true);
       adminProps = data || [];
-
-      // Filter out dummy properties if setting is off
       const useDummy = await getUseDummyData();
-      if (!useDummy) {
-        adminProps = adminProps.filter(p => !p.is_dummy);
-      }
+      if (!useDummy) adminProps = adminProps.filter(p => !p.is_dummy);
     } catch (e1) {
       console.error('[getAllPublicProperties] properties err:', e1.message);
     }
 
     try {
       const { data } = await db.from('agent_properties').select('*').eq('status', 'published');
-      agentProps = (data || []).map(p => ({
-        ...p,
-        active: true,
-        has_img: Boolean(p.img_card || p.img_hero),
-        is_agent_listing: true,
-      }));
+      agentProps = (data || []).map(p => ({ ...p, active: true, has_img: Boolean(p.img_card || p.img_hero), is_agent_listing: true }));
     } catch (e2) {
       console.error('[getAllPublicProperties] agent_properties err:', e2.message);
     }
 
-    return [...adminProps, ...agentProps];
+    try {
+      const raw = await getActiveBuilderProjects(db);
+      builderProps = raw.map(p => {
+        const configs = (p.unit_types || []).map(u => u.config).join(', ');
+        return {
+          id: p.id, slug: p.slug, name: p.name, loc: p.loc, area: p.area,
+          type: 'Apartment', listing: 'sale',
+          price: 'Price on request', price_val: 0, price_note: null,
+          beds: configs || null, baths: null, sqft: (p.unit_types || []).map(u => u.sizeRange).join(', ') || null,
+          subtype: 'Builder Project',
+          description: [p.tagline, p.marketing_desc, p.unit_mix_summary].filter(Boolean).join(' '),
+          amenities: (p.amenities || []).join(' | '),
+          active: true, has_img: Boolean(p.img_card || p.img_hero),
+          img_card: p.img_card, img_hero: p.img_hero,
+          featured: false, sort_order: p.sort_order || 0,
+          is_builder_project: true,
+        };
+      });
+    } catch (e3) {
+      console.error('[getAllPublicProperties] builder_projects err:', e3.message);
+    }
+
+    return [...adminProps, ...agentProps, ...builderProps];
   } catch (err) {
     console.error('[getAllPublicProperties] error:', err.message);
     return [];
