@@ -110,34 +110,37 @@ html.loading,html.loading body{overflow:hidden}
   display:flex;justify-content:space-between;align-items:flex-end;
   gap:clamp(18px,3vw,36px);flex-wrap:wrap;
 }
+.hero-meta{max-width:min(720px,58%);min-width:0}
 .hero-eyebrow{
   display:flex;align-items:center;gap:10px;
   margin-bottom:clamp(14px,2vw,22px);
   font-family:var(--f-mono);font-size:10.5px;letter-spacing:.28em;
   text-transform:uppercase;color:rgba(247,244,237,.82);
+  text-shadow:0 1px 12px rgba(10,9,6,.4);
 }
 .hero-name{
-  font-weight:400;letter-spacing:-.026em;line-height:.95;
-  font-size:clamp(32px,4.6vw,68px);
-  white-space:nowrap;
-  max-width:none;
-  text-wrap:nowrap;
+  font-weight:400;letter-spacing:-.028em;line-height:.98;
+  font-size:clamp(38px,6vw,88px);
+  text-wrap:balance;
+  text-shadow:0 4px 30px rgba(10,9,6,.35);
 }
 .hero-loc{
   margin-top:clamp(14px,2vw,20px);
   display:flex;align-items:center;gap:11px;flex-wrap:wrap;
   font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;
   color:rgba(247,244,237,.76);
+  text-shadow:0 1px 12px rgba(10,9,6,.4);
 }
 .hero-loc .pin{width:12px;height:12px;color:var(--gold);flex:none}
 .hero-loc .sep{width:3px;height:3px;border-radius:50%;background:rgba(247,244,237,.38)}
 .hero-side{
   display:flex;flex-direction:column;align-items:flex-end;
-  gap:13px;text-align:right;padding-bottom:2px;
+  gap:13px;text-align:right;padding-bottom:2px;flex:none;
 }
 .hero-price{
-  font-family:var(--f-display);font-weight:400;
+  font-family:var(--f-display);font-weight:400;font-variant-numeric:tabular-nums;
   font-size:clamp(26px,3.2vw,48px);line-height:1;letter-spacing:-.01em;
+  text-shadow:0 4px 24px rgba(10,9,6,.35);
 }
 .hero-price small{font-family:var(--f-sans);font-size:12px;font-weight:400;color:rgba(247,244,237,.58);letter-spacing:0}
 .hero-view{
@@ -150,6 +153,7 @@ html.loading,html.loading body{overflow:hidden}
 .hero-view .arr{transition:transform .28s var(--ease)}
 @media(max-width:720px){
   .hero-ui-in{flex-direction:column;align-items:flex-start}
+  .hero-meta{max-width:100%}
   .hero-side{align-items:flex-start;text-align:left}
 }
 
