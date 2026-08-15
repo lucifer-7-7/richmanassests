@@ -7,6 +7,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node data/seed.js",
+    "seed:builder-projects": "node scripts/seed-builder-projects.js",
     "build": "echo 'No build step required'"
   },
   "dependencies": {

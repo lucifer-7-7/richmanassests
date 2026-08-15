@@ -4,6 +4,7 @@ const router = express.Router();
 const { getDB } = require('../db/db');
 const { getPromoBanner, getUseDummyData, getHeroPropertyIds } = require('../lib/settings');
 const propSvc = require('../services/propertyService');
+const { getActiveBuilderProjects } = require('./builder-projects');
 
 // canonical site origin (production domain) for SEO tags
 const SITE = process.env.SITE_URL || 'https://richmanassets.com';
@@ -73,7 +74,7 @@ const SERVICES = [
 ];
 
 const CATEGORIES = [
-  { id: 'builder', title: 'Builder Sales', note: 'New launches & projects', img: 'samudra-card', q: 'type=Apartment' },
+  { id: 'builder', title: 'Builder Sales', note: 'New launches & projects', img: 'samudra-card', q: 'type=Apartment', href: '/builder-projects' },
   { id: 'resale', title: 'Resale & Homes', note: 'Houses, villas & flats', img: 'mermaid-card', q: 'type=Villa' },
   { id: 'commercial', title: 'Commercial Spaces', note: 'Offices, retail & sites', img: 'jumeirah-card', q: 'type=Commercial' },
   { id: 'plots', title: 'Plots & Sites', note: 'Residential, beach, river', img: 'kopparige-card', q: 'type=Plot' },
@@ -219,33 +220,48 @@ async function getAllPublicProperties(db) {
   try {
     let adminProps = [];
     let agentProps = [];
+    let builderProps = [];
 
     try {
       const { data } = await db.from('properties').select('*').eq('active', true);
       adminProps = data || [];
-
-      // Filter out dummy properties if setting is off
       const useDummy = await getUseDummyData();
-      if (!useDummy) {
-        adminProps = adminProps.filter(p => !p.is_dummy);
-      }
+      if (!useDummy) adminProps = adminProps.filter(p => !p.is_dummy);
     } catch (e1) {
       console.error('[getAllPublicProperties] properties err:', e1.message);
     }
 
     try {
       const { data } = await db.from('agent_properties').select('*').eq('status', 'published');
-      agentProps = (data || []).map(p => ({
-        ...p,
-        active: true,
-        has_img: Boolean(p.img_card || p.img_hero),
-        is_agent_listing: true,
-      }));
+      agentProps = (data || []).map(p => ({ ...p, active: true, has_img: Boolean(p.img_card || p.img_hero), is_agent_listing: true }));
     } catch (e2) {
       console.error('[getAllPublicProperties] agent_properties err:', e2.message);
     }
 
-    return [...adminProps, ...agentProps];
+    try {
+      const raw = await getActiveBuilderProjects(db);
+      builderProps = raw.map(p => {
+        const configs = [...new Set((p.unit_types || []).map(u => u.config))].join(', ');
+        const sqftRange = [...new Set((p.unit_types || []).map(u => u.sizeRange).filter(Boolean))].join(', ');
+        return {
+          id: p.id, slug: p.slug, name: p.name, loc: p.loc, area: p.area,
+          type: 'Apartment', listing: 'sale',
+          price: 'Price on request', price_val: 0, price_note: null,
+          beds: configs || null, baths: null, sqft: sqftRange || null,
+          subtype: 'Builder Project',
+          description: [p.tagline, p.marketing_desc, p.unit_mix_summary, p.seo_keywords].filter(Boolean).join(' '),
+          amenities: (p.amenities || []).join(' | '),
+          active: true, has_img: Boolean(p.img_card || p.img_hero),
+          img_card: p.img_card, img_hero: p.img_hero,
+          featured: false, sort_order: p.sort_order || 0,
+          is_builder_project: true,
+        };
+      });
+    } catch (e3) {
+      console.error('[getAllPublicProperties] builder_projects err:', e3.message);
+    }
+
+    return [...adminProps, ...agentProps, ...builderProps];
   } catch (err) {
     console.error('[getAllPublicProperties] error:', err.message);
     return [];
@@ -299,10 +315,10 @@ function searchAndSortProperties(allProps, { listing, area, type, budget, q }) {
   }
   if (type) list = list.filter(p => p.type && p.type.toLowerCase().trim() === type.toLowerCase().trim());
 
-  if (budget === 'u30')   list = list.filter(p => (p.price_val || 0) < 3000000);
-  if (budget === '30-1c') list = list.filter(p => (p.price_val || 0) >= 3000000 && (p.price_val || 0) < 10000000);
-  if (budget === '1-5c')  list = list.filter(p => (p.price_val || 0) >= 10000000 && (p.price_val || 0) < 50000000);
-  if (budget === '5c')    list = list.filter(p => (p.price_val || 0) >= 50000000);
+  if (budget === 'u30')   list = list.filter(p => p.is_builder_project || (p.price_val || 0) < 3000000);
+  if (budget === '30-1c') list = list.filter(p => p.is_builder_project || ((p.price_val || 0) >= 3000000 && (p.price_val || 0) < 10000000));
+  if (budget === '1-5c')  list = list.filter(p => p.is_builder_project || ((p.price_val || 0) >= 10000000 && (p.price_val || 0) < 50000000));
+  if (budget === '5c')    list = list.filter(p => p.is_builder_project || (p.price_val || 0) >= 50000000);
 
   if (!q || !q.trim()) {
     return { properties: sortByDefault(list), fallback: false };
@@ -616,9 +632,6 @@ router.post('/property/:id/enquire', async (req, res) => {
     }
 
     const insertObj = {
-      agent_id: agentId,
-      property_id: p.id,
-      property_name: p.name,
       name: name.trim(),
       phone: phone.trim(),
       email: (email || '').trim(),
@@ -628,7 +641,11 @@ router.post('/property/:id/enquire', async (req, res) => {
       created_at: new Date().toISOString(),
     };
 
-    await db.from('enquiries').insert(insertObj);
+    const { error: insertErr } = await db.from('enquiries').insert(insertObj);
+    if (insertErr) {
+      console.error('[/property/:id/enquire] insert error:', insertErr.message);
+      return res.status(500).json({ ok: false, error: 'Failed to process enquiry. Please try again.' });
+    }
 
     // Formulate WhatsApp message
     const cleanPhone = agentPhone.replace(/\D/g, '');

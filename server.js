@@ -123,6 +123,7 @@ app.use(trackVisit);
 
 // ── Routes ────────────────────────────────────────────────────────
 app.use('/',               require('./routes/public'));
+app.use('/',               require('./routes/builder-projects'));
 app.use('/admin',          require('./routes/admin'));
 app.use('/agent',          require('./routes/agent'));
 app.use('/agent/payment',  require('./routes/agent-payment'));

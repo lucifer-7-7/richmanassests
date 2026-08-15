@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+<link rel="stylesheet" href="/assets/builder-project.css?v=1">
+</head>
+<body>
+<%- include('partials/nav') %>
+
+<!-- HERO GALLERY (reuses property.ejs's lightbox interaction pattern) -->
+<section class="bp-hero">
+  <div class="bp-hero-img" style="background-image:url('<%= allImages[0] || '' %>')" onclick="openLightbox(0)" role="button" tabindex="0" aria-label="View <%= p.name %> gallery"></div>
+  <div class="bp-hero-overlay"></div>
+  <div class="bp-hero-content wrap">
+    <h1><%= p.name %></h1>
+    <% if (p.tagline) { %><p class="bp-tagline"><%= p.tagline %></p><% } %>
+    <% if (allImages.length > 1) { %>
+    <button class="btn-all-photos" onclick="event.stopPropagation();openLightbox(0)" style="margin-top:16px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      View All Photos (<%= allImages.length %>)
+    </button>
+    <% } %>
+  </div>
+</section>
+
+<!-- Lightbox Modal (markup copied verbatim from property.ejs) -->
+<div class="gallery-modal" id="galLb" aria-hidden="true">
+  <button class="gallery-modal-close" onclick="closeLightbox()" aria-label="Close">✕</button>
+  <div class="gallery-modal-content">
+    <img class="lb-img" id="lbImg" alt="<%= p.name %> photo">
+    <div class="gallery-modal-nav">
+      <button class="gallery-modal-btn" onclick="lbMove(-1)" aria-label="Previous">&#8592;</button>
+      <button class="gallery-modal-btn" onclick="lbMove(1)" aria-label="Next">&#8594;</button>
+    </div>
+    <div style="font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-top:14px;" id="lbCounter"></div>
+  </div>
+</div>
+
+<script>
+// Gallery lightbox — copied verbatim from property.ejs (adapted to allImages only, no p.id usage)
+var lbImages = <%- JSON.stringify(allImages).replace(/</g, '\\u003c') %>;
+var lbIndex = 0;
+
+function openLightbox(idx) {
+  if (!lbImages.length) return;
+  lbIndex = idx || 0;
+  updateLb();
+  document.getElementById('galLb').classList.add('open');
+  document.getElementById('galLb').setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('galLb').classList.remove('open');
+  document.getElementById('galLb').setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+function lbMove(dir) {
+  if (!lbImages.length) return;
+  lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length;
+  updateLb();
+}
+
+function updateLb() {
+  if (!lbImages.length) return;
+  var imgEl = document.getElementById('lbImg');
+  imgEl.src = lbImages[lbIndex];
+  document.getElementById('lbCounter').innerText = (lbIndex + 1) + ' / ' + lbImages.length;
+}
+
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('galLb').classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') lbMove(-1);
+  if (e.key === 'ArrowRight') lbMove(1);
+});
+</script>
+
+<div class="wrap">
+  <div class="bp-factbar">
+    <% if (p.rera_status) { %><div class="bp-fact"><div class="bp-fact-label">RERA</div><div class="bp-fact-val"><%= p.rera_status %></div></div><% } %>
+    <% if (p.promoter) { %><div class="bp-fact"><div class="bp-fact-label">Promoter</div><div class="bp-fact-val"><%= p.promoter %></div></div><% } %>
+    <% if (configs) { %><div class="bp-fact"><div class="bp-fact-label">Configuration</div><div class="bp-fact-val"><%= configs %></div></div><% } %>
+    <% if (p.unit_types && p.unit_types.length) { %><div class="bp-fact"><div class="bp-fact-label">Unit Types</div><div class="bp-fact-val"><%= p.unit_types.length %></div></div><% } %>
+    <% if (p.area) { %><div class="bp-fact"><div class="bp-fact-label">Location</div><div class="bp-fact-val"><%= p.area %></div></div><% } %>
+  </div>
+
+  <% if (p.marketing_desc || p.positioning) { %>
+  <section class="bp-section">
+    <% if (p.positioning) { %><p style="font-style:italic;color:var(--accent);margin-bottom:10px"><%= p.positioning %></p><% } %>
+    <% if (p.marketing_desc) { %><p style="font-size:16px;line-height:1.7;max-width:70ch"><%= p.marketing_desc %></p><% } %>
+  </section>
+  <% } %>
+
+  <% if (p.unit_types && p.unit_types.length) { %>
+  <% const showFlatNo = p.unit_types.some(u => u.flatNo); const showCount = p.unit_types.some(u => u.count); %>
+  <section class="bp-section">
+    <h2>Unit Mix</h2>
+    <% if (p.unit_mix_summary) { %><p style="margin-bottom:18px;color:var(--ink-3)"><%= p.unit_mix_summary %></p><% } %>
+    <table class="bp-unit-table">
+      <thead><tr><th>Configuration</th><th>Size</th><% if (showFlatNo) { %><th>Flat No.</th><% } %><% if (showCount) { %><th>Count</th><% } %></tr></thead>
+      <tbody>
+      <% p.unit_types.forEach(function(u) { %>
+        <tr><td><%= u.config %></td><td><%= u.sizeRange %></td><% if (showFlatNo) { %><td><%= u.flatNo || '—' %></td><% } %><% if (showCount) { %><td><%= u.count || '—' %></td><% } %></tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </section>
+  <% } %>
+
+  <% if (p.highlights && p.highlights.length) { %>
+  <section class="bp-section">
+    <h2>Highlights</h2>
+    <ul style="line-height:1.9;max-width:70ch">
+    <% p.highlights.forEach(function(h) { %><li><%= h %></li><% }) %>
+    </ul>
+  </section>
+  <% } %>
+
+  <% if (p.floor_breakdown && p.floor_breakdown.length) { %>
+  <section class="bp-section">
+    <h2>Floor-wise Breakdown</h2>
+    <% p.floor_breakdown.forEach(function(f) { var fUnits = f.units || []; var showSqft = fUnits.some(u => u.sqft); %>
+    <details class="bp-floor">
+      <summary><%= f.floor %> — <%= fUnits.length %> unit<%= fUnits.length === 1 ? '' : 's' %><%= f.shops ? ' + ' + f.shops.length + ' shops' : '' %></summary>
+      <div class="bp-floor-body">
+        <table class="bp-unit-table">
+          <thead><tr><th>Flat</th><th>Configuration</th><% if (showSqft) { %><th>Size (sft)</th><% } %></tr></thead>
+          <tbody>
+          <% fUnits.forEach(function(u) { %>
+            <tr><td><%= u.flat %></td><td><%= u.config %></td><% if (showSqft) { %><td><%= u.sqft || '—' %></td><% } %></tr>
+          <% }) %>
+          </tbody>
+        </table>
+        <% if (f.shops && f.shops.length) { %>
+        <table class="bp-unit-table" style="margin-top:14px">
+          <thead><tr><th>Shop</th><th>Size (sft)</th><th>Dimensions</th></tr></thead>
+          <tbody>
+          <% f.shops.forEach(function(s) { %>
+            <tr><td><%= s.shop %></td><td><%= s.sqft %></td><td><%= s.dims %></td></tr>
+          <% }) %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+    </details>
+    <% }) %>
+  </section>
+  <% } %>
+
+  <% if ((p.amenities && p.amenities.length) || (p.terrace_amenities && p.terrace_amenities.length)) { %>
+  <section class="bp-section">
+    <h2>Amenities</h2>
+    <% if (p.terrace_amenities && p.terrace_amenities.length) { %>
+    <p style="font-weight:600;margin-bottom:10px">Terrace</p>
+    <div class="bp-pill-grid" style="margin-bottom:22px"><% p.terrace_amenities.forEach(function(a) { %><span class="bp-pill"><%= a %></span><% }) %></div>
+    <% } %>
+    <% if (p.amenities && p.amenities.length) { %>
+    <p style="font-weight:600;margin-bottom:10px">Common Areas</p>
+    <div class="bp-pill-grid"><% p.amenities.forEach(function(a) { %><span class="bp-pill"><%= a %></span><% }) %></div>
+    <% } %>
+  </section>
+  <% } %>
+
+  <% const specGroups = [
+       ['Structure', p.structure_specs], ['Flooring', p.flooring_specs], ['Electrical', p.electrical_specs],
+       ['Doors & Windows', p.doors_windows_specs], ['Kitchen', p.kitchen_specs], ['Bathroom', p.bathroom_specs],
+     ].filter(([, list]) => list && list.length); %>
+  <% if (specGroups.length) { %>
+  <section class="bp-section">
+    <h2>Specifications</h2>
+    <div class="bp-specs-accordion">
+    <% specGroups.forEach(function(group) { %>
+      <details>
+        <summary><%= group[0] %></summary>
+        <ul><% group[1].forEach(function(item) { %><li><%= item %></li><% }) %></ul>
+      </details>
+    <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <% if (p.proximity && p.proximity.length) { %>
+  <section class="bp-section">
+    <h2>Location & Proximity</h2>
+    <% if (p.address) { %><p style="margin-bottom:16px;color:var(--ink-3)"><%= p.address %></p><% } %>
+    <div class="bp-proximity-list">
+    <% p.proximity.forEach(function(pr) { %>
+      <div class="bp-proximity-row"><span><%= pr.landmark %></span><strong><%= pr.distance %></strong></div>
+    <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <% if (p.promoter || p.architect || p.legal_advisor || p.partnered_by) { %>
+  <section class="bp-section">
+    <h2>Promoter & Credentials</h2>
+    <div class="bp-credibility">
+      <% if (p.promoter) { %><div class="bp-credibility-item"><div class="bp-cred-label">Promoter</div><div><%= p.promoter %></div><% if (p.promoter_office) { %><div style="color:var(--ink-3);font-size:13px;margin-top:4px"><%= p.promoter_office %></div><% } %></div><% } %>
+      <% if (p.architect) { %><div class="bp-credibility-item"><div class="bp-cred-label">Architect / Engineer</div><div><%= p.architect %></div></div><% } %>
+      <% if (p.legal_advisor) { %><div class="bp-credibility-item"><div class="bp-cred-label">Legal Advisor</div><div><%= p.legal_advisor %></div></div><% } %>
+      <% if (p.partnered_by) { %><div class="bp-credibility-item"><div class="bp-cred-label">Partnered By</div><div><%= p.partnered_by %></div></div><% } %>
+      <% if (p.bank_partners && p.bank_partners.length) { %><div class="bp-credibility-item"><div class="bp-cred-label">Banking Partners</div><div><%= p.bank_partners.join(', ') %></div></div><% } %>
+      <% if (p.website) { %><div class="bp-credibility-item"><div class="bp-cred-label">Website</div><div><%= p.website %></div></div><% } %>
+    </div>
+  </section>
+  <% } %>
+
+  <% if (p.rera_status || p.rera_number) { %>
+  <section class="bp-section">
+    <h2>RERA Compliance</h2>
+    <div class="bp-rera-panel">
+      <div>
+        <% if (p.rera_status) { %><p><strong>Status:</strong> <%= p.rera_status %></p><% } %>
+        <% if (p.rera_number) { %><p><strong>Registration No.:</strong> <%= p.rera_number %></p><% } %>
+        <% if (p.rera_date) { %><p><strong>Registered on:</strong> <%= p.rera_date %></p><% } %>
+        <% if (p.rera_validity) { %><p><strong>Valid until:</strong> <%= p.rera_validity %></p><% } %>
+        <% if (p.survey_number) { %><p><strong>Survey No.:</strong> <%= p.survey_number %></p><% } %>
+        <% if (p.registered_office) { %><p><strong>Registered Office:</strong> <%= p.registered_office %></p><% } %>
+      </div>
+      <% if (p.rera_cert_img) { %><a href="<%= p.rera_cert_img %>" target="_blank" rel="noopener"><img src="<%= p.rera_cert_img %>" alt="RERA Certificate" style="width:100%;border-radius:10px"></a><% } %>
+    </div>
+  </section>
+  <% } %>
+
+  <% const sitePhotos = (p.gallery || []).filter(g => g.type === 'site_photo'); %>
+  <% if (sitePhotos.length) { %>
+  <section class="bp-section">
+    <h2>Site Photos</h2>
+    <div class="bp-site-gallery">
+    <% sitePhotos.forEach(function(g) { var gi = allImages.indexOf(g.url); %><img src="<%= g.url %>" alt="<%= p.name %> site photo" onclick="openLightbox(<%= gi >= 0 ? gi : 0 %>)"><% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <% const restGallery = (p.gallery || []).filter(g => g.type !== 'site_photo'); %>
+  <% if (restGallery.length) { %>
+  <section class="bp-section">
+    <h2>Gallery</h2>
+    <div class="bp-site-gallery">
+    <% restGallery.forEach(function(g) { var gi = allImages.indexOf(g.url); %><img src="<%= g.url %>" alt="<%= g.label || p.name %>" onclick="openLightbox(<%= gi >= 0 ? gi : 0 %>)"><% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <section class="bp-section" id="enquire">
+    <h2>Enquire About <%= p.name %></h2>
+    <p style="color:var(--ink-3);margin-bottom:22px;max-width:60ch">Get unit availability, current pricing and floor plans directly from the promoter — no cost, no obligation.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <button type="button" class="btn btn-dark" onclick="openEnquiryModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>Enquire Now</span>
+      </button>
+      <a class="btn" style="flex:none;background:#25D366;color:#fff" href="https://wa.me/91<%= (p.contact_numbers ? String(p.contact_numbers).split(',')[0].trim() : '9380939961').replace(/\D/g,'') %>?text=<%= encodeURIComponent('Hi, I\'m interested in ' + p.name + ' (' + (p.area || p.loc || '') + ').') %>" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+        <span>WhatsApp</span>
+      </a>
+    </div>
+  </section>
+
+  <% if (similar.length) { %>
+  <section class="bp-section" style="border-bottom:0">
+    <h2>Other Builder Projects</h2>
+    <div class="bp-grid">
+    <% similar.forEach(function(s) { %>
+      <a class="bp-card" href="/builder-project/<%= s.slug %>">
+        <div class="bp-card-img" style="background-image:url('<%= s.img_card || s.img_hero || '' %>')"></div>
+        <div class="bp-card-body"><h3><%= s.name %></h3><p class="bp-card-meta"><%= s.area || s.loc %></p></div>
+      </a>
+    <% }) %>
+    </div>
+  </section>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
+
+<!-- ENQUIRY MODAL (markup/JS copied verbatim from property.ejs's .apc-modal pattern,
+     fetch URL renamed to the builder-project enquire endpoint and p.id → p.slug) -->
+<div class="apc-modal" id="enquiryModal" aria-hidden="true">
+  <div class="apc-modal-overlay" onclick="closeEnquiryModal()"></div>
+  <div class="apc-modal-card">
+    <button type="button" class="apc-modal-close" onclick="closeEnquiryModal()" aria-label="Close">✕</button>
+    <div class="apc-modal-header">
+      <div class="apc-modal-badge">Builder Project Enquiry</div>
+      <h3>Enquire About This Project</h3>
+      <p style="font-size:13px;color:var(--muted);margin-top:2px;">Inquiring about <strong><%= p.name %></strong><% if (p.area) { %> (<%= p.area %>)<% } %></p>
+    </div>
+
+    <form id="bpEnquiryForm" onsubmit="handleEnquirySubmit(event)">
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Your Name <span style="color:#D93838">*</span></label>
+        <input type="text" name="name" id="enqName" required placeholder="e.g. Rahul Sharma" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;outline:none;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Phone Number <span style="color:#D93838">*</span></label>
+        <input type="tel" name="phone" id="enqPhone" required placeholder="e.g. +91 98765 43210" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;outline:none;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Email Address (Optional)</label>
+        <input type="email" name="email" id="enqEmail" placeholder="rahul@example.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;outline:none;">
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--ink);">Message</label>
+        <textarea name="message" id="enqMsg" placeholder="Hi, I would like to know unit availability, pricing and floor plans for this project." style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;min-height:75px;outline:none;resize:vertical;"></textarea>
+      </div>
+
+      <div id="enqStatus" style="display:none;font-size:13px;font-weight:600;margin-bottom:14px;padding:10px 14px;border-radius:8px;"></div>
+
+      <button type="submit" id="enqBtn" class="btn btn-dark" style="width:100%;justify-content:center;height:46px;border-radius:999px;font-weight:700;font-size:14px;">
+        <span>Send &amp; Open WhatsApp</span> &rarr;
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openEnquiryModal() {
+    document.getElementById('enquiryModal').classList.add('open');
+    document.getElementById('enquiryModal').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeEnquiryModal() {
+    document.getElementById('enquiryModal').classList.remove('open');
+    document.getElementById('enquiryModal').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  async function handleEnquirySubmit(e) {
+    e.preventDefault();
+    var btn = document.getElementById('enqBtn');
+    var statusDiv = document.getElementById('enqStatus');
+    btn.disabled = true;
+    btn.innerText = 'Submitting...';
+
+    try {
+      var resp = await fetch('/builder-project/<%= p.slug %>/enquire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('enqName').value,
+          phone: document.getElementById('enqPhone').value,
+          email: document.getElementById('enqEmail').value,
+          message: document.getElementById('enqMsg').value,
+        })
+      });
+      var data = await resp.json();
+      if (data.ok) {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#F0FAF4';
+        statusDiv.style.color = '#166534';
+        statusDiv.style.border = '1px solid #BBF7D0';
+        statusDiv.innerText = '✓ Enquiry saved! Opening WhatsApp...';
+        setTimeout(function() {
+          closeEnquiryModal();
+          if (data.whatsappUrl) {
+            window.open(data.whatsappUrl, '_blank');
+          }
+        }, 800);
+      } else {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#FDF2F2';
+        statusDiv.style.color = '#991B1B';
+        statusDiv.style.border = '1px solid #FECACA';
+        statusDiv.innerText = data.error || 'Failed to send enquiry';
+        btn.disabled = false;
+        btn.innerHTML = '<span>Send &amp; Open WhatsApp</span> &rarr;';
+      }
+    } catch (err) {
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = '#FDF2F2';
+      statusDiv.style.color = '#991B1B';
+      statusDiv.style.border = '1px solid #FECACA';
+      statusDiv.innerText = 'Network error. Please try again.';
+      btn.disabled = false;
+      btn.innerHTML = '<span>Send &amp; Open WhatsApp</span> &rarr;';
+    }
+  }
+</script>
+</body>
+</html>

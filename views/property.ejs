@@ -15,7 +15,7 @@
     <div class="t"><%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %> · <%= p.type %></div>
   </div>
   <div class="cta-actions">
-    <a class="cta-wa" href="https://wa.me/919380939961?text=<%= encodeURIComponent('Hi RichManAssets, I\'m interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <a class="cta-wa" href="https://wa.me/91<%= (typeof agentInfo !== 'undefined' && agentInfo && agentInfo.phone) ? agentInfo.phone.replace(/\D/g,'') : '9380939961' %>?text=<%= encodeURIComponent('Hi ' + ((typeof agentInfo !== 'undefined' && agentInfo && agentInfo.name) ? agentInfo.name : 'RichManAssets') + ', I am interested in ' + p.name + ' (' + p.loc + ', ' + p.price + ').') %>" target="_blank" rel="noopener" aria-label="WhatsApp">
       <svg viewBox="0 0 32 32" fill="none"><path d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.6 1.8 6.5L3 29l7.2-2.2c1.8 1 3.8 1.5 5.8 1.5 7 0 12.5-5.5 12.5-12.5S23 3 16 3z" fill="currentColor" stroke="none"/><path d="M11.2 9.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.2.9.7-.1 2.1-.9 2.4-1.7.3-.8.3-1.6.2-1.7-.1-.2-.3-.2-.7-.4-.3-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.2-.7.1-.4-.2-1.6-.6-3-1.8-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.5.2-.7.2-.2.4-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6 0-.2-.7-2-1-2.7z" fill="#fff" stroke="none"/></svg>
     </a>
     <a class="cta-btn" href="/properties" style="gap:6px;">
@@ -369,7 +369,7 @@ document.addEventListener('keydown', function(e) {
   </div>
   <div class="plist-grid">
     <% similar.forEach(function(s) { %>
-    <a class="plist" href="/property/<%= s.id %>" style="text-decoration:none">
+    <a class="plist" href="<%= s.is_builder_project ? ('/builder-project/' + s.slug) : ('/property/' + s.id) %>" style="text-decoration:none">
       <div class="ph">
         <% var simImg = s.img_card || s.img_hero; %>
         <% if (simImg) { %>
@@ -393,7 +393,7 @@ document.addEventListener('keydown', function(e) {
 <% } %>
 
 <% if (next) { %>
-<a class="p-next" href="/property/<%= next.id %>">
+<a class="p-next" href="<%= next.is_builder_project ? ('/builder-project/' + next.slug) : ('/property/' + next.id) %>">
   <% var nextImg = next.img_card || next.img_hero; %>
   <% if (nextImg) { %><img src="<%= nextImg.startsWith('http') ? nextImg : '/' + nextImg.replace(/^\//, '') %>" alt="<%= next.name %>, <%= next.loc %>" loading="lazy"><% } %>
   <div class="scrim"></div>

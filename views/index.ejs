@@ -172,7 +172,7 @@
         </div>
         <div class="hero-side">
           <div class="hero-price"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
-          <a class="hero-view" href="/property/<%= p.id %>">View <span class="arr">&rarr;</span></a>
+          <a class="hero-view" href="<%= p.is_builder_project ? ('/builder-project/' + p.slug) : ('/property/' + p.id) %>">View <span class="arr">&rarr;</span></a>
         </div>
       </div></div>
     </div>
@@ -245,7 +245,7 @@
   <div class="cats-wrap">
     <div class="cats" id="catGrid">
       <% categories.forEach(function(c) { %>
-      <a class="cat fx" href="/properties?<%= c.q %>">
+      <a class="cat fx" href="<%= c.href || ('/properties?' + c.q) %>">
         <img src="/assets/img/<%= c.img %>.jpg" alt="<%= c.title %>" loading="lazy">
         <span class="cat-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
         <span class="cat-txt"><h3><%= c.title %></h3><span class="n"><%= c.note %></span></span>

@@ -8,3 +8,4 @@ uploads/
 *.log
 scratch/
 scratch_*.js
+/Builder project/
