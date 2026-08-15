@@ -65,21 +65,26 @@
       return '<div class="hero-slide' + (i === 0 ? ' is-active' : '') + '">' +
         '<div class="hero-media"><img src="' + heroSrc + '" alt="' + p.name + ', ' + p.loc + '"' + (i === 0 ? '' : ' loading="lazy"') + ' onerror="this.src=\'assets/img/site-hero.jpg\'"' + '></div>' +
         '<div class="hero-grad"></div>' +
-        '<div class="hero-ui"><div class="wrap hero-ui-in">' +
-          '<div class="hero-meta">' +
-            '<div class="hero-eyebrow"><span class="ln"></span>Featured &middot; ' + badge(p) + '</div>' +
-            '<h1 class="hero-name">' + p.name + '</h1>' +
-            '<div class="hero-loc">' + pin + ' ' + p.loc + ' <span class="sep"></span> ' + p.type + ' <span class="sep"></span> ' + p.beds + ' beds</div>' +
-          '</div>' +
-          '<div class="hero-side">' +
-            '<div class="hero-price">' + p.price + (p.note ? '<small> ' + p.note + '</small>' : '') + '</div>' +
-            '<a class="hero-view" href="' + detail + '">View <span class="arr">&rarr;</span></a>' +
+        '<div class="hero-ui"><div class="wrap">' +
+          '<div class="hero-card">' +
+            '<div class="hero-meta">' +
+              '<div class="hero-eyebrow"><span class="badge-featured">Featured &middot; ' + badge(p) + '</span></div>' +
+              '<h2 class="hero-name">' + p.name + '</h2>' +
+              '<div class="hero-loc">' + pin + ' ' + p.loc + ' <span class="sep"></span> ' + p.type + ' <span class="sep"></span> ' + p.beds + ' beds</div>' +
+            '</div>' +
+            '<div class="hero-side">' +
+              '<div class="hero-price-wrap">' +
+                '<div class="hero-price">' + p.price + '</div>' +
+                (p.note ? '<span class="hero-price-note">' + p.note + '</span>' : '') +
+              '</div>' +
+              '<a class="hero-view" href="' + detail + '"><span>View Property</span> <svg class="arr" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.3 8h9.4M8.7 4L12.7 8l-4 4"/></svg></a>' +
+            '</div>' +
           '</div>' +
         '</div></div>' +
       '</div>';
     }).join('');
 
-    // ambient progress dots (indicative)
+    // navigation dots & arrows
     var dotsEl = $('#heroDots');
     if (dotsEl) {
       dotsEl.innerHTML = slides.map(function (p, i) {
@@ -87,6 +92,8 @@
       }).join('');
     }
 
+    var prevBtn = $('#heroPrev');
+    var nextBtn = $('#heroNext');
     var slideEls = [].slice.call(track.querySelectorAll('.hero-slide'));
     var dotEls = dotsEl ? [].slice.call(dotsEl.querySelectorAll('button')) : [];
     var DUR = 6;
@@ -98,12 +105,33 @@
       dotEls.forEach(function (d, i) { d.classList.toggle('on', i === idx); });
     }
     function next() { show(idx + 1); }
+    function prev() { show(idx - 1); }
     function play() { stop(); if (!reduce) timer = setInterval(next, DUR * 1000); }
     function stop() { if (timer) clearInterval(timer); timer = null; }
     function go(n) { show(n); play(); }
 
-    // dots are gentle controls (optional), pause on hover
     dotEls.forEach(function (d) { d.addEventListener('click', function () { go(+d.dataset.i); }); });
+    if (prevBtn) prevBtn.addEventListener('click', function () { prev(); play(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { next(); play(); });
+
+    /* Touch Swipe Support for Mobile */
+    var touchStartX = 0, touchStartY = 0;
+    track.addEventListener('touchstart', function(e) {
+      if (!e.touches || !e.touches[0]) return;
+      touchStartX = e.touches[0].screenX;
+      touchStartY = e.touches[0].screenY;
+    }, { passive: true });
+
+    track.addEventListener('touchend', function(e) {
+      if (!e.changedTouches || !e.changedTouches[0]) return;
+      var diffX = touchStartX - e.changedTouches[0].screenX;
+      var diffY = touchStartY - e.changedTouches[0].screenY;
+      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0) { next(); } else { prev(); }
+        play();
+      }
+    }, { passive: true });
+
     var hero = $('.hero');
     if (hero) {
       hero.addEventListener('mouseenter', stop);

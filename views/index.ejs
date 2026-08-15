@@ -161,23 +161,43 @@
              <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %>>
       </div>
       <div class="hero-grad"></div>
-      <div class="hero-ui"><div class="wrap hero-ui-in">
-        <div class="hero-meta">
-          <div class="hero-eyebrow"><span class="ln"></span>Featured &middot; <%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></div>
-          <h2 class="hero-name"><%= p.name %></h2>
-          <div class="hero-loc">
-            <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
-            <%= p.loc %> <span class="sep"></span> <%= p.type %> <span class="sep"></span> <%= p.beds %> beds
+      <div class="hero-ui">
+        <div class="wrap">
+          <div class="hero-card">
+            <div class="hero-meta">
+              <div class="hero-eyebrow"><span class="badge-featured">Featured &middot; <%= p.listing === 'sale' ? 'For Sale' : p.listing === 'rent' ? 'For Rent' : 'For Lease' %></span></div>
+              <h2 class="hero-name"><%= p.name %></h2>
+              <div class="hero-loc">
+                <svg class="pin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 6.5C8 3.5 4.5 3.5 4.5 6.5 4.5 9 8 11 8 11s3.5-2 3.5-4.5C11.5 3.5 8 3.5 8 6.5z"/><circle cx="8" cy="6.4" r="1.2"/></svg>
+                <%= p.loc %> <span class="sep"></span> <%= p.type %><% if (p.beds && p.beds !== '—') { %> <span class="sep"></span> <%= p.beds %><% if (!p.beds.toString().toLowerCase().includes('bhk') && !p.beds.toString().toLowerCase().includes('bed')) { %> beds<% } %><% } %>
+              </div>
+            </div>
+            <div class="hero-side">
+              <div class="hero-price-wrap">
+                <div class="hero-price"><%= p.price %></div>
+                <% if (p.price_note) { %><span class="hero-price-note"><%= p.price_note %></span><% } %>
+              </div>
+              <a class="hero-view" href="<%= p.is_builder_project ? ('/builder-project/' + p.slug) : ('/property/' + p.id) %>">
+                <span>View Property</span>
+                <svg class="arr" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.3 8h9.4M8.7 4L12.7 8l-4 4"/></svg>
+              </a>
+            </div>
           </div>
         </div>
-        <div class="hero-side">
-          <div class="hero-price"><%= p.price %><% if (p.price_note) { %><small> <%= p.price_note %></small><% } %></div>
-          <a class="hero-view" href="<%= p.is_builder_project ? ('/builder-project/' + p.slug) : ('/property/' + p.id) %>">View <span class="arr">&rarr;</span></a>
-        </div>
-      </div></div>
+      </div>
     </div>
     <% }) %>
   </div>
+
+  <div class="hero-nav">
+    <button class="hero-arrow hero-prev" id="heroPrev" aria-label="Previous Property">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="hero-arrow hero-next" id="heroNext" aria-label="Next Property">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6 6-6"/></svg>
+    </button>
+  </div>
+
   <div class="hero-frame"></div>
   <div class="hero-cue"><span>Scroll</span><span class="bar"></span></div>
   <div class="hero-dots" id="heroDots">
