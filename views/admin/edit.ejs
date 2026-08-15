@@ -128,14 +128,14 @@
       <div class="fg">
         <div class="field">
           <label>Card image (thumbnail)</label>
-          <% if (p.img_card) { %><img class="curr-img" src="<%= p.img_card.startsWith('http') ? p.img_card : '/' + p.img_card %>" alt="Current card"><small>Current above · Upload to replace</small><% } %>
+          <% if (p.img_card) { %><img class="curr-img" src="<%= cldOptimize(p.img_card.startsWith('http') ? p.img_card : '/' + p.img_card, {w:260}) %>" alt="Current card"><small>Current above · Upload to replace</small><% } %>
           <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp" onchange="prevEdit(this,'ec-card')">
           <img id="ec-card" class="curr-img" alt="" style="display:none">
           <small>800×600 JPG recommended · listing grids</small>
         </div>
         <div class="field">
           <label>Hero image (full-width)</label>
-          <% if (p.img_hero) { %><img class="curr-img" src="<%= p.img_hero.startsWith('http') ? p.img_hero : '/' + p.img_hero %>" alt="Current hero"><small>Current above · Upload to replace</small><% } %>
+          <% if (p.img_hero) { %><img class="curr-img" src="<%= cldOptimize(p.img_hero.startsWith('http') ? p.img_hero : '/' + p.img_hero, {w:260}) %>" alt="Current hero"><small>Current above · Upload to replace</small><% } %>
           <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp" onchange="prevEdit(this,'ec-hero')">
           <img id="ec-hero" class="curr-img" alt="" style="display:none">
           <small>1600×900 JPG recommended · property page header</small>
@@ -151,7 +151,7 @@
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
           <% galleryArr.forEach(function(url, idx) { %>
           <div style="position:relative;display:inline-block">
-            <img src="<%= url.startsWith('http') ? url : '/' + url %>" alt="Gallery <%= idx+1 %>" class="gallery-thumb">
+            <img src="<%= cldOptimize(url.startsWith('http') ? url : '/' + url, {w:180}) %>" alt="Gallery <%= idx+1 %>" class="gallery-thumb">
             <label style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.65);border-radius:4px;padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:2px">
               <input type="checkbox" name="gallery_remove[]" value="<%= idx %>" style="width:11px;height:11px;accent-color:#E03E3E">
               <span style="font-size:9px;color:#fff;letter-spacing:.06em;font-weight:700">DEL</span>

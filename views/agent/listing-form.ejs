@@ -153,13 +153,13 @@
     <% if (prop.img_card) { %>
     <div class="form-group">
       <label>Current Card Image</label>
-      <div class="img-preview-wrap"><img src="<%- prop.img_card %>" class="img-preview" alt="Card"></div>
+      <div class="img-preview-wrap"><img src="<%- cldOptimize(prop.img_card, {w:260}) %>" class="img-preview" alt="Card"></div>
     </div>
     <% } %>
     <% if (prop.img_hero) { %>
     <div class="form-group">
       <label>Current Hero Image</label>
-      <div class="img-preview-wrap"><img src="<%- prop.img_hero %>" class="img-preview" alt="Hero"></div>
+      <div class="img-preview-wrap"><img src="<%- cldOptimize(prop.img_hero, {w:260}) %>" class="img-preview" alt="Hero"></div>
     </div>
     <% } %>
     <% if (prop.gallery) {
@@ -171,7 +171,7 @@
       <div class="img-preview-wrap">
         <% gallery.forEach(function(g,i) { %>
         <div>
-          <img src="<%- g %>" class="img-preview" alt="Gallery <%=i+1%>">
+          <img src="<%- cldOptimize(g, {w:180}) %>" class="img-preview" alt="Gallery <%=i+1%>">
           <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:2px">
             <label style="cursor:pointer;text-transform:none;letter-spacing:0;font-size:11px;color:var(--danger)">
               <input type="checkbox" name="gallery_remove[]" value="<%=i%>" style="margin-right:2px">Remove

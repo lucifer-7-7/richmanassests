@@ -411,7 +411,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
         <div class="prop-card" data-name="<%= (p.name + ' ' + p.loc).toLowerCase() %>" data-listing="<%= p.listing %>">
           <div class="thumb">
             <% if (p.img_card || p.img_hero) { %>
-            <img src="<%= (p.img_card || p.img_hero || '').startsWith('http') ? (p.img_card || p.img_hero) : '/' + (p.img_card || p.img_hero) %>" alt="<%= p.name %>" loading="lazy">
+            <img src="<%= cldOptimize((p.img_card || p.img_hero || '').startsWith('http') ? (p.img_card || p.img_hero) : '/' + (p.img_card || p.img_hero), {w:300}) %>" alt="<%= p.name %>" loading="lazy">
             <% } else { %><div class="no-img">No photo</div><% } %>
             <span class="listing-badge <%= p.listing %>"><%= p.listing === 'sale' ? 'Sale' : p.listing === 'rent' ? 'Rent' : 'Lease' %></span>
             <span class="status-dot <%= p.active ? 'active' : 'hidden' %>" title="<%= p.active ? 'Active' : 'Hidden' %>"></span>
@@ -956,7 +956,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
               </div>
             </div>
             <div style="margin-top:8px;">
-              <img id="bannerPhotoPreview" src="<%= promoBanner && promoBanner.bg_img ? promoBanner.bg_img : '' %>" alt="Banner Preview" style="max-height:90px;border-radius:8px;object-fit:cover;border:1px solid var(--line);display:<%= promoBanner && promoBanner.bg_img ? 'block' : 'none' %>;">
+              <img id="bannerPhotoPreview" src="<%= promoBanner && promoBanner.bg_img ? cldOptimize(promoBanner.bg_img, {w:400}) : '' %>" alt="Banner Preview" style="max-height:90px;border-radius:8px;object-fit:cover;border:1px solid var(--line);display:<%= promoBanner && promoBanner.bg_img ? 'block' : 'none' %>;">
             </div>
           </div>
 
@@ -1021,11 +1021,11 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
             %>
             <div style="position:relative;">
               <label style="display:block;cursor:pointer;border:2px solid var(--line);border-radius:10px;overflow:hidden;transition:0.2s;position:relative;">
-                <input type="checkbox" name="hero_ids" value="<%=prop.id%>" <%= isChecked ? 'checked' : '' %> data-prop-id="<%=prop.id%>" data-prop-name="<%=prop.name%>" data-prop-img="<%=prop.img_card || '/assets/img/site-hero.jpg'%>"
+                <input type="checkbox" name="hero_ids" value="<%=prop.id%>" <%= isChecked ? 'checked' : '' %> data-prop-id="<%=prop.id%>" data-prop-name="<%=prop.name%>" data-prop-img="<%=cldOptimize(prop.img_card, {w:1600}) || '/assets/img/site-hero.jpg'%>"
                   style="position:absolute;left:-9999px;"
                   data-hero-checkbox>
                 <div style="aspect-ratio:1;background:#f5f5f5;position:relative;overflow:hidden;">
-                  <img src="<%=prop.img_card || '/assets/img/site-hero.jpg'%>" alt="<%=prop.name%>" style="width:100%;height:100%;object-fit:cover;display:block;">
+                  <img src="<%=cldOptimize(prop.img_card, {w:200}) || '/assets/img/site-hero.jpg'%>" alt="<%=prop.name%>" style="width:100%;height:100%;object-fit:cover;display:block;">
                   <div style="position:absolute;inset:0;background:rgba(0,0,0,0);transition:0.2s;pointer-events:none;" class="hero-thumb-overlay"></div>
                 </div>
                 <div style="padding:10px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-2);"><%=prop.name%></div>

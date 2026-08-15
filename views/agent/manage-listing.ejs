@@ -57,7 +57,7 @@
         <div class="manage-img-label">Card / Thumbnail</div>
         <% if (prop.img_card) { %>
         <div class="manage-img-preview">
-          <img src="<%- prop.img_card %>" alt="Card image">
+          <img src="<%- cldOptimize(prop.img_card, {w:260}) %>" alt="Card image">
           <div class="manage-img-overlay">Current</div>
         </div>
         <% } else { %>
@@ -76,7 +76,7 @@
         <div class="manage-img-label">Hero / Full-size</div>
         <% if (prop.img_hero) { %>
         <div class="manage-img-preview">
-          <img src="<%- prop.img_hero %>" alt="Hero image">
+          <img src="<%- cldOptimize(prop.img_hero, {w:260}) %>" alt="Hero image">
           <div class="manage-img-overlay">Current</div>
         </div>
         <% } else { %>
@@ -99,7 +99,7 @@
       <div class="manage-gallery-grid">
         <% gallery.forEach(function(img, i) { %>
         <div class="manage-gallery-item">
-          <img src="<%- img %>" alt="Gallery <%= i+1 %>">
+          <img src="<%- cldOptimize(img, {w:260}) %>" alt="Gallery <%= i+1 %>">
           <label class="manage-gallery-remove">
             <input type="checkbox" name="gallery_remove" value="<%= i %>">
             <span>Remove</span>

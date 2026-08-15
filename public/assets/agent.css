@@ -259,6 +259,11 @@ h1, h2, h3, .heading-serif {
 /* ── FORM ELEMENTS (Crisp white fill + Defined 1.5px border) ─── */
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 @media(max-width:600px) { .form-row { grid-template-columns: 1fr; gap: 16px; } }
+
+/* ── IMAGE PREVIEWS (listing-form: current card/hero/gallery images) ── */
+.img-preview-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+.img-preview { width: 130px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+@media(max-width:600px) { .img-preview { width: 100px; height: 72px; } }
 .form-group { margin-bottom: 22px; }
 .form-group label {
   display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
