@@ -632,9 +632,6 @@ router.post('/property/:id/enquire', async (req, res) => {
     }
 
     const insertObj = {
-      agent_id: agentId,
-      property_id: p.id,
-      property_name: p.name,
       name: name.trim(),
       phone: phone.trim(),
       email: (email || '').trim(),
@@ -644,7 +641,11 @@ router.post('/property/:id/enquire', async (req, res) => {
       created_at: new Date().toISOString(),
     };
 
-    await db.from('enquiries').insert(insertObj);
+    const { error: insertErr } = await db.from('enquiries').insert(insertObj);
+    if (insertErr) {
+      console.error('[/property/:id/enquire] insert error:', insertErr.message);
+      return res.status(500).json({ ok: false, error: 'Failed to process enquiry. Please try again.' });
+    }
 
     // Formulate WhatsApp message
     const cleanPhone = agentPhone.replace(/\D/g, '');
