@@ -13,7 +13,7 @@ module.exports = async function sitemap(req, res) {
     const base = `${req.protocol}://${req.get('host')}`;
 
     // Fetch all published properties
-    let props = [], agentProps = [], areas = [];
+    let props = [], agentProps = [], areas = [], builderProjects = [];
     try {
       const [propsRes, agentPropsRes] = await Promise.all([
         db.from('properties').select('id, created_at').eq('active', true),
@@ -26,7 +26,6 @@ module.exports = async function sitemap(req, res) {
       areas = [...new Set((areaRes.data || []).map(r => r.area).filter(Boolean))].sort();
 
       // Fetch builder projects for sitemap
-      let builderProjects = [];
       try {
         const bpRes = await db.from('builder_projects').select('slug, created_at').eq('status', 'active');
         builderProjects = bpRes.data || [];

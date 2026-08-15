@@ -123,12 +123,12 @@ router.post('/builder-project/:slug/enquire', async (req, res) => {
     const { data: p } = await db.from('builder_projects').select('id, name, loc, contact_numbers').eq('slug', req.params.slug).maybeSingle();
     if (!p) return res.status(404).json({ ok: false, error: 'Project not found.' });
 
-    await db.from('enquiries').insert({
-      property_id: p.id, property_name: p.name,
+    const { error: insertErr } = await db.from('enquiries').insert({
       name: name.trim(), phone: phone.trim(), email: (email || '').trim(), message: (message || '').trim(),
       property_ref: `${p.name} (${p.loc})`, page: '/builder-project/' + req.params.slug,
       created_at: new Date().toISOString(),
     });
+    if (insertErr) console.error('[/builder-project/:slug/enquire] insert error:', insertErr.message);
 
     let agentPhone = '9380939961';
     if (p.contact_numbers) {
