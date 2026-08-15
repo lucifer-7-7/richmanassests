@@ -224,6 +224,10 @@ body.has-prop-cta .floaters { display: none !important; }
 /* ── STORY + BUY CARD ── */
 .story{padding-block:clamp(36px,7vw,88px)}
 .story-grid{display:grid;gap:clamp(24px,4vw,52px);align-items:start}
+/* Grid items default to the max-content width of their descendants —
+   the horizontally-scrolling thumbnail row was stretching this whole
+   column (and everything below it) past the viewport. Cap it. */
+.story-grid > *{min-width:0}
 .story-grid.with-buy .buy-card-wrap{order:-1}
 @media(min-width:860px){
   .story-grid.with-buy{grid-template-columns:1.45fr 1fr;gap:64px;align-items:start}
