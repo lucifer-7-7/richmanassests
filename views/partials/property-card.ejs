@@ -3,7 +3,7 @@
   <a href="<%= linkUrl %>" class="ph" style="display:block;text-decoration:none;color:inherit;">
     <% var cardImg = p.img_card || p.img_hero; %>
     <% if (cardImg) { %>
-    <img src="<%= cardImg.startsWith('http') ? cardImg : '/' + cardImg %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
+    <img src="<%= cldOptimize(cardImg.startsWith('http') ? cardImg : '/' + cardImg, {w:600}) %>" alt="<%= p.name %>, <%= p.loc %>" loading="lazy">
     <% } else { %>
     <div class="ph-placeholder"><span>Photos on request</span></div>
     <% } %>

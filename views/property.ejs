@@ -58,7 +58,7 @@
   </div>
   <% } else { %>
   <div class="dt-hero-single-wrap" style="position:relative;margin-bottom:14px;border-radius:16px;overflow:hidden;border:1px solid var(--line-soft);cursor:pointer;background:var(--paper-2);" onclick="openLightbox(0)">
-    <img src="<%= pImgs[0] %>" alt="<%= p.name %> Main Hero" style="width:100%;height:auto;max-height:580px;object-fit:cover;display:block;">
+    <img src="<%= cldOptimize(pImgs[0], {w:1600}) %>" alt="<%= p.name %> Main Hero" style="width:100%;height:auto;max-height:580px;object-fit:cover;display:block;">
     <button class="btn-all-photos" onclick="event.stopPropagation();openLightbox(0)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       View All Photos (<%= pImgs.length %>)
@@ -69,7 +69,7 @@
   <div class="dt-horizontal-thumbs" style="display:flex;justify-content:center;gap:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:6px;">
     <% pImgs.forEach(function(imgUrl, idx) { %>
     <div class="dt-thumb-tile" onclick="openLightbox(<%= idx %>)" style="flex:0 0 160px;border-radius:10px;overflow:hidden;border:2px solid <%= idx === 0 ? 'var(--gold-deep)' : 'var(--line-soft)' %>;cursor:pointer;position:relative;aspect-ratio:4/3;">
-      <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 1 %>" style="width:100%;height:100%;object-fit:cover;display:block;">
+      <img src="<%= cldOptimize(imgUrl, {w:400}) %>" alt="<%= p.name %> Photo <%= idx + 1 %>" style="width:100%;height:100%;object-fit:cover;display:block;">
       <span style="position:absolute;bottom:6px;right:6px;font-family:var(--f-mono);font-size:9px;color:#FFF;background:rgba(10,9,6,0.65);padding:2px 6px;border-radius:4px;"><%= idx + 1 %></span>
     </div>
     <% }); %>
@@ -84,7 +84,7 @@
   <div class="phero-slider" id="pheroSlider">
     <% pImgs.forEach(function(imgUrl, idx) { %>
     <div class="phero-slide" onclick="openLightbox(<%= idx %>)">
-      <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 1 %>" loading="<%= idx === 0 ? 'eager' : 'lazy' %>">
+      <img src="<%= cldOptimize(imgUrl, {w:1000}) %>" alt="<%= p.name %> Photo <%= idx + 1 %>" loading="<%= idx === 0 ? 'eager' : 'lazy' %>">
     </div>
     <% }); %>
 
@@ -129,7 +129,7 @@ function formatPrice(priceStr) {
   return '₹' + num.toString().replace(/\B(?=(\d{2})+(?!\d))/g, ',');
 }
 
-var lbImages = <%- JSON.stringify(typeof allImages !== 'undefined' ? allImages : [p.img_hero, p.img_card].filter(Boolean)) %>;
+var lbImages = <%- JSON.stringify((typeof allImages !== 'undefined' ? allImages : [p.img_hero, p.img_card].filter(Boolean)).map(u => cldOptimize(u, {w:1400}))) %>;
 var lbIndex = 0;
 
 function openLightbox(idx) {
@@ -217,7 +217,7 @@ document.addEventListener('keydown', function(e) {
         
         <!-- Big Main Image -->
         <figure class="figcrop" onclick="openLightbox(0)" style="aspect-ratio:16/10;cursor:pointer;border-radius:14px;overflow:hidden;border:1px solid var(--line-soft);">
-          <img src="<%= pImgs[0] %>" alt="<%= p.name %>" loading="lazy" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
+          <img src="<%= cldOptimize(pImgs[0], {w:900}) %>" alt="<%= p.name %>" loading="lazy" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
         </figure>
 
         <!-- Small Stacked Thumbnails Preview -->
@@ -225,7 +225,7 @@ document.addEventListener('keydown', function(e) {
         <div class="story-thumb-preview" style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:12px;padding-bottom:4px;">
           <% pImgs.forEach(function(imgUrl, idx) { %>
           <div class="story-thumb-item" onclick="openLightbox(<%= idx %>)" style="flex:0 0 96px;aspect-ratio:16/11;border-radius:8px;overflow:hidden;border:1px solid var(--line-soft);position:relative;cursor:pointer;background:var(--paper-2);scroll-snap-align:start;">
-            <img src="<%= imgUrl %>" alt="<%= p.name %> Thumb <%= idx + 1 %>" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
+            <img src="<%= cldOptimize(imgUrl, {w:300}) %>" alt="<%= p.name %> Thumb <%= idx + 1 %>" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='<%= fallbackMain %>';this.onerror=null;">
             <span style="position:absolute;bottom:4px;right:4px;font-family:var(--f-mono);font-size:8.5px;color:#FFF;background:rgba(10,9,6,0.7);padding:2px 5px;border-radius:4px;"><%= idx + 1 %></span>
           </div>
           <% }); %>
@@ -373,7 +373,7 @@ document.addEventListener('keydown', function(e) {
       <div class="ph">
         <% var simImg = s.img_card || s.img_hero; %>
         <% if (simImg) { %>
-        <img src="<%= simImg.startsWith('http') ? simImg : '/' + simImg.replace(/^\//, '') %>" alt="<%= s.name %>, <%= s.loc %>" loading="lazy">
+        <img src="<%= cldOptimize(simImg.startsWith('http') ? simImg : '/' + simImg.replace(/^\//, ''), {w:400}) %>" alt="<%= s.name %>, <%= s.loc %>" loading="lazy">
         <% } else { %><div class="ph-placeholder"><span>Photos on request</span></div><% } %>
         <span class="badge <%= s.listing %>"><%= s.listing === 'sale' ? 'For Sale' : s.listing === 'rent' ? 'For Rent' : 'For Lease' %></span>
       </div>
@@ -395,7 +395,7 @@ document.addEventListener('keydown', function(e) {
 <% if (next) { %>
 <a class="p-next" href="<%= next.is_builder_project ? ('/builder-project/' + next.slug) : ('/property/' + next.id) %>">
   <% var nextImg = next.img_card || next.img_hero; %>
-  <% if (nextImg) { %><img src="<%= nextImg.startsWith('http') ? nextImg : '/' + nextImg.replace(/^\//, '') %>" alt="<%= next.name %>, <%= next.loc %>" loading="lazy"><% } %>
+  <% if (nextImg) { %><img src="<%= cldOptimize(nextImg.startsWith('http') ? nextImg : '/' + nextImg.replace(/^\//, ''), {w:600}) %>" alt="<%= next.name %>, <%= next.loc %>" loading="lazy"><% } %>
   <div class="scrim"></div>
   <div class="nx">
     <span class="k">Next listing</span>

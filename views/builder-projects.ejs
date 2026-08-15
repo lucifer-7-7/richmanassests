@@ -25,7 +25,7 @@
   <div class="bp-grid">
     <% projects.forEach(function(p) { %>
     <a class="bp-card" href="/builder-project/<%= p.slug %>">
-      <div class="bp-card-img" style="background-image:url('<%= p.img_card || p.img_hero || '' %>')">
+      <div class="bp-card-img" style="background-image:url('<%= cldOptimize(p.img_card || p.img_hero || '', {w:600}) %>')">
         <% if (p.rera_status === 'Approved') { %><span class="bp-badge">RERA Approved</span><% } %>
       </div>
       <div class="bp-card-body">

@@ -135,7 +135,7 @@
   .faq-answer strong{color:var(--ink-2)}
 </style>
 
-<link rel="preload" as="image" href="<%= heroSlides[0] && heroSlides[0].img_hero ? (heroSlides[0].img_hero.indexOf('http')===0 ? heroSlides[0].img_hero : '/' + heroSlides[0].img_hero) : '/assets/img/site-hero.jpg' %>" fetchpriority="high">
+<link rel="preload" as="image" href="<%= heroSlides[0] && heroSlides[0].img_hero ? cldOptimize(heroSlides[0].img_hero.indexOf('http')===0 ? heroSlides[0].img_hero : '/' + heroSlides[0].img_hero, {w:1600}) : '/assets/img/site-hero.jpg' %>" fetchpriority="high">
 </head>
 <body data-screen-label="Home">
 
@@ -156,7 +156,7 @@
     <% heroSlides.forEach(function(p, i) { %>
     <div class="hero-slide<%= i === 0 ? ' is-active' : '' %>">
       <div class="hero-media">
-        <img src="<%= p.img_hero && p.img_hero.indexOf('http')===0 ? p.img_hero : '/' + p.img_hero %>"
+        <img src="<%= cldOptimize(p.img_hero && p.img_hero.indexOf('http')===0 ? p.img_hero : '/' + p.img_hero, {w:1600}) %>"
              alt="<%= p.name %>, <%= p.loc %> property for <%= p.listing === 'rent' ? 'rent' : 'sale' %> in coastal Karnataka"
              <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %>>
       </div>

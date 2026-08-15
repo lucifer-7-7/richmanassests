@@ -108,11 +108,13 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // ── Global template locals ────────────────────────────────────────
+const { cldOptimize } = require('./lib/cloudinary');
 app.use((req, res, next) => {
   res.locals.flash  = req.session.flash  || null;
   res.locals.admin  = req.session.admin  || false;
   res.locals.agent  = req.session.agent  || null;
   res.locals.path   = req.path;
+  res.locals.cldOptimize = cldOptimize;
   delete req.session.flash;
   next();
 });
