@@ -82,7 +82,7 @@ html.loading,html.loading body{overflow:hidden}
 .hero-ui-in{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
 .hero-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:clamp(16px,2.2vw,24px);font-family:var(--f-mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:rgba(247,244,237,.92)}
 .hero-eyebrow .ln{width:34px;height:1px;background:var(--gold)}
-.hero-name{font-weight:400;letter-spacing:-.02em;line-height:.92;font-size:clamp(50px,9vw,140px);max-width:14ch;text-wrap:balance;text-shadow:0 2px 40px rgba(10,9,6,.3)}
+.hero-name{font-weight:400;letter-spacing:-.02em;line-height:.95;font-size:clamp(32px,4.6vw,68px);white-space:nowrap;max-width:none;text-wrap:nowrap;text-shadow:0 2px 40px rgba(10,9,6,.3)}
 .hero-loc{margin-top:clamp(16px,2vw,24px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:var(--f-mono);font-size:12.5px;letter-spacing:.06em;color:rgba(247,244,237,.86)}
 .hero-loc .pin{width:13px;height:13px;color:var(--gold)}
 .hero-loc .sep{width:4px;height:4px;border-radius:50%;background:rgba(247,244,237,.5)}
@@ -96,6 +96,7 @@ html.loading,html.loading body{overflow:hidden}
 @media(max-width:760px){
   .hero-ui-in{flex-direction:column;align-items:flex-start}
   .hero-side{align-items:flex-start;text-align:left}
+  .hero-name{font-size:40px;line-height:1.0;white-space:normal;text-wrap:balance;max-width:12ch}
 }
 
 /* ambient auto-progress dots (indicative, not clunky controls) */

@@ -116,11 +116,12 @@ html.loading,html.loading body{overflow:hidden}
   font-family:var(--f-mono);font-size:10.5px;letter-spacing:.28em;
   text-transform:uppercase;color:rgba(247,244,237,.82);
 }
-.hero-eyebrow .ln{display:none}
 .hero-name{
-  font-weight:400;letter-spacing:-.026em;line-height:.93;
-  font-size:clamp(46px,8.5vw,128px);
-  max-width:12ch;text-wrap:balance;
+  font-weight:400;letter-spacing:-.026em;line-height:.95;
+  font-size:clamp(32px,4.6vw,68px);
+  white-space:nowrap;
+  max-width:none;
+  text-wrap:nowrap;
 }
 .hero-loc{
   margin-top:clamp(14px,2vw,20px);
@@ -862,6 +863,9 @@ html.loading,html.loading body{overflow:hidden}
   .hero-name {
     font-size: 40px;
     line-height: 1.0;
+    white-space: normal;
+    text-wrap: balance;
+    max-width: 12ch;
   }
   .hero-eyebrow {
     font-size: 9px;
