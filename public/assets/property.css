@@ -206,6 +206,12 @@
   .spec:last-child{border-right:0}
 }
 
+/* Admin-entered free-text detail fields (e.g. Approvals) vary wildly in
+   length — sharing a grid row with compact stats stretched every cell
+   in that row to match the tallest one. Give them their own full row. */
+.spec.spec-wide{grid-column:1/-1;text-align:left;border-right:0}
+.spec.spec-wide .v{font-size:clamp(14px,1.4vw,18px)!important;line-height:1.5;font-weight:400}
+
 /* Hide duplicate floating WhatsApp/Call widget on property pages with sticky CTA */
 body.has-prop-cta .floaters { display: none !important; }
 .spec h6{font-family:var(--f-mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;font-weight:400}

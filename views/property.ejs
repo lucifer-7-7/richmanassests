@@ -185,7 +185,7 @@ document.addEventListener('keydown', function(e) {
         Object.keys(parsedDet).forEach(function(key) {
           if (parsedDet[key] && parsedDet[key] !== '—') {
     %>
-    <div class="spec"><h6><%= key %></h6><div class="v" style="font-size:clamp(15px,1.5vw,20px)"><%= parsedDet[key] %></div></div>
+    <div class="spec spec-wide"><h6><%= key %></h6><div class="v" style="font-size:clamp(15px,1.5vw,20px)"><%= parsedDet[key] %></div></div>
     <% 
           }
         });
