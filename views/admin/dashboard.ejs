@@ -193,10 +193,10 @@ body{font-family:'Inter','Plus Jakarta Sans',system-ui,sans-serif;background:var
 .prop-card .info .price{font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--ink)}
 .prop-card .info .name{font-size:14.5px;font-weight:700;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
 .prop-card .info .loc{font-size:12px;color:var(--muted);margin-top:4px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.prop-card .actions{display:flex;gap:8px;padding:0 18px 18px}
+.prop-card .actions{display:flex;gap:8px;padding:0 18px 18px;align-items:center}
 .prop-card .actions a,.prop-card .actions button{
   flex:1;padding:9px 6px;border-radius:var(--r-pill);font-size:12.5px;font-weight:700;
-  text-align:center;border:0;cursor:pointer;text-decoration:none;transition:all .18s;display:block;
+  text-align:center;border:0;cursor:pointer;text-decoration:none;transition:all .18s;display:flex;align-items:center;justify-content:center;line-height:1;min-height:36px;
 }
 .prop-card .actions .a-edit{background:var(--ink);color:#fff}
 .prop-card .actions .a-edit:hover{background:var(--accent-hover)}
@@ -411,7 +411,7 @@ input[type=file]::-webkit-file-upload-button:hover { background: var(--accent-ho
         <div class="prop-card" data-name="<%= (p.name + ' ' + p.loc).toLowerCase() %>" data-listing="<%= p.listing %>">
           <div class="thumb">
             <% if (p.img_card || p.img_hero) { %>
-            <img src="/<%= p.img_card || p.img_hero %>" alt="<%= p.name %>" loading="lazy">
+            <img src="<%= (p.img_card || p.img_hero || '').startsWith('http') ? (p.img_card || p.img_hero) : '/' + (p.img_card || p.img_hero) %>" alt="<%= p.name %>" loading="lazy">
             <% } else { %><div class="no-img">No photo</div><% } %>
             <span class="listing-badge <%= p.listing %>"><%= p.listing === 'sale' ? 'Sale' : p.listing === 'rent' ? 'Rent' : 'Lease' %></span>
             <span class="status-dot <%= p.active ? 'active' : 'hidden' %>" title="<%= p.active ? 'Active' : 'Hidden' %>"></span>
