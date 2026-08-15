@@ -145,11 +145,9 @@ html.loading,html.loading body{overflow:hidden}
   font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--paper);padding-bottom:4px;
   border-bottom:1px solid rgba(247,244,237,.34);
-  transition:.38s ease;
+  transition:border-color .28s var(--ease),color .28s var(--ease);
 }
-.hero-view .arr{transition:transform .38s ease}
-.hero-view:hover{border-color:var(--gold);color:var(--gold)}
-.hero-view:hover .arr{transform:translateX(5px)}
+.hero-view .arr{transition:transform .28s var(--ease)}
 @media(max-width:720px){
   .hero-ui-in{flex-direction:column;align-items:flex-start}
   .hero-side{align-items:flex-start;text-align:left}
@@ -161,7 +159,7 @@ html.loading,html.loading body{overflow:hidden}
 }
 .hero-dots button{
   width:6px;height:6px;border-radius:50%;padding:0;
-  background:rgba(247,244,237,.28);transition:.38s ease;
+  background:rgba(247,244,237,.28);transition:width .28s var(--ease),background .28s var(--ease);
 }
 .hero-dots button.on{width:24px;border-radius:6px;background:var(--gold)}
 
@@ -181,6 +179,7 @@ html.loading,html.loading body{overflow:hidden}
   background:var(--gold);animation:cue 2.4s ease infinite;
 }
 @keyframes cue{0%{transform:translateY(-120%)}100%{transform:translateY(280%)}}
+.hero-cue .bar::after{animation-timing-function:linear}
 @media(max-width:940px){.hero-cue{display:none}}
 
 /* ════════════════════════════════════════════
@@ -275,14 +274,13 @@ html.loading,html.loading body{overflow:hidden}
 }
 .cat img{
   position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;transition:transform 1s ease;
+  object-fit:cover;transition:transform .6s var(--ease);
 }
 .cat::after{
   content:"";position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(10,9,6,.04) 28%,rgba(10,9,6,.68) 100%);
   z-index:1;
 }
-.cat:hover img{transform:scale(1.07)}
 .cat-txt{
   position:absolute;left:0;right:0;bottom:0;z-index:2;
   padding:clamp(14px,1.2vw,20px);color:var(--paper);
@@ -297,9 +295,8 @@ html.loading,html.loading body{overflow:hidden}
   position:absolute;top:clamp(11px,.9vw,15px);right:clamp(11px,.9vw,15px);
   z-index:2;width:30px;height:30px;border-radius:50%;
   background:rgba(247,244,237,.13);backdrop-filter:blur(6px);
-  display:grid;place-items:center;color:var(--paper);transition:.38s ease;
+  display:grid;place-items:center;color:var(--paper);transition:background .28s var(--ease),color .28s var(--ease);
 }
-.cat:hover .cat-arr{background:var(--gold);color:var(--ink)}
 .cat-arr svg{width:12px;height:12px}
 
 /* ════════════════════════════════════════════
@@ -320,11 +317,9 @@ html.loading,html.loading body{overflow:hidden}
   transition:transform .3s var(--ease),box-shadow .3s var(--ease);
 }
 .feat-grid .plist .ph{border-radius:var(--r-sm);aspect-ratio:4/3;overflow:hidden;}
-.feat-grid .plist:hover{transform:translateY(-5px);box-shadow:0 16px 36px -8px rgba(10,9,6,0.1)}
 .feat-grid .plist .body{padding:16px 4px 4px}
 .feat-grid .plist .cta{padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .feat-grid .plist .cta .v{border-radius:100px;background:var(--ink);color:#FFFFFF !important;font-size:12.5px;font-weight:600;padding:10px 20px;transition:background .18s;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;flex:1;}
-.feat-grid .plist .cta .v:hover{background:var(--gold-deep);color:#FFFFFF !important;}
 
 /* ════════════════════════════════════════════
    IMAGE-DRIVEN WIDE LISTINGS
@@ -345,9 +340,8 @@ html.loading,html.loading body{overflow:hidden}
 }
 .lw-card img{
   width:100%;height:100%;object-fit:cover;display:block;
-  transition:transform .9s ease;
+  transition:transform .6s var(--ease);
 }
-.lw-card:hover img{transform:scale(1.05)}
 .lw-card::after{
   content:"";position:absolute;inset:0;z-index:1;
   background:linear-gradient(
@@ -358,15 +352,6 @@ html.loading,html.loading body{overflow:hidden}
     transparent 100%
   );
   transition:background .4s ease;
-}
-.lw-card:hover::after{
-  background:linear-gradient(
-    to top,
-    rgba(10,9,6,.9) 0,
-    rgba(10,9,6,.44) 46%,
-    rgba(10,9,6,.12) 72%,
-    transparent 100%
-  );
 }
 .lw-body{
   position:absolute;left:0;right:0;bottom:0;z-index:2;
@@ -403,9 +388,8 @@ html.loading,html.loading body{overflow:hidden}
   text-transform:uppercase;color:rgba(247,244,237,.66);
   display:inline-flex;align-items:center;gap:5px;
   border-bottom:1px solid rgba(247,244,237,.24);padding-bottom:2px;
-  transition:.3s ease;
+  transition:color .28s var(--ease),border-color .28s var(--ease);
 }
-.lw-card:hover .lw-cta{color:var(--gold);border-color:var(--gold)}
 
 /* hero card */
 .lw-hero .lw-card{aspect-ratio:21/9;min-height:340px}
@@ -533,9 +517,8 @@ html.loading,html.loading body{overflow:hidden}
 .trust-stat{
   background:var(--paper);border:1px solid var(--line);
   border-radius:var(--r-sm);padding:clamp(18px,2.2vw,26px);
-  transition:.36s ease;
+  transition:border-color .28s var(--ease),transform .28s var(--ease);
 }
-.trust-stat:hover{border-color:var(--accent);transform:translateY(-3px)}
 .trust-stat .v{
   font-family:var(--f-display);font-weight:500;
   font-size:clamp(26px,3vw,38px);letter-spacing:-.02em;line-height:1;
@@ -554,6 +537,38 @@ html.loading,html.loading body{overflow:hidden}
 .split .w{display:inline-block;vertical-align:top;clip-path:inset(-.22em -.42em -.04em -.42em)}
 .split .wi{display:inline-block;will-change:transform}
 .js-split .split .wi{opacity:0}
+
+/* ════════════════════════════════════════════
+   HOVER-ONLY MOTION — gated so tap on touch
+   devices can't trigger/stick these states
+   ════════════════════════════════════════════ */
+@media (hover:hover) and (pointer:fine){
+  .hero-view:hover{border-color:var(--gold);color:var(--gold)}
+  .hero-view:hover .arr{transform:translateX(5px)}
+  .cat:hover img{transform:scale(1.07)}
+  .cat:hover .cat-arr{background:var(--gold);color:var(--ink)}
+  .feat-grid .plist:hover{transform:translateY(-5px);box-shadow:0 16px 36px -8px rgba(10,9,6,0.1)}
+  .feat-grid .plist .cta .v:hover{background:var(--gold-deep);color:#FFFFFF !important;}
+  .lw-card:hover img{transform:scale(1.05)}
+  .lw-card:hover::after{
+    background:linear-gradient(
+      to top,
+      rgba(10,9,6,.9) 0,
+      rgba(10,9,6,.44) 46%,
+      rgba(10,9,6,.12) 72%,
+      transparent 100%
+    );
+  }
+  .lw-card:hover .lw-cta{color:var(--gold);border-color:var(--gold)}
+  .trust-stat:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .mkt-tab:hover{border-color:var(--ink);color:var(--ink)}
+  .int-card:hover{transform:translateY(-4px);border-color:var(--ink-3)}
+  .int-card:hover .media img{transform:scale(1.06)}
+  .int-card .btn-int:hover{background:var(--gold-deep)}
+  .rma-btn-show:hover{background:var(--ink);color:var(--paper)}
+  .loc-chip:hover{border-color:var(--ink);color:var(--ink);transform:translateY(-2px)}
+  .loc-chip.alt:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+}
 
 /* ============================================================
    RichManAssets — tabbed marketplace & responsive additions
@@ -593,11 +608,7 @@ html.loading,html.loading body{overflow:hidden}
   border: 1px solid var(--line);
   background: var(--paper-2);
   white-space: nowrap;
-  transition: all .3s var(--ease);
-}
-.mkt-tab:hover {
-  border-color: var(--ink);
-  color: var(--ink);
+  transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
 }
 .mkt-tab.on {
   background: var(--ink);
@@ -721,11 +732,7 @@ html.loading,html.loading body{overflow:hidden}
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all .35s var(--ease);
-}
-.int-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--ink-3);
+  transition: transform .3s var(--ease), border-color .3s var(--ease);
 }
 .int-card .media {
   aspect-ratio: 4/3;
@@ -736,10 +743,7 @@ html.loading,html.loading body{overflow:hidden}
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1s var(--ease);
-}
-.int-card:hover .media img {
-  transform: scale(1.06);
+  transition: transform .6s var(--ease);
 }
 .int-card .body {
   padding: 20px;
@@ -784,10 +788,7 @@ html.loading,html.loading body{overflow:hidden}
   font-size: 12.5px;
   letter-spacing: .02em;
   text-align: center;
-  transition: all .3s;
-}
-.int-card .btn-int:hover {
-  background: var(--gold-deep);
+  transition: background .25s var(--ease);
 }
 
 /* ── RMA always-on horizontal scroll strips ─────────────────────────── */
@@ -835,9 +836,8 @@ html.loading,html.loading body{overflow:hidden}
   font-size: 13.5px; letter-spacing: .04em; cursor: pointer;
   background: none; color: var(--ink); font-family: inherit;
   text-decoration: none;
-  transition: background .3s, color .3s;
+  transition: background .25s var(--ease), color .25s var(--ease);
 }
-.rma-btn-show:hover { background: var(--ink); color: var(--paper); }
 .rma-btn-show svg { width: 14px; height: 14px; }
 
 /* ── Browse-by-location chips (local SEO internal links) ── */
@@ -849,11 +849,9 @@ html.loading,html.loading body{overflow:hidden}
   display:inline-flex;align-items:center;
   padding:10px 18px;border:1px solid var(--line);border-radius:100px;
   font-size:13.5px;color:var(--ink-2);background:var(--white);
-  transition:border-color .25s,color .25s,background .25s,transform .25s;
+  transition:border-color .25s var(--ease),color .25s var(--ease),background .25s var(--ease),transform .25s var(--ease);
 }
-.loc-chip:hover{border-color:var(--ink);color:var(--ink);transform:translateY(-2px)}
 .loc-chip.alt{background:var(--paper-2);color:var(--accent)}
-.loc-chip.alt:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
 /* Mobile-First Hero Fixes */
 @media (max-width: 760px) {
