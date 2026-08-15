@@ -24,6 +24,13 @@ module.exports = async function sitemap(req, res) {
 
       const areaRes = await db.from('properties').select('area').eq('active', true).neq('area', '');
       areas = [...new Set((areaRes.data || []).map(r => r.area).filter(Boolean))].sort();
+
+      // Fetch builder projects for sitemap
+      let builderProjects = [];
+      try {
+        const bpRes = await db.from('builder_projects').select('slug, created_at').eq('status', 'active');
+        builderProjects = bpRes.data || [];
+      } catch (_) { /* table may not exist yet in older envs — non-fatal */ }
     } catch (_) {
       // Fallback for SQLite-based local dev
       try {
@@ -40,6 +47,7 @@ module.exports = async function sitemap(req, res) {
       { loc: '/about',      priority: '0.75', changefreq: 'monthly', lastmod: TODAY },
       { loc: '/loans',      priority: '0.8', changefreq: 'monthly',  lastmod: TODAY },
       { loc: '/contact',    priority: '0.75', changefreq: 'monthly', lastmod: TODAY },
+      { loc: '/builder-projects', priority: '0.9', changefreq: 'weekly', lastmod: TODAY },
     ];
 
     // ── Property-type landing pages (keyword targets) ─────────────
@@ -84,6 +92,11 @@ module.exports = async function sitemap(req, res) {
       ...agentProps.map(p => xmlUrl(`${base}/property/${p.id}`, {
         lastmod: p.published_at ? p.published_at.split('T')[0] : TODAY,
         changefreq: 'monthly', priority: '0.75',
+      })),
+      // Builder project pages
+      ...builderProjects.map(p => xmlUrl(`${base}/builder-project/${p.slug}`, {
+        lastmod: p.created_at ? p.created_at.split('T')[0] : TODAY,
+        changefreq: 'weekly', priority: '0.9',
       })),
     ];
 
