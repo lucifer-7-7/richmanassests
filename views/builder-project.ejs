@@ -38,7 +38,7 @@
 
 <script>
 // Gallery lightbox — copied verbatim from property.ejs (adapted to allImages only, no p.id usage)
-var lbImages = <%- JSON.stringify(allImages) %>;
+var lbImages = <%- JSON.stringify(allImages).replace(/</g, '\\u003c') %>;
 var lbIndex = 0;
 
 function openLightbox(idx) {
