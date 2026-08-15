@@ -130,8 +130,13 @@ router.post('/builder-project/:slug/enquire', async (req, res) => {
       created_at: new Date().toISOString(),
     });
 
-    const agentPhone = '9380939961';
-    const fullPhone = '91' + agentPhone;
+    let agentPhone = '9380939961';
+    if (p.contact_numbers) {
+      const first = String(p.contact_numbers).split(',')[0].trim();
+      if (first) agentPhone = first;
+    }
+    const cleanPhone = agentPhone.replace(/\D/g, '');
+    const fullPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
     const waText = `Hi, I am interested in "${p.name}" (${p.loc}).\n\nBuyer: ${name.trim()}\nPhone: ${phone.trim()}${email ? '\nEmail: ' + email.trim() : ''}${message ? '\nMessage: ' + message.trim() : ''}`;
     const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodeURIComponent(waText)}`;
 
