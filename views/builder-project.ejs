@@ -2,26 +2,76 @@
 <html lang="en">
 <head>
 <%- include('partials/head') %>
+<link rel="stylesheet" href="/assets/property.css">
 <link rel="stylesheet" href="/assets/builder-project.css?v=1">
 </head>
 <body>
 <%- include('partials/nav') %>
 
-<!-- HERO GALLERY (reuses property.ejs's lightbox interaction pattern) -->
-<section class="bp-hero">
-  <div class="bp-hero-img" style="background-image:url('<%= allImages[0] || '' %>')" onclick="openLightbox(0)" role="button" tabindex="0" aria-label="View <%= p.name %> gallery"></div>
-  <div class="bp-hero-overlay"></div>
-  <div class="bp-hero-content wrap">
-    <h1><%= p.name %></h1>
-    <% if (p.tagline) { %><p class="bp-tagline"><%= p.tagline %></p><% } %>
-    <% if (allImages.length > 1) { %>
-    <button class="btn-all-photos" onclick="event.stopPropagation();openLightbox(0)" style="margin-top:16px">
+<!-- DESKTOP GALLERY (860px+) — ported from property.ejs's dt-gallery-sec pattern -->
+<section class="dt-gallery-sec">
+  <div class="dt-gallery-head">
+    <div>
+      <div class="crumb" style="margin-bottom:8px;">
+        <a href="/">Home</a><span class="sep">/</span><a href="/builder-projects">Builder Projects</a><span class="sep">/</span><span><%= p.name %></span>
+      </div>
+      <h1><%= p.name %></h1>
+      <div class="meta-pills">
+        <span class="pbadge sale">Builder Project</span>
+        <% if (p.area || p.loc) { %><span style="font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)"><%= p.area || p.loc %></span><% } %>
+      </div>
+      <% if (p.tagline) { %><p class="bp-tagline" style="margin-top:10px"><%= p.tagline %></p><% } %>
+    </div>
+  </div>
+
+  <% if (allImages.length === 0) { %>
+  <div style="background:#F6F2EC;border:1px solid #EAE4DC;border-radius:16px;padding:60px 24px;text-align:center;color:#78716C;margin-bottom:32px;">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px;opacity:0.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    <div style="font-size:15px;font-weight:600">No project photos uploaded</div>
+  </div>
+  <% } else { %>
+  <div class="dt-hero-single-wrap" style="position:relative;margin-bottom:14px;border-radius:16px;overflow:hidden;border:1px solid var(--line-soft);cursor:pointer;background:var(--paper-2);" onclick="openLightbox(0)">
+    <img src="<%= allImages[0] %>" alt="<%= p.name %> Main" style="width:100%;height:auto;max-height:580px;object-fit:cover;display:block;">
+    <button class="btn-all-photos" onclick="event.stopPropagation();openLightbox(0)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       View All Photos (<%= allImages.length %>)
     </button>
+  </div>
+
+  <% if (allImages.length > 1) { %>
+  <div class="dt-horizontal-thumbs" style="display:flex;justify-content:center;gap:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:6px;">
+    <% allImages.forEach(function(imgUrl, idx) { %>
+    <div class="dt-thumb-tile" onclick="openLightbox(<%= idx %>)" style="flex:0 0 160px;border-radius:10px;overflow:hidden;border:2px solid <%= idx === 0 ? 'var(--gold-deep)' : 'var(--line-soft)' %>;cursor:pointer;position:relative;">
+      <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 1 %>" style="width:100%;height:auto;object-fit:cover;display:block;">
+      <span style="position:absolute;bottom:6px;right:6px;font-family:var(--f-mono);font-size:9px;color:#FFF;background:rgba(10,9,6,0.65);padding:2px 6px;border-radius:4px;"><%= idx + 1 %></span>
+    </div>
+    <% }); %>
+  </div>
+  <% } %>
+  <% } %>
+</section>
+
+<!-- MOBILE HERO (<860px) — ported from property.ejs's phero pattern -->
+<header class="phero">
+  <div class="phero-slider" id="pheroSlider">
+    <% allImages.forEach(function(imgUrl, idx) { %>
+    <div class="phero-slide" onclick="openLightbox(<%= idx %>)">
+      <img src="<%= imgUrl %>" alt="<%= p.name %> Photo <%= idx + 1 %>" loading="<%= idx === 0 ? 'eager' : 'lazy' %>">
+    </div>
+    <% }); %>
+  </div>
+  <div class="scrim"></div>
+  <div class="phero-inner">
+    <div class="badge-row">
+      <span class="pbadge sale">Builder Project</span>
+    </div>
+    <% if (p.area || p.loc) { %><div class="eyebrow"><span class="ln"></span><span><%= p.area || p.loc %></span></div><% } %>
+    <h1><%= p.name %></h1>
+    <% if (allImages.length > 1) { %>
+    <span style="font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);background:rgba(10,9,6,0.5);padding:4px 10px;border-radius:100px;">Swipe &rarr; (1/<%= allImages.length %>)</span>
     <% } %>
   </div>
-</section>
+</header>
 
 <!-- Lightbox Modal (markup copied verbatim from property.ejs) -->
 <div class="gallery-modal" id="galLb" aria-hidden="true">
@@ -91,6 +141,10 @@ document.addEventListener('keydown', function(e) {
     <% if (p.positioning) { %><p style="font-style:italic;color:var(--accent);margin-bottom:10px"><%= p.positioning %></p><% } %>
     <% if (p.marketing_desc) { %><p style="font-size:16px;line-height:1.7;max-width:70ch"><%= p.marketing_desc %></p><% } %>
   </section>
+  <% } else if (p.unit_mix_summary || configs) { %>
+  <section class="bp-section">
+    <p style="font-size:16px;line-height:1.7;max-width:70ch"><%= p.name %><% if (p.area) { %> is a <%= configs || 'residential' %> project in <%= p.area %><% } %><% if (p.unit_mix_summary) { %>. <%= p.unit_mix_summary %><% } %>.</p>
+  </section>
   <% } %>
 
   <% if (p.unit_types && p.unit_types.length) { %>
@@ -112,9 +166,14 @@ document.addEventListener('keydown', function(e) {
   <% if (p.highlights && p.highlights.length) { %>
   <section class="bp-section">
     <h2>Highlights</h2>
-    <ul style="line-height:1.9;max-width:70ch">
-    <% p.highlights.forEach(function(h) { %><li><%= h %></li><% }) %>
-    </ul>
+    <div class="bp-highlight-grid">
+    <% p.highlights.forEach(function(h) { %>
+      <div class="bp-highlight-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span><%= h %></span>
+      </div>
+    <% }) %>
+    </div>
   </section>
   <% } %>
 
@@ -220,26 +279,6 @@ document.addEventListener('keydown', function(e) {
         <% if (p.registered_office) { %><p><strong>Registered Office:</strong> <%= p.registered_office %></p><% } %>
       </div>
       <% if (p.rera_cert_img) { %><a href="<%= p.rera_cert_img %>" target="_blank" rel="noopener"><img src="<%= p.rera_cert_img %>" alt="RERA Certificate" style="width:100%;border-radius:10px"></a><% } %>
-    </div>
-  </section>
-  <% } %>
-
-  <% const sitePhotos = (p.gallery || []).filter(g => g.type === 'site_photo'); %>
-  <% if (sitePhotos.length) { %>
-  <section class="bp-section">
-    <h2>Site Photos</h2>
-    <div class="bp-site-gallery">
-    <% sitePhotos.forEach(function(g) { var gi = allImages.indexOf(g.url); %><img src="<%= g.url %>" alt="<%= p.name %> site photo" onclick="openLightbox(<%= gi >= 0 ? gi : 0 %>)"><% }) %>
-    </div>
-  </section>
-  <% } %>
-
-  <% const restGallery = (p.gallery || []).filter(g => g.type !== 'site_photo'); %>
-  <% if (restGallery.length) { %>
-  <section class="bp-section">
-    <h2>Gallery</h2>
-    <div class="bp-site-gallery">
-    <% restGallery.forEach(function(g) { var gi = allImages.indexOf(g.url); %><img src="<%= g.url %>" alt="<%= g.label || p.name %>" onclick="openLightbox(<%= gi >= 0 ? gi : 0 %>)"><% }) %>
     </div>
   </section>
   <% } %>

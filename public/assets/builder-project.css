@@ -15,12 +15,7 @@
 .bp-card-meta{font:12px var(--f-mono);letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
 
 /* ── Detail page ─────────────────────────────────────────────── */
-.bp-hero{position:relative;height:clamp(360px,52vw,640px);background:var(--ink);overflow:hidden}
-.bp-hero-img{position:absolute;inset:0;background-size:cover;background-position:center}
-.bp-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.65))}
-.bp-hero-content{position:absolute;left:0;right:0;bottom:0;padding:clamp(28px,4vw,56px) 0;color:#fff}
-.bp-hero-content h1{font-family:var(--f-display);font-size:clamp(30px,5vw,58px);font-weight:400;line-height:1.05}
-.bp-hero-content .bp-tagline{margin-top:8px;font-size:16px;font-style:italic;color:rgba(255,255,255,.85)}
+.bp-tagline{font-size:15px;font-style:italic;color:var(--ink-3)}
 
 .bp-factbar{display:flex;flex-wrap:wrap;gap:22px 40px;padding:26px 0;border-bottom:1px solid var(--line)}
 .bp-fact{min-width:120px}
@@ -39,6 +34,10 @@
 .bp-floor summary::-webkit-details-marker{display:none}
 .bp-floor-body{padding:0 20px 18px}
 
+.bp-highlight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px 24px}
+.bp-highlight-item{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;font-size:14.5px;line-height:1.5}
+.bp-highlight-item svg{flex:none;margin-top:1px;color:var(--gold-deep)}
+
 .bp-pill-grid{display:flex;flex-wrap:wrap;gap:10px}
 .bp-pill{background:var(--paper-2);border:1px solid var(--line);border-radius:100px;padding:8px 16px;font-size:13px}
 
@@ -55,9 +54,6 @@
 
 .bp-rera-panel{background:var(--paper-2);border-radius:14px;padding:26px 28px;display:grid;grid-template-columns:1fr;gap:16px}
 @media(min-width:720px){.bp-rera-panel{grid-template-columns:1fr 1fr}}
-
-.bp-site-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-.bp-site-gallery img{width:100%;height:170px;object-fit:cover;border-radius:10px;cursor:pointer}
 
 @media(max-width:680px){.bp-grid{grid-template-columns:1fr}}
 
