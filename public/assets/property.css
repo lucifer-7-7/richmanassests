@@ -189,18 +189,27 @@
 }
 .gallery-modal-btn:hover { background: rgba(255,255,255,0.4); }
 
-/* ── SPEC BAR — Neat 3-column grid on mobile, 6-column on desktop ── */
+/* ── SPEC BAR — Responsive grid: 2 cols on mobile, 3 cols on tablet, 6 cols on desktop ── */
 .specs{border-bottom:1px solid var(--line);overflow-x:hidden;}
-.specs-in{display:grid;grid-template-columns:repeat(3,1fr);width:100%;}
+.specs-in{display:grid;grid-template-columns:repeat(2,1fr);width:100%;}
+@media(min-width:600px){.specs-in{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:900px){.specs-in{grid-template-columns:repeat(6,1fr)}}
-.spec{padding:clamp(14px,2.4vw,28px) clamp(10px,1.8vw,22px);border-right:1px solid var(--line-soft);text-align:center;}
-.spec:nth-child(3n){border-right:0}
-@media(min-width:900px){.spec:nth-child(3n){border-right:1px solid var(--line-soft)}.spec:last-child{border-right:0}}
+.spec{padding:clamp(12px,2vw,24px) clamp(8px,1.5vw,18px);border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);text-align:center;min-width:0;overflow:hidden;}
+.spec:nth-child(2n){border-right:0}
+@media(min-width:600px){
+  .spec{border-bottom:0}
+  .spec:nth-child(2n){border-right:1px solid var(--line-soft)}
+  .spec:nth-child(3n){border-right:0}
+}
+@media(min-width:900px){
+  .spec:nth-child(3n){border-right:1px solid var(--line-soft)}
+  .spec:last-child{border-right:0}
+}
 
 /* Hide duplicate floating WhatsApp/Call widget on property pages with sticky CTA */
 body.has-prop-cta .floaters { display: none !important; }
 .spec h6{font-family:var(--f-mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;font-weight:400}
-.spec .v{font-family:var(--f-display);font-size:clamp(17px,2vw,26px);font-weight:500;line-height:1;letter-spacing:-.01em}
+.spec .v{font-family:var(--f-display);font-size:clamp(14px,1.6vw,24px);font-weight:500;line-height:1.3;letter-spacing:-.01em;word-break:break-word}
 
 /* ── STORY + BUY CARD ── */
 .story{padding-block:clamp(36px,7vw,88px)}
