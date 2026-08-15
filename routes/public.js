@@ -314,10 +314,10 @@ function searchAndSortProperties(allProps, { listing, area, type, budget, q }) {
   }
   if (type) list = list.filter(p => p.type && p.type.toLowerCase().trim() === type.toLowerCase().trim());
 
-  if (budget === 'u30')   list = list.filter(p => (p.price_val || 0) < 3000000);
-  if (budget === '30-1c') list = list.filter(p => (p.price_val || 0) >= 3000000 && (p.price_val || 0) < 10000000);
-  if (budget === '1-5c')  list = list.filter(p => (p.price_val || 0) >= 10000000 && (p.price_val || 0) < 50000000);
-  if (budget === '5c')    list = list.filter(p => (p.price_val || 0) >= 50000000);
+  if (budget === 'u30')   list = list.filter(p => p.is_builder_project || (p.price_val || 0) < 3000000);
+  if (budget === '30-1c') list = list.filter(p => p.is_builder_project || ((p.price_val || 0) >= 3000000 && (p.price_val || 0) < 10000000));
+  if (budget === '1-5c')  list = list.filter(p => p.is_builder_project || ((p.price_val || 0) >= 10000000 && (p.price_val || 0) < 50000000));
+  if (budget === '5c')    list = list.filter(p => p.is_builder_project || (p.price_val || 0) >= 50000000);
 
   if (!q || !q.trim()) {
     return { properties: sortByDefault(list), fallback: false };
