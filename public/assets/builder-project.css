@@ -57,6 +57,12 @@
 
 @media(max-width:680px){.bp-grid{grid-template-columns:1fr}}
 
+/* ── Gallery thumbnail responsiveness ─────────────────────────────── */
+.dt-horizontal-thumbs { display: flex; justify-content: center; gap: 12px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 6px; }
+.dt-thumb-tile { flex: 0 0 160px; }
+@media(max-width: 860px) { .dt-thumb-tile { flex: 0 0 140px; } }
+@media(max-width: 600px) { .dt-thumb-tile { flex: 0 0 120px; } }
+
 /* ── Hero gallery lightbox + enquiry modal ───────────────────────
    Reused verbatim (class names + behavior) from property.css so the
    interaction pattern matches the rest of the site exactly. */

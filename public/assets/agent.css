@@ -174,6 +174,7 @@ h1, h2, h3, .heading-serif {
 .ap-topbar-actions { display: flex; gap: 10px; align-items: center; }
 
 .ap-content { padding: 32px; flex: 1; overflow-y: auto; }
+@media(max-width:600px) { .ap-content { padding: 20px 16px; } }
 
 /* ── MENU TOGGLE ──────────────────────────────────────────────── */
 .menu-toggle {
@@ -257,6 +258,7 @@ h1, h2, h3, .heading-serif {
 
 /* ── FORM ELEMENTS (Crisp white fill + Defined 1.5px border) ─── */
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media(max-width:600px) { .form-row { grid-template-columns: 1fr; gap: 16px; } }
 .form-group { margin-bottom: 22px; }
 .form-group label {
   display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;

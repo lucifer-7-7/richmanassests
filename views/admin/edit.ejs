@@ -29,7 +29,10 @@
   .form-card h2{font-size:22px;font-weight:800;margin-bottom:24px;letter-spacing:-.02em}
   .fg{display:grid;gap:16px;grid-template-columns:1fr 1fr}
   @media(max-width:700px){.fg{grid-template-columns:1fr}}
+  @media(max-width:480px){.fg{grid-template-columns:1fr}}
   .fg.cols3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:700px){.fg.cols3{grid-template-columns:1fr}}
+  @media(max-width:480px){.fg.cols3{grid-template-columns:1fr}}
   .fg.full{grid-template-columns:1fr}
   .field{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
   .field label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-top:4px}
@@ -37,7 +40,8 @@
   .field input:focus,.field select:focus,.field textarea:focus{background:var(--white);border-color:var(--ink);box-shadow:0 0 0 3.5px rgba(28,25,23,0.08)}
   .field textarea{resize:vertical;min-height:100px}
   .field small,.form-hint{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:5px;margin-bottom:14px;line-height:1.4}
-  .curr-img{width:130px;height:86px;object-fit:cover;border-radius:10px;display:block;margin-top:6px;border:1px solid var(--line)}
+  .curr-img{width:130px;height:86px;object-fit:cover;border-radius:10px;display:block;margin-top:6px;border:1px solid var(--line);max-width:100%}
+  @media(max-width:480px){.curr-img{width:100%;max-width:120px;height:auto}}
   .form-actions{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
   .btn-primary{padding:13px 28px;background:var(--ink);color:#fff;border:0;border-radius:var(--r-pill);font:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 4px 14px rgba(0,0,0,0.12)}
   .btn-primary:hover{background:#2A2A32;transform:translateY(-1px)}
@@ -147,7 +151,7 @@
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
           <% galleryArr.forEach(function(url, idx) { %>
           <div style="position:relative;display:inline-block">
-            <img src="<%= url.startsWith('http') ? url : '/' + url %>" alt="Gallery <%= idx+1 %>" style="width:90px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
+            <img src="<%= url.startsWith('http') ? url : '/' + url %>" alt="Gallery <%= idx+1 %>" class="gallery-thumb">
             <label style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.65);border-radius:4px;padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:2px">
               <input type="checkbox" name="gallery_remove[]" value="<%= idx %>" style="width:11px;height:11px;accent-color:#E03E3E">
               <span style="font-size:9px;color:#fff;letter-spacing:.06em;font-weight:700">DEL</span>
@@ -182,6 +186,8 @@
 </div>
 
 <style>
+  .gallery-thumb{width:90px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+  @media(max-width:480px){.gallery-thumb{width:70px;height:50px}}
   .tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border:1px solid transparent;border-radius:12px;min-height:44px;cursor:text;background:var(--surface2)}
   .tag-input:focus-within{background:#fff;border-color:#0F0F12;box-shadow:0 0 0 3px rgba(15,15,18,0.06)}
   .tag-chip{display:inline-flex;align-items:center;gap:6px;background:#0F0F12;color:#fff;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}
@@ -200,7 +206,7 @@ function prevGalleryEdit(input, containerId) {
   Array.from(input.files).forEach(function(f) {
     var img = document.createElement('img');
     img.src = URL.createObjectURL(f);
-    img.style.cssText = 'width:90px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)';
+    img.className = 'gallery-thumb';
     c.appendChild(img);
   });
 }
