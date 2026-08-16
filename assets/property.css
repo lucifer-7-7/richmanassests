@@ -46,7 +46,7 @@
 .phero .eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .phero .eyebrow .ln { width: 24px; height: 1px; background: rgba(255,255,255,0.6); }
 .phero .eyebrow span { font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,0.9); }
-.phero h1 { font-family: var(--f-display); font-weight: 500; letter-spacing: -.02em; line-height: 1.05; font-size: clamp(32px, 7.5vw, 48px); color: #FFFFFF; margin-bottom: 6px; }
+.phero h1, .phero .phero-title { font-family: var(--f-display); font-weight: 500; letter-spacing: -.02em; line-height: 1.05; font-size: clamp(32px, 7.5vw, 48px); color: #FFFFFF; margin-bottom: 6px; }
 .phero .pprice { font-family: var(--f-display); font-weight: 600; font-size: clamp(24px, 5.5vw, 32px); color: #FFFFFF; }
 .phero .pprice small { font-family: var(--f-sans); font-size: 13px; font-weight: 400; opacity: .85; }
 

@@ -7,7 +7,7 @@ const propSvc = require('../services/propertyService');
 const { getActiveBuilderProjects } = require('./builder-projects');
 
 // canonical site origin (production domain) for SEO tags
-const SITE = process.env.SITE_URL || 'https://richmanassets.com';
+const SITE = process.env.SITE_URL || 'https://www.richmanassets.in';
 const canon = (path) => SITE + path;
 
 // ── helpers ──────────────────────────────────────────────────────

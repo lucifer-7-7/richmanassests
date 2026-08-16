@@ -106,6 +106,7 @@ app.use(session({
 // ── View engine ───────────────────────────────────────────────────
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.set('trust proxy', 1); // behind Vercel — req.protocol/req.ip must reflect X-Forwarded-* headers
 
 // ── Global template locals ────────────────────────────────────────
 const { cldOptimize } = require('./lib/cloudinary');
@@ -213,7 +214,6 @@ app.get('/robots.txt', (req, res) => {
     'Disallow: /agent/',
     '',
     `Sitemap: ${host}/sitemap.xml`,
-    `Sitemap: ${host}/sitemap-index.xml`,
   ].join('\n'));
 });
 

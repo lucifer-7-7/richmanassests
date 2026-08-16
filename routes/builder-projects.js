@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { getDB } = require('../db/db');
 
-const SITE = process.env.SITE_URL || 'https://richmanassets.com';
+const SITE = process.env.SITE_URL || 'https://www.richmanassets.in';
 const canon = (p) => SITE + p;
 
 function parseJSON(val, fallback) {

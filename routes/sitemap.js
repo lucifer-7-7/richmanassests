@@ -2,6 +2,7 @@
 const { getDB } = require('../db/db');
 
 const TODAY = new Date().toISOString().split('T')[0];
+const SITE = process.env.SITE_URL || 'https://www.richmanassets.in';
 
 function xmlUrl(loc, { changefreq = 'monthly', priority = '0.7', lastmod } = {}) {
   return `\n  <url>\n    <loc>${loc}</loc>${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''}\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
@@ -10,7 +11,7 @@ function xmlUrl(loc, { changefreq = 'monthly', priority = '0.7', lastmod } = {})
 module.exports = async function sitemap(req, res) {
   try {
     const db   = getDB();
-    const base = `${req.protocol}://${req.get('host')}`;
+    const base = SITE;
 
     // Fetch all published properties
     let props = [], agentProps = [], areas = [], builderProjects = [];

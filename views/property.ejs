@@ -96,7 +96,7 @@
       <span class="pbadge"><%= p.type %></span>
     </div>
     <div class="eyebrow"><span class="ln"></span><span><%= p.loc %></span></div>
-    <h1><%= p.name %></h1>
+    <p class="phero-title" role="heading" aria-level="1"><%= p.name %></p>
     <div class="pprice-wrap" style="display:flex;justify-content:space-between;align-items:flex-end;">
       <div><div class="pprice"><%= p.price %></div><% if (p.price_note) { %><div class="loan-chip" style="margin-top:6px;color:#FFF;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><%= p.price_note %></div><% } %></div>
       <% if (pImgs.length > 1) { %>
