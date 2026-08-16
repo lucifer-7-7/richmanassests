@@ -127,6 +127,7 @@ app.use(trackVisit);
 // ── Routes ────────────────────────────────────────────────────────
 app.use('/',               require('./routes/public'));
 app.use('/',               require('./routes/builder-projects'));
+app.use('/',               require('./routes/blog'));
 app.use('/admin',          require('./routes/admin'));
 app.use('/agent',          require('./routes/agent'));
 app.use('/agent/payment',  require('./routes/agent-payment'));
@@ -269,6 +270,7 @@ app.get('/llms.txt', (req, res) => {
     `- Services: ${host}/services`,
     `- Contact: ${host}/contact`,
     `- About: ${host}/about`,
+    `- Property Guides (pricing, RERA, NRI, loans, investment areas): ${host}/blog`,
     '',
     '## Sitemap',
     `${host}/sitemap.xml`,

@@ -14,7 +14,7 @@ module.exports = async function sitemap(req, res) {
     const base = SITE;
 
     // Fetch all published properties
-    let props = [], agentProps = [], areas = [], builderProjects = [];
+    let props = [], agentProps = [], areas = [], builderProjects = [], blogPosts = [];
     try {
       const [propsRes, agentPropsRes] = await Promise.all([
         db.from('properties').select('id, created_at').eq('active', true),
@@ -30,6 +30,12 @@ module.exports = async function sitemap(req, res) {
       try {
         const bpRes = await db.from('builder_projects').select('slug, created_at').eq('status', 'active');
         builderProjects = bpRes.data || [];
+      } catch (_) { /* table may not exist yet in older envs — non-fatal */ }
+
+      // Fetch blog posts for sitemap
+      try {
+        const blogRes = await db.from('blog_posts').select('slug, updated_at').eq('status', 'published');
+        blogPosts = blogRes.data || [];
       } catch (_) { /* table may not exist yet in older envs — non-fatal */ }
     } catch (_) {
       // Fallback for SQLite-based local dev
@@ -48,6 +54,7 @@ module.exports = async function sitemap(req, res) {
       { loc: '/loans',      priority: '0.8', changefreq: 'monthly',  lastmod: TODAY },
       { loc: '/contact',    priority: '0.75', changefreq: 'monthly', lastmod: TODAY },
       { loc: '/builder-projects', priority: '0.9', changefreq: 'weekly', lastmod: TODAY },
+      { loc: '/blog',       priority: '0.85', changefreq: 'weekly', lastmod: TODAY },
     ];
 
     // ── Property-type landing pages (keyword targets) ─────────────
@@ -97,6 +104,11 @@ module.exports = async function sitemap(req, res) {
       ...builderProjects.map(p => xmlUrl(`${base}/builder-project/${p.slug}`, {
         lastmod: p.created_at ? p.created_at.split('T')[0] : TODAY,
         changefreq: 'weekly', priority: '0.9',
+      })),
+      // Blog / guide pages
+      ...blogPosts.map(p => xmlUrl(`${base}/blog/${p.slug}`, {
+        lastmod: p.updated_at ? p.updated_at.split('T')[0] : TODAY,
+        changefreq: 'monthly', priority: '0.75',
       })),
     ];
 

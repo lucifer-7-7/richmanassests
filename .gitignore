@@ -9,3 +9,6 @@ uploads/
 scratch/
 scratch_*.js
 /Builder project/
+
+.vercel
+.env*
