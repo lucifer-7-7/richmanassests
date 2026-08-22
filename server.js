@@ -98,7 +98,12 @@ app.use(session({
   cookie: {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days persistent login
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    // 'auto' (honors X-Forwarded-Proto via `trust proxy`) instead of a hard NODE_ENV check —
+    // a bare NODE_ENV=production check marks the cookie Secure even when the request actually
+    // arrived over plain HTTP (misconfigured proxy, local prod-mode testing), which makes the
+    // browser silently drop the cookie: login "succeeds" but the session never sticks, and the
+    // admin just bounces back to the login page with no visible error.
+    secure: 'auto',
     sameSite: 'lax',
   },
 }));

@@ -339,6 +339,7 @@ router.post('/property/:id/edit', requireAdmin, upload.fields([
       emi_label: body.emi_label || null, emi_val: body.emi_val || null, sort_order: parseInt(body.sort_order) || 99,
     }).eq('id', id);
     req.session.flash = { type:'ok', msg: `"${body.name}" updated.` };
+    return req.session.save(() => res.redirect('/admin'));
   } catch (e) { req.session.flash = { type:'err', msg: 'Error: ' + e.message }; }
   res.redirect('/admin/property/' + id + '/edit');
 });

@@ -42,13 +42,20 @@
     <h1>Sign in</h1>
     <p class="sub">Enter your admin password to continue.</p>
     <% if (flash) { %><div class="err">⚠ <%= flash %></div><% } %>
-    <form method="post" action="/admin/login">
+    <form method="post" action="/admin/login" id="login-form">
       <label for="admin-pw">Password</label>
       <input type="password" id="admin-pw" name="password" autofocus autocomplete="current-password" required>
-      <button type="submit">Sign in →</button>
+      <button type="submit" id="login-submit">Sign in →</button>
     </form>
   </div>
   <a href="/" class="back">← Back to site</a>
 </div>
+<script>
+  document.getElementById('login-form').addEventListener('submit', function() {
+    var btn = document.getElementById('login-submit');
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+  });
+</script>
 </body>
 </html>
