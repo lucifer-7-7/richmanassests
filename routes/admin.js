@@ -283,7 +283,7 @@ router.get('/property/:id/edit', requireAdmin, async (req, res) => {
 
 // ── SAVE EDIT ─────────────────────────────────────────────────────
 router.post('/property/:id/edit', requireAdmin, upload.fields([
-  { name: 'img_card', maxCount: 1 }, { name: 'img_hero', maxCount: 1 }, { name: 'gallery', maxCount: 10 },
+  { name: 'gallery', maxCount: 10 },
 ]), async (req, res) => {
   const db    = getDB();
   const body  = req.body;
@@ -293,20 +293,37 @@ router.post('/property/:id/edit', requireAdmin, upload.fields([
   const { data: existing } = await db.from('properties').select('*').eq('id', id).maybeSingle();
   if (!existing) { req.session.flash = { type:'err', msg: 'Property not found.' }; return res.redirect('/admin'); }
 
-  const imgCard = files.img_card ? await resolveImg(files.img_card[0], id + '-card') : existing.img_card;
-  const imgHero = files.img_hero ? await resolveImg(files.img_hero[0], id + '-hero') : existing.img_hero;
+  // Existing photos are a single merged set (gallery ∪ legacy img_card/img_hero), addressed by
+  // "e{index}" tokens — this must mirror the merge the edit view builds so tokens line up.
+  let existingCombined = [];
+  try { existingCombined = JSON.parse(existing.gallery || '[]'); } catch (_) {}
+  if (existing.img_card && !existingCombined.includes(existing.img_card)) existingCombined.push(existing.img_card);
+  if (existing.img_hero && !existingCombined.includes(existing.img_hero)) existingCombined.push(existing.img_hero);
 
-  let existingGallery = [];
-  try { existingGallery = JSON.parse(existing.gallery || '[]'); } catch(_) {}
-  const removeIdxs = [].concat(body.gallery_remove || []).map(Number);
-  const orderIdxs = body.gallery_order
-    ? body.gallery_order.split(',').map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n < existingGallery.length)
-    : existingGallery.map((_, i) => i);
-  existingGallery = orderIdxs.filter((i) => !removeIdxs.includes(i)).map((i) => existingGallery[i]);
-  if (files.gallery?.length) {
-    const newUrls = await Promise.all(files.gallery.map((f, i) => resolveImg(f, id + '-gallery-' + Date.now() + '-' + i)));
-    existingGallery = existingGallery.concat(newUrls.filter(Boolean));
-  }
+  const newUrls = files.gallery?.length
+    ? (await Promise.all(files.gallery.map((f, i) => resolveImg(f, id + '-gallery-' + Date.now() + '-' + i)))).filter(Boolean)
+    : [];
+
+  const removeTokens = [].concat(body.gallery_remove || []);
+  const orderTokens = body.gallery_order
+    ? body.gallery_order.split(',').filter(Boolean)
+    : existingCombined.map((_, i) => 'e' + i);
+  const keptExisting = orderTokens
+    .filter((t) => !removeTokens.includes(t) && /^e\d+$/.test(t))
+    .map((t) => existingCombined[Number(t.slice(1))])
+    .filter(Boolean);
+  const finalGallery = keptExisting.concat(newUrls);
+
+  const tokenToUrl = (t) => {
+    if (!t) return null;
+    if (/^e\d+$/.test(t)) return existingCombined[Number(t.slice(1))] || null;
+    if (/^n\d+$/.test(t)) return newUrls[Number(t.slice(1))] || null;
+    return null;
+  };
+  let imgHero = tokenToUrl(body.hero_pick);
+  if (!imgHero || !finalGallery.includes(imgHero)) imgHero = finalGallery[0] || null;
+  let imgCard = tokenToUrl(body.card_pick);
+  if (!imgCard || !finalGallery.includes(imgCard)) imgCard = finalGallery[0] || null;
 
   try {
     await db.from('properties').update({
@@ -315,7 +332,7 @@ router.post('/property/:id/edit', requireAdmin, upload.fields([
       beds: body.beds || null, baths: body.baths || null, sqft: body.sqft || null, subtype: body.subtype || null,
       details: body.details !== undefined ? (typeof body.details === 'object' ? JSON.stringify(body.details) : body.details) : existing.details,
       featured: body.featured === '1', has_img: !!(imgCard || imgHero), img_card: imgCard, img_hero: imgHero,
-      gallery: existingGallery.length ? JSON.stringify(existingGallery) : null,
+      gallery: finalGallery.length ? JSON.stringify(finalGallery) : null,
       story_kicker: body.story_kicker || null, story_heading: body.story_heading || null, story_body: body.story_body || null,
       amenities: body.amenities || null, setting_heading: body.setting_heading || null,
       setting_body: body.setting_body || null, setting_pills: body.setting_pills || null,

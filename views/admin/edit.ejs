@@ -40,8 +40,6 @@
   .field input:focus,.field select:focus,.field textarea:focus{background:var(--white);border-color:var(--ink);box-shadow:0 0 0 3.5px rgba(28,25,23,0.08)}
   .field textarea{resize:vertical;min-height:100px}
   .field small,.form-hint{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:5px;margin-bottom:14px;line-height:1.4}
-  .curr-img{width:130px;height:86px;object-fit:cover;border-radius:10px;display:block;margin-top:6px;border:1px solid var(--line);max-width:100%}
-  @media(max-width:480px){.curr-img{width:100%;max-width:120px;height:auto}}
   .form-actions{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
   .btn-primary{padding:13px 28px;background:var(--ink);color:#fff;border:0;border-radius:var(--r-pill);font:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 4px 14px rgba(0,0,0,0.12)}
   .btn-primary:hover{background:#2A2A32;transform:translateY(-1px)}
@@ -125,50 +123,40 @@
 
       <hr style="border:0;border-top:1px solid var(--line2);margin:24px 0">
 
-      <div class="fg">
-        <div class="field">
-          <label>Card image (thumbnail)</label>
-          <% if (p.img_card) { %><img class="curr-img" src="<%= cldOptimize(p.img_card.startsWith('http') ? p.img_card : '/' + p.img_card, {w:260}) %>" alt="Current card"><small>Current above · Upload to replace</small><% } %>
-          <input type="file" name="img_card" accept="image/jpeg,image/png,image/webp" onchange="prevEdit(this,'ec-card')">
-          <img id="ec-card" class="curr-img" alt="" style="display:none">
-          <small>800×600 JPG recommended · listing grids</small>
-        </div>
-        <div class="field">
-          <label>Hero image (full-width)</label>
-          <% if (p.img_hero) { %><img class="curr-img" src="<%= cldOptimize(p.img_hero.startsWith('http') ? p.img_hero : '/' + p.img_hero, {w:260}) %>" alt="Current hero"><small>Current above · Upload to replace</small><% } %>
-          <input type="file" name="img_hero" accept="image/jpeg,image/png,image/webp" onchange="prevEdit(this,'ec-hero')">
-          <img id="ec-hero" class="curr-img" alt="" style="display:none">
-          <small>1600×900 JPG recommended · property page header</small>
-        </div>
-      </div>
-
-      <hr style="border:0;border-top:1px solid var(--line2);margin:24px 0">
-
       <div class="field">
-        <label>Gallery images</label>
+        <label>Property photos</label>
+        <small style="margin-bottom:10px">Add up to 10. Pick a hero (property page header) and a thumbnail (listing grids) — the first photo covers both if you don't choose.</small>
         <% var galleryArr = []; try { galleryArr = JSON.parse(p.gallery || '[]'); } catch(_) {} %>
-        <% if (galleryArr.length > 0) { %>
-        <div id="gallery-order" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-          <% galleryArr.forEach(function(url, idx) { %>
-          <div class="gallery-item" data-idx="<%= idx %>" style="position:relative;display:inline-block">
-            <img src="<%= cldOptimize(url.startsWith('http') ? url : '/' + url, {w:180}) %>" alt="Gallery <%= idx+1 %>" class="gallery-thumb" onerror="this.classList.add('broken-img')">
-            <div style="position:absolute;top:2px;left:2px;display:flex;gap:2px">
-              <button type="button" class="gallery-move" data-dir="-1" title="Move left" style="width:20px;height:20px;border:0;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;cursor:pointer;line-height:1">‹</button>
-              <button type="button" class="gallery-move" data-dir="1" title="Move right" style="width:20px;height:20px;border:0;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;cursor:pointer;line-height:1">›</button>
+        <% var combinedArr = galleryArr.slice();
+           if (p.img_card && combinedArr.indexOf(p.img_card) === -1) combinedArr.push(p.img_card);
+           if (p.img_hero && combinedArr.indexOf(p.img_hero) === -1) combinedArr.push(p.img_hero);
+           var heroToken = ''; if (p.img_hero) { var hi = combinedArr.indexOf(p.img_hero); if (hi !== -1) heroToken = 'e' + hi; }
+           var cardToken = ''; if (p.img_card) { var ci = combinedArr.indexOf(p.img_card); if (ci !== -1) cardToken = 'e' + ci; }
+        %>
+        <div id="photo-grid">
+          <% combinedArr.forEach(function(url, idx) { %>
+          <div class="photo-card" data-token="e<%= idx %>">
+            <div class="photo-frame">
+              <img src="<%= cldOptimize(url.startsWith('http') ? url : '/' + url, {w:220}) %>" alt="Photo <%= idx+1 %>" class="photo-img" onerror="this.classList.add('broken-img')">
+              <div class="photo-toolbar">
+                <button type="button" class="photo-move" data-dir="-1" title="Move earlier">‹</button>
+                <button type="button" class="photo-move" data-dir="1" title="Move later">›</button>
+              </div>
+              <label class="photo-remove"><input type="checkbox" name="gallery_remove[]" value="e<%= idx %>"><span>Remove</span></label>
+              <span class="default-badge">Default</span>
             </div>
-            <label style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.65);border-radius:4px;padding:3px 6px;cursor:pointer;display:flex;align-items:center;gap:4px">
-              <input type="checkbox" name="gallery_remove[]" value="<%= idx %>" style="width:13px;height:13px;margin:0;accent-color:#E03E3E">
-              <span style="font-size:9px;color:#fff;letter-spacing:.06em;font-weight:700">DEL</span>
-            </label>
+            <div class="photo-roles">
+              <button type="button" class="role-chip" data-role="hero">Hero</button>
+              <button type="button" class="role-chip" data-role="card">Thumbnail</button>
+            </div>
           </div>
           <% }) %>
         </div>
-        <input type="hidden" name="gallery_order" id="gallery_order-hidden" value="<%= galleryArr.map(function(_,i){return i;}).join(',') %>">
-        <small style="display:block;margin-bottom:8px">Use ‹ › to reorder, tick DEL to remove. Add new below.</small>
-        <% } %>
-        <input type="file" name="gallery" multiple accept="image/jpeg,image/png,image/webp" onchange="prevGalleryEdit(this,'ec-gallery')">
-        <div id="ec-gallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
-        <small>1200×800 JPG recommended · up to 10 · select multiple files at once</small>
+        <input type="hidden" name="gallery_order" id="gallery_order-hidden" value="<%= combinedArr.map(function(_,i){return 'e'+i;}).join(',') %>">
+        <input type="hidden" name="hero_pick" id="hero_pick-hidden" value="<%= heroToken %>">
+        <input type="hidden" name="card_pick" id="card_pick-hidden" value="<%= cardToken %>">
+        <input type="file" id="photo-input" name="gallery" multiple accept="image/jpeg,image/png,image/webp">
+        <small style="margin-top:8px">JPG, PNG or WebP · 1200×800 recommended</small>
       </div>
 
       <div class="fg" style="margin-top:16px">
@@ -191,9 +179,25 @@
 </div>
 
 <style>
-  .gallery-thumb{width:90px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:var(--surface2)}
-  .gallery-thumb.broken-img{object-fit:contain;padding:8px}
-  @media(max-width:480px){.gallery-thumb{width:70px;height:50px}}
+  #photo-grid{display:flex;flex-wrap:wrap;gap:14px;margin:4px 0 10px}
+  .photo-card{width:150px;display:flex;flex-direction:column;gap:6px}
+  .photo-frame{position:relative;border-radius:12px;overflow:hidden;border:1.5px solid var(--line);transition:border-color .18s, box-shadow .18s}
+  .photo-card.is-hero .photo-frame,.photo-card.is-card .photo-frame{border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,15,18,0.08)}
+  .photo-img{width:150px;height:106px;object-fit:cover;display:block;background:var(--surface2)}
+  .photo-img.broken-img{object-fit:contain;padding:10px}
+  .photo-toolbar{position:absolute;top:6px;left:6px;display:flex;gap:4px}
+  .photo-move{width:22px;height:22px;border:0;border-radius:6px;background:rgba(23,21,15,.62);color:#fff;font-size:12px;font-weight:700;cursor:pointer;line-height:1}
+  .photo-move:hover{background:rgba(23,21,15,.85)}
+  .photo-remove{position:absolute;top:6px;right:6px;background:rgba(23,21,15,.62);border-radius:6px;padding:4px 7px;cursor:pointer;display:flex;align-items:center;gap:4px}
+  .photo-remove input{width:13px;height:13px;margin:0;accent-color:#E03E3E}
+  .photo-remove span{font-size:10px;color:#fff;font-weight:700;letter-spacing:.02em}
+  .photo-roles{display:flex;gap:6px}
+  .role-chip{flex:1;padding:6px 0;border:1.5px solid var(--line);border-radius:var(--r-pill);background:var(--white);color:var(--ink-2);font:inherit;font-size:11px;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:.16s}
+  .role-chip:hover{border-color:var(--ink)}
+  .role-chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
+  .default-badge{display:none;position:absolute;bottom:6px;left:6px;background:rgba(255,255,255,.92);color:var(--ink-2);font-size:9px;font-weight:700;letter-spacing:.04em;padding:3px 7px;border-radius:6px}
+  .photo-card.is-implicit-default .default-badge{display:block}
+  @media(max-width:480px){.photo-card{width:calc(50% - 7px)}.photo-img{width:100%}}
   .tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border:1px solid transparent;border-radius:12px;min-height:44px;cursor:text;background:var(--surface2)}
   .tag-input:focus-within{background:#fff;border-color:#0F0F12;box-shadow:0 0 0 3px rgba(15,15,18,0.06)}
   .tag-chip{display:inline-flex;align-items:center;gap:6px;background:#0F0F12;color:#fff;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}
@@ -202,40 +206,103 @@
   .tag-typeahead{border:0;outline:0;flex:1;min-width:120px;font:inherit;font-size:13.5px;background:none;padding:2px 4px}
 </style>
 <script>
-function prevEdit(input, previewId) {
-  var f = input.files[0]; if (!f) return;
-  var img = document.getElementById(previewId);
-  img.src = URL.createObjectURL(f); img.style.display = 'block';
-}
-function prevGalleryEdit(input, containerId) {
-  var c = document.getElementById(containerId); c.innerHTML = '';
-  Array.from(input.files).forEach(function(f) {
-    var img = document.createElement('img');
-    img.src = URL.createObjectURL(f);
-    img.className = 'gallery-thumb';
-    c.appendChild(img);
-  });
-}
-
-// ── gallery reorder ──
+// ── property photos: reorder, hero/thumbnail pick, remove, new-file previews ──
 (function() {
-  var order = document.getElementById('gallery-order');
-  var hidden = document.getElementById('gallery_order-hidden');
-  if (!order || !hidden) return;
-  function sync() {
-    hidden.value = Array.from(order.querySelectorAll('.gallery-item')).map(function(el) { return el.dataset.idx; }).join(',');
+  var grid = document.getElementById('photo-grid');
+  var orderHidden = document.getElementById('gallery_order-hidden');
+  var heroHidden = document.getElementById('hero_pick-hidden');
+  var cardHidden = document.getElementById('card_pick-hidden');
+  var fileInput = document.getElementById('photo-input');
+  if (!grid) return;
+
+  function allCards() { return Array.from(grid.querySelectorAll('.photo-card')); }
+  function existingCards() { return Array.from(grid.querySelectorAll('.photo-card[data-token^="e"]')); }
+
+  function syncOrder() {
+    orderHidden.value = existingCards().map(function(el) { return el.dataset.token; }).join(',');
   }
-  order.addEventListener('click', function(e) {
-    var btn = e.target.closest('.gallery-move');
-    if (!btn) return;
-    var item = btn.closest('.gallery-item');
-    var dir = parseInt(btn.dataset.dir, 10);
-    var sibling = dir < 0 ? item.previousElementSibling : item.nextElementSibling;
-    if (!sibling) return;
-    if (dir < 0) order.insertBefore(item, sibling);
-    else order.insertBefore(sibling, item);
-    sync();
+
+  function refreshRoles() {
+    allCards().forEach(function(card) {
+      var token = card.dataset.token;
+      var isHero = token === heroHidden.value;
+      var isCard = token === cardHidden.value;
+      card.classList.toggle('is-hero', isHero);
+      card.classList.toggle('is-card', isCard);
+      var heroBtn = card.querySelector('.role-chip[data-role=hero]');
+      var cardBtn = card.querySelector('.role-chip[data-role=card]');
+      if (heroBtn) heroBtn.classList.toggle('active', isHero);
+      if (cardBtn) cardBtn.classList.toggle('active', isCard);
+    });
+    refreshDefaultBadge();
+  }
+
+  function refreshDefaultBadge() {
+    var cards = allCards();
+    cards.forEach(function(card) { card.classList.remove('is-implicit-default'); });
+    if (heroHidden.value || cardHidden.value) return;
+    var visible = cards.filter(function(c) {
+      var cb = c.querySelector('.photo-remove input');
+      return !cb || !cb.checked;
+    });
+    if (visible[0]) visible[0].classList.add('is-implicit-default');
+  }
+
+  grid.addEventListener('click', function(e) {
+    var moveBtn = e.target.closest('.photo-move');
+    if (moveBtn) {
+      var card = moveBtn.closest('.photo-card');
+      var dir = parseInt(moveBtn.dataset.dir, 10);
+      var sibling = dir < 0 ? card.previousElementSibling : card.nextElementSibling;
+      if (!sibling || !sibling.classList.contains('photo-card') || !/^e/.test(sibling.dataset.token || '')) return;
+      if (dir < 0) grid.insertBefore(card, sibling);
+      else grid.insertBefore(sibling, card);
+      syncOrder();
+      refreshDefaultBadge();
+      return;
+    }
+    var roleBtn = e.target.closest('.role-chip');
+    if (roleBtn) {
+      var card2 = roleBtn.closest('.photo-card');
+      var hidden = roleBtn.dataset.role === 'hero' ? heroHidden : cardHidden;
+      hidden.value = (hidden.value === card2.dataset.token) ? '' : card2.dataset.token;
+      refreshRoles();
+    }
   });
+
+  grid.addEventListener('change', function(e) {
+    if (!e.target.matches('.photo-remove input')) return;
+    var card = e.target.closest('.photo-card');
+    card.style.opacity = e.target.checked ? '.35' : '';
+    if (e.target.checked) {
+      if (heroHidden.value === card.dataset.token) heroHidden.value = '';
+      if (cardHidden.value === card.dataset.token) cardHidden.value = '';
+    }
+    refreshRoles();
+  });
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      Array.from(grid.querySelectorAll('.photo-card[data-token^="n"]')).forEach(function(el) { el.remove(); });
+      Array.from(fileInput.files).forEach(function(f, i) {
+        var card = document.createElement('div');
+        card.className = 'photo-card';
+        card.dataset.token = 'n' + i;
+        card.innerHTML =
+          '<div class="photo-frame"><img class="photo-img" alt="New photo ' + (i + 1) + '"><span class="default-badge">Default</span></div>' +
+          '<div class="photo-roles">' +
+            '<button type="button" class="role-chip" data-role="hero">Hero</button>' +
+            '<button type="button" class="role-chip" data-role="card">Thumbnail</button>' +
+          '</div>';
+        card.querySelector('.photo-img').src = URL.createObjectURL(f);
+        grid.appendChild(card);
+      });
+      refreshRoles();
+    });
+  }
+
+  syncOrder();
+  refreshRoles();
 })();
 
 // ── tag-input ──
