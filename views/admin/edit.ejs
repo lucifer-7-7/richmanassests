@@ -36,7 +36,7 @@
   .fg.full{grid-template-columns:1fr}
   .field{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
   .field label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-top:4px}
-  .field input,.field select,.field textarea{padding:13px 16px;border:1.5px solid var(--line);border-radius:var(--r-sm);font:inherit;font-size:14px;font-weight:500;color:var(--ink);outline:none;transition:border-color .18s, box-shadow .18s;background:var(--white);-webkit-appearance:none}
+  .field input:not([type=checkbox]):not([type=radio]),.field select,.field textarea{padding:13px 16px;border:1.5px solid var(--line);border-radius:var(--r-sm);font:inherit;font-size:14px;font-weight:500;color:var(--ink);outline:none;transition:border-color .18s, box-shadow .18s;background:var(--white);-webkit-appearance:none}
   .field input:focus,.field select:focus,.field textarea:focus{background:var(--white);border-color:var(--ink);box-shadow:0 0 0 3.5px rgba(28,25,23,0.08)}
   .field textarea{resize:vertical;min-height:100px}
   .field small,.form-hint{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:5px;margin-bottom:14px;line-height:1.4}
@@ -148,18 +148,23 @@
         <label>Gallery images</label>
         <% var galleryArr = []; try { galleryArr = JSON.parse(p.gallery || '[]'); } catch(_) {} %>
         <% if (galleryArr.length > 0) { %>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        <div id="gallery-order" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
           <% galleryArr.forEach(function(url, idx) { %>
-          <div style="position:relative;display:inline-block">
-            <img src="<%= cldOptimize(url.startsWith('http') ? url : '/' + url, {w:180}) %>" alt="Gallery <%= idx+1 %>" class="gallery-thumb">
-            <label style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.65);border-radius:4px;padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:2px">
-              <input type="checkbox" name="gallery_remove[]" value="<%= idx %>" style="width:11px;height:11px;accent-color:#E03E3E">
+          <div class="gallery-item" data-idx="<%= idx %>" style="position:relative;display:inline-block">
+            <img src="<%= cldOptimize(url.startsWith('http') ? url : '/' + url, {w:180}) %>" alt="Gallery <%= idx+1 %>" class="gallery-thumb" onerror="this.classList.add('broken-img')">
+            <div style="position:absolute;top:2px;left:2px;display:flex;gap:2px">
+              <button type="button" class="gallery-move" data-dir="-1" title="Move left" style="width:20px;height:20px;border:0;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;cursor:pointer;line-height:1">‹</button>
+              <button type="button" class="gallery-move" data-dir="1" title="Move right" style="width:20px;height:20px;border:0;border-radius:4px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;cursor:pointer;line-height:1">›</button>
+            </div>
+            <label style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.65);border-radius:4px;padding:3px 6px;cursor:pointer;display:flex;align-items:center;gap:4px">
+              <input type="checkbox" name="gallery_remove[]" value="<%= idx %>" style="width:13px;height:13px;margin:0;accent-color:#E03E3E">
               <span style="font-size:9px;color:#fff;letter-spacing:.06em;font-weight:700">DEL</span>
             </label>
           </div>
           <% }) %>
         </div>
-        <small style="display:block;margin-bottom:8px">Tick DEL on images to remove. Add new below.</small>
+        <input type="hidden" name="gallery_order" id="gallery_order-hidden" value="<%= galleryArr.map(function(_,i){return i;}).join(',') %>">
+        <small style="display:block;margin-bottom:8px">Use ‹ › to reorder, tick DEL to remove. Add new below.</small>
         <% } %>
         <input type="file" name="gallery" multiple accept="image/jpeg,image/png,image/webp" onchange="prevGalleryEdit(this,'ec-gallery')">
         <div id="ec-gallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
@@ -186,7 +191,8 @@
 </div>
 
 <style>
-  .gallery-thumb{width:90px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+  .gallery-thumb{width:90px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:var(--surface2)}
+  .gallery-thumb.broken-img{object-fit:contain;padding:8px}
   @media(max-width:480px){.gallery-thumb{width:70px;height:50px}}
   .tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border:1px solid transparent;border-radius:12px;min-height:44px;cursor:text;background:var(--surface2)}
   .tag-input:focus-within{background:#fff;border-color:#0F0F12;box-shadow:0 0 0 3px rgba(15,15,18,0.06)}
@@ -210,6 +216,27 @@ function prevGalleryEdit(input, containerId) {
     c.appendChild(img);
   });
 }
+
+// ── gallery reorder ──
+(function() {
+  var order = document.getElementById('gallery-order');
+  var hidden = document.getElementById('gallery_order-hidden');
+  if (!order || !hidden) return;
+  function sync() {
+    hidden.value = Array.from(order.querySelectorAll('.gallery-item')).map(function(el) { return el.dataset.idx; }).join(',');
+  }
+  order.addEventListener('click', function(e) {
+    var btn = e.target.closest('.gallery-move');
+    if (!btn) return;
+    var item = btn.closest('.gallery-item');
+    var dir = parseInt(btn.dataset.dir, 10);
+    var sibling = dir < 0 ? item.previousElementSibling : item.nextElementSibling;
+    if (!sibling) return;
+    if (dir < 0) order.insertBefore(item, sibling);
+    else order.insertBefore(sibling, item);
+    sync();
+  });
+})();
 
 // ── tag-input ──
 function initTagInput(containerEl, hiddenEl) {

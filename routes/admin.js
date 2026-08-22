@@ -299,7 +299,10 @@ router.post('/property/:id/edit', requireAdmin, upload.fields([
   let existingGallery = [];
   try { existingGallery = JSON.parse(existing.gallery || '[]'); } catch(_) {}
   const removeIdxs = [].concat(body.gallery_remove || []).map(Number);
-  existingGallery = existingGallery.filter((_, i) => !removeIdxs.includes(i));
+  const orderIdxs = body.gallery_order
+    ? body.gallery_order.split(',').map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n < existingGallery.length)
+    : existingGallery.map((_, i) => i);
+  existingGallery = orderIdxs.filter((i) => !removeIdxs.includes(i)).map((i) => existingGallery[i]);
   if (files.gallery?.length) {
     const newUrls = await Promise.all(files.gallery.map((f, i) => resolveImg(f, id + '-gallery-' + Date.now() + '-' + i)));
     existingGallery = existingGallery.concat(newUrls.filter(Boolean));
